@@ -1,0 +1,107 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <X11/Xlib.h>
+#include <X11/xpm.h>
+#include <X11/extensions/shape.h>
+
+#include "ruby.h"
+
+#include "dockapp.h"
+
+#define WMDOCKTIMER_STOP  0
+#define WMDOCKTIMER_START 1
+
+WMDockTimer *docktimer;
+extern ID id_call;
+
+static void docktimer_mark(WMDockTimer *timer)
+{
+	printf ("timer mark!!\n");
+	rb_gc_mark(timer->callback);
+}
+
+void new_timer(WMDockTimer *timer, int interval)
+{
+
+	timerclear(&timer->interval);
+	if (interval >= 1000000) {
+		timer->interval.tv_sec = interval/1000000;
+		interval %= 1000000;
+	}
+	timer->interval.tv_usec = interval;
+	gettimeofday(&timer->next_time, NULL);
+}
+
+void update_timer(WMDockTimer *timer)
+{
+	struct timeval current;
+	if (timer->status == WMDOCKTIMER_STOP) {
+		return;
+	}
+	gettimeofday(&current, NULL);
+	if (timercmp(&current, &timer->next_time, >)) {
+		timeradd(&current, &timer->interval, &timer->next_time);
+		rb_funcall(timer->callback, id_call, 0);
+	}
+}
+
+void docktimer_start(VALUE self)
+{
+	WMDockTimer *timer;
+
+	Data_Get_Struct(self, WMDockTimer, timer);
+	timer->status = WMDOCKTIMER_START;
+	update_timer(timer);
+}
+
+VALUE docktimer_getstatus(VALUE self)
+{
+	WMDockTimer *timer;
+
+	Data_Get_Struct(self, WMDockTimer, timer);
+	return INT2FIX(timer->status);
+}
+
+
+void docktimer_stop(VALUE self)
+{
+	WMDockTimer *timer;
+
+	Data_Get_Struct(self, WMDockTimer, timer);
+	timer->status = WMDOCKTIMER_STOP;
+}
+
+VALUE docktimer_initialize(VALUE self, VALUE interval)
+{
+	VALUE obj;
+
+	WMDockTimer *timer, *tmp;
+
+	Check_Type(interval, T_FIXNUM);
+
+	timer = malloc(sizeof(WMDockTimer));
+	memset(timer, 0, sizeof(WMDockTimer));
+
+	
+	new_timer(timer, FIX2INT(interval)*1000);
+	timer->callback = rb_block_proc();
+	timer->status = WMDOCKTIMER_STOP;
+
+	printf ("%x\n", TYPE(timer->callback));
+	if (docktimer == NULL) {
+		docktimer = timer;
+	} else {
+		tmp = docktimer;
+		while (tmp->next != NULL) {
+			tmp = tmp->next;
+		}
+		tmp->next = timer;
+	}
+
+	obj = Data_Wrap_Struct(self, docktimer_mark, -1, timer);
+	return obj;
+}
