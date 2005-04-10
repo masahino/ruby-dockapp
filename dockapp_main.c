@@ -64,10 +64,13 @@ static void sig_int()
 	rb_raise(rb_eInterrupt, "");
 }
 
-static void mouse_callback(WMDockItem *item, int x, int y)
+static void mouse_callback(WMDockItem *item, XButtonEvent event)
 {
-	if (item->callback) 
-		rb_funcall(item->callback, id_call, 2, INT2FIX(x), INT2FIX(y));
+	if (item->callback) {
+		rb_funcall(item->callback, id_call, 3,
+			   INT2FIX(event.x), INT2FIX(event.y),
+			   INT2FIX(event.button));
+	}
 }
 
 
@@ -402,8 +405,7 @@ static void dockapp_start(VALUE self)
 				printf ("ButtonPress\n");
 				if (s != -1 && mouse_region[s].item != NULL) {
 					mouse_callback(mouse_region[s].item, 
-						       event.xbutton.x,
-						       event.xbutton.y);
+						       event.xbutton);
 				}
 				break;
 			case ButtonRelease:
@@ -450,16 +452,12 @@ static VALUE dockapp_s_new(VALUE self, VALUE name)
 
 void Init_dockapp(void) {
 	VALUE rb_DockApp;
-	VALUE rb_DockItem;
-	VALUE rb_DockText;
-	VALUE rb_DockTimer;
 
 	id_call = rb_intern("call");
 	mDockApp = rb_define_module("Dock");
 	rb_ivar_set(mDockApp, id_relative_callbacks, Qnil);
-
+	signal(SIGINT, sig_int);
 	memset(mouse_region, 0, sizeof(MOUSE_REGION)*MAX_MOUSE_REGION);
-
 	mouse_region_index = 0;
 
 	rb_DockApp = rb_define_class("DockApp", rb_cObject);
@@ -477,35 +475,10 @@ void Init_dockapp(void) {
 //	rb_define_method(rb_DockApp, "set_timer", 
 //			 RUBY_METHOD_FUNC(dockapp_set_timer), 1);
 
-	rb_DockItem = rb_define_class_under(rb_DockApp, "Item", rb_cObject);
-	rb_define_singleton_method(rb_DockItem, "new",  dockitem_s_new, 2);
-	rb_define_method(rb_DockItem, "drawLEDstring", 
-			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), 4);
-	rb_define_method(rb_DockItem, "draw_string", 
-			 RUBY_METHOD_FUNC(dockitem_drawstring), -1);
-	rb_define_method(rb_DockItem, "click_callback",
-			 RUBY_METHOD_FUNC(dockitem_callback), 0);
-	rb_define_method(rb_DockItem, "clear",
-			 RUBY_METHOD_FUNC(dockitem_clear), 0);
-	rb_define_method(rb_DockItem, "set_pixmap",
-			 RUBY_METHOD_FUNC(dockitem_set_pixmap), 1);
-	rb_define_method(rb_DockItem, "draw_point",
-			 RUBY_METHOD_FUNC(dockitem_draw_point), 3);
-	rb_define_method(rb_DockItem, "draw_line",
-			 RUBY_METHOD_FUNC(dockitem_draw_line), 5);
-	rb_define_method(rb_DockItem, "draw_rect",
-			 RUBY_METHOD_FUNC(dockitem_draw_rect), 5);
-
-	rb_DockText = rb_define_class_under(rb_DockApp, "Text", rb_cObject);
-	rb_define_singleton_method(rb_DockText, "new", docktext_s_new, -1);
-	rb_define_method(rb_DockText, "set_text",
-			 RUBY_METHOD_FUNC(docktext_set_text), -1);
-	rb_define_method(rb_DockText, "click_callback",
-			 RUBY_METHOD_FUNC(dockitem_callback), 0);
-
-	rb_DockTimer = rb_define_class_under(rb_DockApp, "Timer", rb_cObject);
-	rb_define_singleton_method(rb_DockTimer, "new", docktimer_initialize, 1);
-	rb_define_method(rb_DockTimer, "start", RUBY_METHOD_FUNC(docktimer_start), 0);
-	rb_define_method(rb_DockTimer, "stop", RUBY_METHOD_FUNC(docktimer_stop), 0);
-	rb_define_method(rb_DockTimer, "get_status", RUBY_METHOD_FUNC(docktimer_getstatus), 0);
+	dockitem_init(rb_DockApp);
+	docktext_init(rb_DockApp);
+	docktimer_init(rb_DockApp);
+#if 0
+	gtk_dockapp_init();
+#endif 
 }

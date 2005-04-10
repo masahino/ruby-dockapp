@@ -12,7 +12,7 @@
 
 #include "dockapp.h"
 
-void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)
+static void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)
 {
 	WMDockItem *item;
 
@@ -26,7 +26,7 @@ void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)
 		   item->y + FIX2INT(y), StringValuePtr(color));
 }
 
-void dockitem_draw_line(VALUE self, VALUE x1, VALUE y1,
+static void dockitem_draw_line(VALUE self, VALUE x1, VALUE y1,
 			VALUE x2, VALUE y2, VALUE color)
 {
 	WMDockItem *item;
@@ -46,7 +46,7 @@ void dockitem_draw_line(VALUE self, VALUE x1, VALUE y1,
 		  StringValuePtr(color));
 }
 
-void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
+static void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
 			VALUE width, VALUE height, VALUE color)
 {
 	WMDockItem *item;
@@ -66,7 +66,7 @@ void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
 		  StringValuePtr(color));
 }
 
-void dockitem_set_pixmap(VALUE self, VALUE filename)
+static void dockitem_set_pixmap(VALUE self, VALUE filename)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
@@ -91,9 +91,7 @@ void dockitem_set_pixmap(VALUE self, VALUE filename)
 
 }
 
-/* TODO: color, font */
-void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
-/* (VALUE self, VALUE x, VALUE y, VALUE text) */
+static void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
@@ -125,7 +123,7 @@ void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 /* argv[1]: x */
 /* argv[2]: y */
 /* argv[3]: text type(0 = normal, 1 = Yellow text) */
-void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y, VALUE text, VALUE color)
+static void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y, VALUE text, VALUE color)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
@@ -157,7 +155,6 @@ void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y, VALUE text, VALUE colo
 	  free(lines);
 }
 
-
 void dockitem_callback(VALUE self)
 {
 	WMDockItem *item;
@@ -172,7 +169,7 @@ void dockitem_callback(VALUE self)
 	mouse_region_index++;
 }
 
-void dockitem_clear(VALUE self)
+static void dockitem_clear(VALUE self)
 {
 	WMDockItem *item;
 
@@ -187,7 +184,8 @@ void dockitem_mark(WMDockItem *item)
 {
 	rb_gc_mark(item->callback);
 }
-VALUE dockitem_s_new(VALUE self, VALUE width, VALUE height)
+
+static VALUE dockitem_s_new(VALUE self, VALUE width, VALUE height)
 {
 	VALUE obj;
 	WMDockItem *item;
@@ -206,3 +204,27 @@ VALUE dockitem_s_new(VALUE self, VALUE width, VALUE height)
 	return obj;
 }
 
+void dockitem_init(VALUE rb_DockApp)
+{
+	VALUE rb_DockItem;
+
+	rb_DockItem = rb_define_class_under(rb_DockApp, "Item", rb_cObject);
+	rb_define_singleton_method(rb_DockItem, "new",  dockitem_s_new, 2);
+	rb_define_method(rb_DockItem, "drawLEDstring", 
+			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), 4);
+	rb_define_method(rb_DockItem, "draw_string", 
+			 RUBY_METHOD_FUNC(dockitem_drawstring), -1);
+	rb_define_method(rb_DockItem, "click_callback",
+			 RUBY_METHOD_FUNC(dockitem_callback), 0);
+	rb_define_method(rb_DockItem, "clear",
+			 RUBY_METHOD_FUNC(dockitem_clear), 0);
+	rb_define_method(rb_DockItem, "set_pixmap",
+			 RUBY_METHOD_FUNC(dockitem_set_pixmap), 1);
+	rb_define_method(rb_DockItem, "draw_point",
+			 RUBY_METHOD_FUNC(dockitem_draw_point), 3);
+	rb_define_method(rb_DockItem, "draw_line",
+			 RUBY_METHOD_FUNC(dockitem_draw_line), 5);
+	rb_define_method(rb_DockItem, "draw_rect",
+			 RUBY_METHOD_FUNC(dockitem_draw_rect), 5);
+
+}

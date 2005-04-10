@@ -49,7 +49,7 @@ void update_timer(WMDockTimer *timer)
 	}
 }
 
-void docktimer_start(VALUE self)
+static void docktimer_start(VALUE self)
 {
 	WMDockTimer *timer;
 
@@ -58,7 +58,7 @@ void docktimer_start(VALUE self)
 	update_timer(timer);
 }
 
-VALUE docktimer_getstatus(VALUE self)
+static VALUE docktimer_getstatus(VALUE self)
 {
 	WMDockTimer *timer;
 
@@ -67,7 +67,7 @@ VALUE docktimer_getstatus(VALUE self)
 }
 
 
-void docktimer_stop(VALUE self)
+static void docktimer_stop(VALUE self)
 {
 	WMDockTimer *timer;
 
@@ -75,7 +75,7 @@ void docktimer_stop(VALUE self)
 	timer->status = WMDOCKTIMER_STOP;
 }
 
-VALUE docktimer_initialize(VALUE self, VALUE interval)
+static VALUE docktimer_initialize(VALUE self, VALUE interval)
 {
 	VALUE obj;
 
@@ -104,4 +104,15 @@ VALUE docktimer_initialize(VALUE self, VALUE interval)
 
 	obj = Data_Wrap_Struct(self, docktimer_mark, -1, timer);
 	return obj;
+}
+
+void docktimer_init(VALUE rb_DockApp)
+{
+	VALUE rb_DockTimer;
+
+	rb_DockTimer = rb_define_class_under(rb_DockApp, "Timer", rb_cObject);
+	rb_define_singleton_method(rb_DockTimer, "new", docktimer_initialize, 1);
+	rb_define_method(rb_DockTimer, "start", RUBY_METHOD_FUNC(docktimer_start), 0);
+	rb_define_method(rb_DockTimer, "stop", RUBY_METHOD_FUNC(docktimer_stop), 0);
+	rb_define_method(rb_DockTimer, "get_status", RUBY_METHOD_FUNC(docktimer_getstatus), 0);
 }

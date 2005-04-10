@@ -46,8 +46,7 @@ static void set_text(WMDockItem *dockitem, char *text, int color)
 	  free(lines);
 }
 
-/*void docktext_set_text(VALUE self, VALUE text, VALUE color)*/
-void docktext_set_text(int argc, VALUE *argv, VALUE self)
+static void docktext_set_text(int argc, VALUE *argv, VALUE self)
 {
 	WMDockItem *dockitem;
 	VALUE text, vcolor;
@@ -70,7 +69,7 @@ void docktext_set_text(int argc, VALUE *argv, VALUE self)
 }
 
 
-VALUE docktext_s_new(int argc, VALUE *argv, VALUE self)
+static VALUE docktext_s_new(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
 	WMDockItem *wmtext;
@@ -97,4 +96,18 @@ VALUE docktext_s_new(int argc, VALUE *argv, VALUE self)
 	set_text(wmtext, wmtext->text, color);
 	
 	return obj;
+}
+
+void docktext_init(VALUE rb_DockApp)
+{
+	VALUE rb_DockText;
+
+	rb_DockText = rb_define_class_under(rb_DockApp, "Text", rb_cObject);
+	rb_define_singleton_method(rb_DockText, "new", docktext_s_new, -1);
+	rb_define_method(rb_DockText, "set_text",
+			 RUBY_METHOD_FUNC(docktext_set_text), -1);
+	rb_define_method(rb_DockText, "click_callback",
+			 RUBY_METHOD_FUNC(dockitem_callback), 0);
+
+
 }
