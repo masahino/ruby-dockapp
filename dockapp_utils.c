@@ -233,9 +233,14 @@ void drawnString(WMDockApp *dock, int dest_x, int dest_y, const char *string,
         if (right_justify)
                 dest_x -= XTextWidth(f, string, len);
 */
-        XmbDrawString(dock->display, dock->wmgen.pixmap, dock->fontset, 
-		      dock->NormalGC, dest_x, dest_y, string, len);
-
+	if (dock->use_fontset) {
+		XmbDrawString(dock->display, dock->wmgen.pixmap,
+			      dock->fontset, dock->NormalGC,
+			      dest_x, dest_y, string, len);
+	} else {
+		XDrawString (dock->display, dock->wmgen.pixmap,
+			     dock->NormalGC, dest_x, dest_y, string, len);
+	}
 }
 
 void drawString(WMDockApp *dock, int dest_x, int dest_y, const char *string,
@@ -244,20 +249,8 @@ void drawString(WMDockApp *dock, int dest_x, int dest_y, const char *string,
 {
 
         int len = strlen(string);
-//        assert(colorname != NULL);
-        XSetForeground(dock->display, dock->NormalGC,
-		       GetColor(dock, colorname));
-        XSetBackground(dock->display, dock->NormalGC,
-		       GetColor(dock, bgcolorname));
-/*
-        if (right_justify)
-                dest_x -= XTextWidth(f, string, len);
-*/
-
-        XmbDrawString(dock->display, dock->wmgen.pixmap, 
-		      dock->fontset, dock->NormalGC, dest_x, dest_y,
-		      string, len);
-
+	drawnString(dock, dest_x, dest_y, string, colorname, bgcolorname,
+		    right_justify, len);
 }
 
 

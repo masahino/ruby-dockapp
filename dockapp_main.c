@@ -66,10 +66,16 @@ static void sig_int()
 
 static void mouse_callback(WMDockItem *item, XButtonEvent event)
 {
+	
+	printf (" state = %d\n", event.state);
+
 	if (item->callback) {
-		rb_funcall(item->callback, id_call, 3,
+		/* TODO: to return as Hash */
+		rb_funcall(item->callback, id_call, 5,
 			   INT2FIX(event.x), INT2FIX(event.y),
-			   INT2FIX(event.button));
+			   INT2FIX(event.button),
+			   INT2FIX(event.x_root),
+			   INT2FIX(event.y_root));
 	}
 }
 
@@ -198,6 +204,7 @@ static void dockapp_openwindow(VALUE self)
 	XWMHints	mywmhints;
 	Pixel		back_pix, fore_pix;
 	char		*Geometry = "";
+	char *loc;
 	Pixmap pixmask;
 
 	WMDockApp *wmdockapp;
@@ -205,7 +212,14 @@ static void dockapp_openwindow(VALUE self)
 	Data_Get_Struct(self, WMDockApp, wmdockapp);
 	wname = strdup(wmdockapp->wname);
 
-        setlocale(LC_ALL, "");
+	/* taken from twm.c */
+	loc = setlocale(LC_ALL, "");
+	if (!loc || !strcmp(loc, "C") || !strcmp(loc, "POSIX") ||
+	    !XSupportsLocale()) {
+		wmdockapp->use_fontset = False;
+	} else {
+		wmdockapp->use_fontset = True;
+	}
 
 	if (!(wmdockapp->display = XOpenDisplay(display_name))) {
 		fprintf(stderr, "%s: can't open display %s\n",
@@ -327,7 +341,7 @@ static void dockapp_openwindow(VALUE self)
 	XMapWindow(wmdockapp->display, wmdockapp->win);
 
 
-	{
+	if (wmdockapp->use_fontset) {
 		char **miss, *def;
 		int n_miss; 
 
@@ -397,6 +411,7 @@ static void dockapp_start(VALUE self)
                                 //exit(EXIT_SUCCESS);
                                 break;
 			case ButtonPress:
+			case ButtonRelease:
 				s = CheckMouseRegion(event.xbutton.x,
 						     event.xbutton.y);
 				printf ("ButtonPress %d(%d, %d)\n", s,
@@ -407,9 +422,6 @@ static void dockapp_start(VALUE self)
 					mouse_callback(mouse_region[s].item, 
 						       event.xbutton);
 				}
-				break;
-			case ButtonRelease:
-//				printf ("ButtonRelease\n");
 				break;
 			}
 		}
