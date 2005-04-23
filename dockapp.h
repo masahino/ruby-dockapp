@@ -23,6 +23,8 @@
 #define DOCKITEM_INVISIBLE 0
 #define DOCKITEM_VISIBLE 1
 
+#define TYPE_POPUP 10
+
 /* Typedefs */
 typedef struct _rckeys rckeys;
 
@@ -59,7 +61,8 @@ typedef struct {
 	Pixmap		pixmask;
 	char            *wname;
 	char            **xpm_master;
-	WMDockTimer         *timer;
+	WMDockTimer     *timer;
+	Bool            use_fontset;
 } WMDockApp;
 
 typedef struct {
@@ -74,6 +77,8 @@ typedef struct {
 	int             index; /* unused */
 	int             visible;
 	XpmIcon         xpm;
+	int             type;
+	Window          win;
 } WMDockItem;
 
 
@@ -90,9 +95,14 @@ typedef struct {
 MOUSE_REGION	mouse_region[MAX_MOUSE_REGION];
 #define MAX_LIST_LINE 64
 int mouse_region_index;
+Display         *display;
+Window          Root;
+GC              NormalGC;
+
 
 /* Function Prototypes */
 /* dockapp_utils.c */
+void get_pointer_position(Window win, int *x, int *y);
 void draw_point(WMDockApp *dock, int x, int y, char *color);
 void draw_line(WMDockApp *dock, int x1, int y1,
 	       int x2, int y2, char *color);
@@ -126,34 +136,26 @@ void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2);
 void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[]);
 Pixel GetColor(WMDockApp *dock, char *name);
 void createXBMfromXPM(char *xbm_org, char **xpm, int sx, int sy);
-void GetXPMfromFile(WMDockApp *dockapp, XpmIcon *wmgen, char *filename);
+void GetXPMfromFile(XpmIcon *wmgen, char *filename);
 void new_timer(WMDockTimer *timer, int interval);
 
 /* docktext.c */
-void docktext_set_text(int argc, VALUE *argv, VALUE self);
-VALUE docktext_s_new(int argc, VALUE *argv, VALUE self);
+void docktext_init(VALUE rb_DockApp);
 
 /* dockitem.c */
-VALUE dockitem_s_new(VALUE self, VALUE width, VALUE height);
 void dockitem_callback(VALUE self);
-void dockitem_clear(VALUE self);
-void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y, VALUE text, 
-			  VALUE color);
-void dockitem_drawstring(int argc, VALUE *argv, VALUE self);
-void dockitem_set_timer(VALUE self, VALUE interval);
-void dockitem_set_pixmap(VALUE self, VALUE filename);
-void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color);
-void dockitem_draw_line(VALUE self, VALUE x1, VALUE y1,
-			VALUE x2, VALUE y2, VALUE color);
-void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
-			VALUE width, VALUE height, VALUE color);
 void dockitem_mark(WMDockItem *item);
+void dockitem_init(VALUE rb_DockApp);
+
 
 /* docktimer.c */
-VALUE docktimer_initialize(VALUE self, VALUE interval);
+void docktimer_init(VALUE rb_DockApp);
 void update_timer(WMDockTimer *timer);
-void docktimer_start(VALUE self);
-void docktimer_stop(VALUE self);
-VALUE docktimer_getstatus(VALUE self);
+
+#if 0
+void gtk_dockapp_init();
+#endif 
+
+void dockpopup_init(VALUE rb_DockApp);
 
 #endif
