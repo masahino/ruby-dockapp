@@ -27,9 +27,21 @@
 #include "ruby.h"
 
 #include "dockapp.h"
+#include "dockapp_pixmap.h"
 //#include "pixmap.h"
 
 /* Function Prototypes */
+
+void get_pointer_position(Window win, int *x, int *y)
+{
+	Window dummy_root, dummy_child;
+	int win_x, win_y;
+	unsigned int mask;
+	XQueryPointer(display, win, &dummy_root, &dummy_child,
+		      x, y,
+		      &win_x, &win_y, &mask);
+}
+
 
 void draw_point(WMDockApp *dock, int x, int y, char *color)
 {
@@ -385,20 +397,20 @@ void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
 	}
 }
 
-void GetXPMfromFile(WMDockApp *dockapp, XpmIcon *wmgen, char *filename)
+void GetXPMfromFile(XpmIcon *wmgen, char *filename)
 {
 	XWindowAttributes	attributes;
 	int			err;
 
 	/* For the colormap */
 
-	XGetWindowAttributes(dockapp->display, dockapp->Root, &attributes);
+	XGetWindowAttributes(display, Root, &attributes);
 	wmgen->attributes.valuemask |= (XpmReturnPixels | XpmReturnExtensions);
 
-	err = XpmReadFileToPixmap(dockapp->display, dockapp->Root, 
+	err = XpmReadFileToPixmap(display, Root, 
 				  filename, &(wmgen->pixmap),
 				  &(wmgen->mask), &(wmgen->attributes));
-	printf ("%d\n", err);
+	printf ("error = %d\n", err);
 	if (err != XpmSuccess) {
 		fprintf(stderr, "Not enough free colorcells.\n");
 		exit(1);

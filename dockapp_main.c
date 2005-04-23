@@ -133,9 +133,11 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	dockitem->x = FIX2INT(x)+margin;
 	dockitem->y = FIX2INT(y)+margin;
 
-	set_pixmap(dock, dockitem->x, dockitem->y, 
-		 dockitem->x + dockitem->width,
-		 dockitem->y + dockitem->height);
+	if (dockitem->type != TYPE_POPUP) {
+		set_pixmap(dock, dockitem->x, dockitem->y, 
+			   dockitem->x + dockitem->width,
+			   dockitem->y + dockitem->height);
+	}
 	if (search_dockitem(dock, dockitem) == NULL) {
 		if (dock->item == NULL) {
 			dock->item = dockitem;
@@ -149,7 +151,9 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 		}
 		dockitem->next = NULL;
 	}
-	dockitem->visible = DOCKITEM_VISIBLE;
+	if (dockitem->type != TYPE_POPUP) {
+		dockitem->visible = DOCKITEM_VISIBLE;
+	}
 }
 
 static void _dockapp_set_timer(VALUE self, VALUE interval)
@@ -221,15 +225,16 @@ static void dockapp_openwindow(VALUE self)
 		wmdockapp->use_fontset = True;
 	}
 
-	if (!(wmdockapp->display = XOpenDisplay(display_name))) {
+	if (!(display = XOpenDisplay(display_name))) {
 		fprintf(stderr, "%s: can't open display %s\n",
 			wname, XDisplayName(display_name));
 		exit(1);
 		/* TODO:raise exception */
 	}
-
+	wmdockapp->display = display;
 	screen  = DefaultScreen(wmdockapp->display);
-	wmdockapp->Root    = RootWindow(wmdockapp->display, screen);
+	Root = RootWindow(wmdockapp->display, screen);
+	wmdockapp->Root    = Root;
 	d_depth = DefaultDepth(wmdockapp->display, screen);
 	x_fd    = XConnectionNumber(wmdockapp->display);
 
@@ -300,7 +305,7 @@ static void dockapp_openwindow(VALUE self)
 	gcv.background = back_pix;
 	gcv.graphics_exposures = 0;
 	wmdockapp->NormalGC = XCreateGC(wmdockapp->display, wmdockapp->Root, 
-					gcm, &gcv);
+			     gcm, &gcv);
 
 	/* ONLYSHAPE ON */
 
@@ -490,7 +495,10 @@ void Init_dockapp(void) {
 	dockitem_init(rb_DockApp);
 	docktext_init(rb_DockApp);
 	docktimer_init(rb_DockApp);
+	dockpopup_init(rb_DockApp);
+
 #if 0
 	gtk_dockapp_init();
-#endif 
+#endif
+
 }

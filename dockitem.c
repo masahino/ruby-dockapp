@@ -78,7 +78,7 @@ static void dockitem_set_pixmap(VALUE self, VALUE filename)
 	if (dock == NULL) {
 		return;
 	}
-	GetXPMfromFile(dock, &(dockitem->xpm), StringValuePtr(filename));
+	GetXPMfromFile(&(dockitem->xpm), StringValuePtr(filename));
 //	GetXPM(dock, &(dockitem->xpm), text_xpm);
 	XCopyArea(dock->display, 
 		  dockitem->xpm.pixmap,
