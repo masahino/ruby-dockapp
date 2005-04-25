@@ -134,9 +134,15 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	dockitem->y = FIX2INT(y)+margin;
 
 	if (dockitem->type != TYPE_POPUP) {
-		set_pixmap(dock, dockitem->x, dockitem->y, 
-			   dockitem->x + dockitem->width,
-			   dockitem->y + dockitem->height);
+		if (dockitem->type == ITEMTYPE_RECTANGLE) {
+			set_pixmap(dock, dockitem->x, dockitem->y, 
+				   dockitem->x + dockitem->width,
+				   dockitem->y + dockitem->height);
+		} else {
+			set_pixmap_circle(dock, dockitem->x, dockitem->y, 
+					  dockitem->x + dockitem->width,
+					  dockitem->y + dockitem->height);
+		}
 	}
 	if (search_dockitem(dock, dockitem) == NULL) {
 		if (dock->item == NULL) {
@@ -496,7 +502,7 @@ void Init_dockapp(void) {
 	docktext_init(rb_DockApp);
 	docktimer_init(rb_DockApp);
 	dockpopup_init(rb_DockApp);
-
+	dockevent_init(rb_DockApp);
 #if 0
 	gtk_dockapp_init();
 #endif

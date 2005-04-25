@@ -454,6 +454,85 @@ static void mask_window(WMDockApp *dock)
 
 }
 
+void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2)
+{
+	int i, j, x, y;
+	int width = 64;
+	int height = 64;
+	int margin = 4;
+	int colors = 5;
+	int base = colors + 1;
+	int radius, radius2;
+	int l1, l2;
+	int r, a;
+	int minx, miny, maxx, maxy;
+
+	r = x2 - x1;
+	radius = r / 2; radius2 = radius * radius;
+	minx = width;
+	maxx = 0;
+	miny = height;
+	maxy = 0;
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			a = (j-radius)*(j-radius) + (i-radius)*(i-radius);
+			x = x1 + j;
+			y = y1 + base + i;
+			/* x^2 + y^2 < r^2 */
+			if (a < radius2) {
+				dock->xpm_master[y][x] = '.';
+				if (x > maxx) {
+					maxx = x;
+				}
+				if (y > maxy) {
+					maxy = y;
+				}
+				if (x < minx) {
+					minx = x;
+				}
+				if (y < miny) {
+					miny = y;
+				}
+			}
+		}
+	}
+	printf ("maxx = %d\n", maxx);
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			a = (j-radius)*(j-radius) + (i-radius)*(i-radius);
+			x = x1 + j;
+			y = y1 + base + i;
+			if ((a < radius2) && (radius2 - a < r)) {
+				if (((i-radius) >= 0 &&
+				    (j-radius) >= 0) || 
+				x == maxx || y == maxy) {
+					dock->xpm_master[y][x] = '@';
+				} else if (((i-radius) <= 0 &&
+					   (j-radius) <= 0) || 
+				x == minx || y == miny) {
+					dock->xpm_master[y][x] = '+';
+				} else {
+					dock->xpm_master[y][x] = '.';
+				}
+			}
+		}
+	}
+	   
+	GetXPM(dock, &dock->wmgen, dock->xpm_master);
+	mask_window(dock);
+	{
+		int i, j;
+		for (i = 0; i < base + height; i++) {
+			for (j = 0; j < width; j++) {
+				printf ("%c", dock->xpm_master[i][j]);
+//			printf ("%02d\"%s\"\n", i, dock->xpm_master[i]);
+			}
+			printf ("\n");
+		}
+	}
+	
+}
+
 void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2)
 {
 	int i;
@@ -478,8 +557,7 @@ void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2)
 /* あふれた場合の処理を追加しないとヤバい */
 		if ((i - base) == y1) {
 			int j;
-			for (j = x1;
-			     j < x2; j++) {
+			for (j = x1; j < x2; j++) {
 				if (dock->xpm_master[i][j] == ' ') {
 					dock->xpm_master[i][j] = '+';
 				} else if (dock->xpm_master[i][j] == '@') {
@@ -489,8 +567,7 @@ void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2)
 					break;
 				}
 			}
-		} else if (y1 < (i - base) &&
-			   (i - base) < y2) {
+		} else if (y1 < (i - base) && (i - base) < y2) {
 			if (dock->xpm_master[i][x1] == ' ') {
 				dock->xpm_master[i][x1] = '+';
 			} else if (dock->xpm_master[i][x1] == '@') {

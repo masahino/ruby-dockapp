@@ -185,21 +185,33 @@ void dockitem_mark(WMDockItem *item)
 	rb_gc_mark(item->callback);
 }
 
-static VALUE dockitem_s_new(VALUE self, VALUE width, VALUE height)
+static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
+	VALUE width, height, rtype;
 	WMDockItem *item;
+	int type; 
+
+	if (rb_scan_args(argc, argv, "21", &width, &height, &rtype) == 2) {
+		type = ITEMTYPE_RECTANGLE;
+	} else {
+		if (strcmp(StringValuePtr(rtype), "circle") == 0) {
+			type = ITEMTYPE_CIRCLE;
+		} else {
+			type = ITEMTYPE_RECTANGLE;
+		}
+	}
 
 	Check_Type(width, T_FIXNUM);
 	Check_Type(height, T_FIXNUM);
-	  
+	
 	item = malloc(sizeof(WMDockItem));
-
 	memset(item, 0, sizeof(WMDockItem));
 
 	item->text = NULL;
 	item->width = FIX2INT(width);
 	item->height = FIX2INT(height);
+	item->type = type;
 	obj = Data_Wrap_Struct(self, dockitem_mark, -1, item);
 	return obj;
 }
@@ -209,7 +221,7 @@ void dockitem_init(VALUE rb_DockApp)
 	VALUE rb_DockItem;
 
 	rb_DockItem = rb_define_class_under(rb_DockApp, "Item", rb_cObject);
-	rb_define_singleton_method(rb_DockItem, "new",  dockitem_s_new, 2);
+	rb_define_singleton_method(rb_DockItem, "new",  dockitem_s_new, -1);
 	rb_define_method(rb_DockItem, "drawLEDstring", 
 			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), 4);
 	rb_define_method(rb_DockItem, "draw_string", 
