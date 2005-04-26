@@ -12,6 +12,27 @@
 
 #include "dockapp.h"
 
+static void dockitem_signal_connect(VALUE self, VALUE signal_type)
+{
+
+	WMDockItem *item;
+	struct WMDockSignal *signal, *tmp;
+
+	Data_Get_Struct(self, WMDockItem, item);
+	Check_Type(signal_type, T_STRING);
+	signal = malloc(sizeof(struct WMDockSignal));
+	memset(signal, 0, sizeof(struct WMDockSignal));
+	signal->type = ButtonPress;
+	signal->callback = rb_block_proc();
+	
+	tmp = item->signal;
+	while (tmp != NULL) {
+		tmp = tmp->next;
+	}
+	tmp = signal;
+	signal->next = NULL;
+}
+
 static void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)
 {
 	WMDockItem *item;
@@ -239,4 +260,6 @@ void dockitem_init(VALUE rb_DockApp)
 	rb_define_method(rb_DockItem, "draw_rect",
 			 RUBY_METHOD_FUNC(dockitem_draw_rect), 5);
 
+	rb_define_method(rb_DockItem, "signal_connect",
+			 RUBY_METHOD_FUNC(dockitem_signal_connect), 1);
 }

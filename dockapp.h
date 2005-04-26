@@ -2,7 +2,7 @@
 #define DOCKAPP_H_INCLUDED
 
 /* Defines */
-#define MAX_MOUSE_REGION (8)
+#define MAX_MOUSE_REGION (16)
 
 #define DEFAULT_FONT "-shinonome-gothic-medium-r-normal--12-*-*-*-*-*"
 #define SUBSTITUTE_FONT "-misc-fixed-medium-r-normal--12-*-*-*-*-*"
@@ -67,6 +67,12 @@ typedef struct {
 	Bool            use_fontset;
 } WMDockApp;
 
+struct WMDockSignal {
+	void *next;
+	int type;
+	VALUE callback;
+};
+
 typedef struct {
 	void            *next;
 	WMDockApp       *dock;
@@ -76,6 +82,7 @@ typedef struct {
 	int             width;
 	int             height;
 	VALUE           callback;
+	struct WMDockSignal *signal;
 	int             index; /* unused */
 	int             visible;
 	XpmIcon         xpm;

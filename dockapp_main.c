@@ -69,6 +69,17 @@ static void mouse_callback(WMDockItem *item, XButtonEvent event)
 	
 	printf (" state = %d\n", event.state);
 
+	if (item->signal) {
+		struct WMDockSignal *signal;
+		signal = item->signal;
+		while (signal) {
+			if (signal->type == ButtonPress) {
+				rb_funcall(item->callback, id_call, 0);
+			}
+			signal = signal->next;
+		}
+	}
+
 	if (item->callback) {
 		/* TODO: to return as Hash */
 		rb_funcall(item->callback, id_call, 5,
