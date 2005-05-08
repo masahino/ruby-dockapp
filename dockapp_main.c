@@ -47,16 +47,16 @@ extern WMDockTimer *docktimer;
 static void rbgobj_add_relative_removable(VALUE obj, VALUE relative, 
 					  ID obj_ivar_id, VALUE hash_key)
 {
-    VALUE hash = Qnil;
+	VALUE hash = Qnil;
 
-    if (RTEST(rb_ivar_defined(obj, obj_ivar_id)))
-        hash = rb_ivar_get(obj, obj_ivar_id);
+	if (RTEST(rb_ivar_defined(obj, obj_ivar_id)))
+		hash = rb_ivar_get(obj, obj_ivar_id);
 
-    if (NIL_P(hash) || TYPE(hash) != T_HASH) {
-        hash = rb_hash_new();
-        rb_ivar_set(obj, obj_ivar_id, hash);
-    }
-    rb_hash_aset(hash, hash_key, relative);
+	if (NIL_P(hash) || TYPE(hash) != T_HASH) {
+		hash = rb_hash_new();
+		rb_ivar_set(obj, obj_ivar_id, hash);
+	}
+	rb_hash_aset(hash, hash_key, relative);
 }
 
 static void sig_int()
@@ -64,30 +64,43 @@ static void sig_int()
 	rb_raise(rb_eInterrupt, "");
 }
 
-static void mouse_callback(WMDockItem *item, XButtonEvent event)
+
+static void signal_callback(WMDockItem *item, XEvent event)
 {
-	
-	printf (" state = %d\n", event.state);
+	XButtonEvent button_event;
 
 	if (item->signal) {
 		struct WMDockSignal *signal;
 		signal = item->signal;
 		while (signal) {
-			if (signal->type == ButtonPress) {
-				rb_funcall(item->callback, id_call, 0);
+			if (signal->type == event.type) {
+				VALUE dockevent;
+				printf ("hoge %d\n", event.type);
+				signal->event = event;
+				dockevent = dockevent_initialize(NULL, event);
+
+				rb_funcall(signal->callback, id_call, 1, 
+					   dockevent);
+
 			}
 			signal = signal->next;
 		}
 	}
-
+#if 0
 	if (item->callback) {
 		/* TODO: to return as Hash */
-		rb_funcall(item->callback, id_call, 5,
-			   INT2FIX(event.x), INT2FIX(event.y),
-			   INT2FIX(event.button),
-			   INT2FIX(event.x_root),
-			   INT2FIX(event.y_root));
+		if (event.type == ButtonPress ||
+		    event.type == ButtonRelease) {
+			button_event = event.xbutton;
+			rb_funcall(item->callback, id_call, 5,
+				   INT2FIX(button_event.x),
+				   INT2FIX(button_event.y),
+				   INT2FIX(button_event.button),
+				   INT2FIX(button_event.x_root),
+				   INT2FIX(button_event.y_root));
+		}
 	}
+#endif 
 }
 
 
@@ -170,6 +183,12 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	}
 	if (dockitem->type != TYPE_POPUP) {
 		dockitem->visible = DOCKITEM_VISIBLE;
+		AddMouseRegion(mouse_region_index,
+			       dockitem->x, dockitem->y, 
+			       dockitem->x + dockitem->width, 
+			       dockitem->y + dockitem->height, 
+			       dockitem);
+		mouse_region_index++;
 	}
 }
 
@@ -200,8 +219,9 @@ static void _dockapp_set_timer(VALUE self, VALUE interval)
 	timer_id += 1;
 	//	Data_Wrap_Struct(self, NULL, NULL, timer);
 
-	rbgobj_add_relative_removable(self, timer->callback, id_relative_callbacks, INT2FIX(timer_id));
-
+	rbgobj_add_relative_removable(self, timer->callback,
+				      id_relative_callbacks,
+				      INT2FIX(timer_id));
 }
 
 static void dockapp_openwindow(VALUE self)
@@ -433,18 +453,21 @@ static void dockapp_start(VALUE self)
                                 //exit(EXIT_SUCCESS);
                                 break;
 			case ButtonPress:
-			case ButtonRelease:
 				s = CheckMouseRegion(event.xbutton.x,
 						     event.xbutton.y);
-				printf ("ButtonPress %d(%d, %d)\n", s,
+				printf ("ButtonPress: %d(%d, %d)\n", s,
 					event.xbutton.x, event.xbutton.y);
-				printf ("%d\n", event.xbutton.button);
-				printf ("ButtonPress\n");
 				if (s != -1 && mouse_region[s].item != NULL) {
-					mouse_callback(mouse_region[s].item, 
-						       event.xbutton);
+					signal_callback(mouse_region[s].item, 
+							event);
 				}
 				break;
+			case ButtonRelease:
+				printf ("ButtonRelease: %d(%d, %d)\n", s,
+					event.xbutton.x, event.xbutton.y);
+				signal_callback(mouse_region[s].item, event);
+				break;
+				
 			}
 		}
 		usleep(10000); /* 10ms */

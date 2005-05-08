@@ -151,7 +151,8 @@ void dockpopup_init(VALUE rb_DockApp)
 	VALUE rb_DockPopUpImage;
 
 	rb_DockPopUp = rb_define_class_under(rb_DockApp, "PopUp", rb_cObject);
-	rb_define_singleton_method(rb_DockPopUp, "new", dockpopup_initialize, -1);
+	rb_define_singleton_method(rb_DockPopUp, "new",
+				   dockpopup_initialize, -1);
 	rb_define_method(rb_DockPopUp, "show",
 			 RUBY_METHOD_FUNC(dockpopup_show), 2);
 	rb_define_method(rb_DockPopUp, "hide",

@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,14 +26,25 @@ static void dockitem_signal_connect(VALUE self, VALUE signal_type)
 	Check_Type(signal_type, T_STRING);
 	signal = malloc(sizeof(struct WMDockSignal));
 	memset(signal, 0, sizeof(struct WMDockSignal));
-	signal->type = ButtonPress;
-	signal->callback = rb_block_proc();
-	
-	tmp = item->signal;
-	while (tmp != NULL) {
-		tmp = tmp->next;
+	if (strcmp(StringValuePtr(signal_type), "button_press_event") == 0) {
+		signal->type = ButtonPress;
+	}  else if (strcmp(StringValuePtr(signal_type), 
+			   "button_release_event") == 0) {
+		signal->type = ButtonRelease;
+	} else {
+		exit(0);
 	}
-	tmp = signal;
+	signal->callback = rb_block_proc();
+
+	if (item->signal == NULL) {
+		item->signal = signal;
+	} else {
+		tmp = item->signal;
+		while (tmp->next != NULL) {
+			tmp = tmp->next;
+		}
+		tmp->next = signal;
+	}
 	signal->next = NULL;
 }
 
@@ -144,7 +159,8 @@ static void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 /* argv[1]: x */
 /* argv[2]: y */
 /* argv[3]: text type(0 = normal, 1 = Yellow text) */
-static void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y, VALUE text, VALUE color)
+static void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y,
+				   VALUE text, VALUE color)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
@@ -184,10 +200,12 @@ void dockitem_callback(VALUE self)
 
 	item->callback = rb_block_proc();
 
+/*
 	AddMouseRegion(mouse_region_index, item->x, item->y, 
 		       item->x + item->width, item->y + item->height, 
 		       item);
 	mouse_region_index++;
+*/
 }
 
 static void dockitem_clear(VALUE self)

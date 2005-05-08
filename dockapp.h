@@ -70,7 +70,12 @@ typedef struct {
 struct WMDockSignal {
 	void *next;
 	int type;
+	XEvent event;
 	VALUE callback;
+};
+
+struct WMDockEvent {
+	XEvent event;
 };
 
 typedef struct {

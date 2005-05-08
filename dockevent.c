@@ -18,22 +18,32 @@
 #include "ruby.h"
 #include "dockapp.h"
 
+VALUE rb_DockEvent;
 
+VALUE dockevent_button(VALUE self)
+{
+	return INT2FIX(3);
+}
 
-VALUE dockevent_initialize(VALUE self, VALUE xevent)
+VALUE dockevent_initialize(VALUE self, XEvent xevent)
 {
 	VALUE obj;
+	struct WMDockEvent *dockevent;
 
-/*	obj = Data_Wrap_Struct(self, dockitem_mark, -1, popup);*/
+	dockevent = malloc(sizeof(struct WMDockEvent));
+	dockevent->event = xevent;
+
+	obj = Data_Wrap_Struct(rb_DockEvent, NULL, -1, dockevent);
 	
 	return obj;
 }
 
 void dockevent_init(VALUE rb_DockApp)
 {
-	VALUE rb_DockEvent;
 
 	rb_DockEvent = rb_define_class_under(rb_DockApp, "Event", rb_cObject);
 	rb_define_singleton_method(rb_DockEvent, "new", dockevent_initialize, 1);
-
+	rb_define_method(rb_DockEvent, "button",
+			 RUBY_METHOD_FUNC(dockevent_button), 0);
+	
 }

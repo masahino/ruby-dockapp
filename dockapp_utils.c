@@ -314,7 +314,7 @@ void AddMouseRegion(int index, int left, int top, int right, int bottom,
 int CheckMouseRegion(int x, int y)
 {
 	int	i;
-
+	printf ("x = %d\ty = %d\n", x, y);
 	for (i=0; i<MAX_MOUSE_REGION; i++) {
 		if (mouse_region[i].enable &&
 			x <= mouse_region[i].right &&
