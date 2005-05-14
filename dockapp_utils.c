@@ -32,6 +32,33 @@
 
 /* Function Prototypes */
 
+void draw_ledpoint(WMDockApp *dock, int x, int y, char *color)
+{
+	int src_x, src_y;
+	if (strcmp("green", color) == 0) {
+		src_x = 50;
+		src_y =  6;
+	} else if (strcmp("red", color) == 0) {
+		src_x = 56;
+		src_y =  1;
+	} else if (strcmp("yellow", color) == 0) {
+		src_x = 56;
+		src_y =  6;
+	} else if (strcmp("off", color) == 0) {
+		src_x = 50;
+		src_y =  1;
+	} else {
+		/* error */
+		return;
+	}
+	XCopyArea(dock->display, 
+		  dock->parts_pixmap.pixmap,
+		  dock->wmgen.pixmap, 
+		  dock->NormalGC,
+		  src_x, src_y, 4, 4, x, y); // off
+
+}
+
 void get_pointer_position(Window win, int *x, int *y)
 {
 	Window dummy_root, dummy_child;
@@ -397,13 +424,33 @@ void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
 	}
 }
 
+void GetXPM2(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
+{
+	XWindowAttributes	attributes;
+	int			err;
+
+	/* For the colormap */
+/*
+	XGetWindowAttributes(dockapp->display, dockapp->Root, &attributes);
+	wmgen->attributes.valuemask |= (XpmReturnPixels | XpmReturnExtensions);
+*/
+	err = XpmCreatePixmapFromData(dockapp->display, dockapp->Root, 
+				      pixmap_bytes, &(wmgen->pixmap),
+		&(wmgen->mask), &(wmgen->attributes));
+
+
+	if (err != XpmSuccess) {
+		fprintf(stderr, "Not enough free colorcells.\n");
+		exit(1);
+	}
+}
+
 void GetXPMfromFile(XpmIcon *wmgen, char *filename)
 {
 	XWindowAttributes	attributes;
 	int			err;
 
 	/* For the colormap */
-
 	XGetWindowAttributes(display, Root, &attributes);
 	wmgen->attributes.valuemask |= (XpmReturnPixels | XpmReturnExtensions);
 
@@ -560,6 +607,9 @@ void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2)
 			for (j = x1; j < x2; j++) {
 				if (dock->xpm_master[i][j] == ' ') {
 					dock->xpm_master[i][j] = '+';
+					if (j == x2-1) {
+						dock->xpm_master[i][j] = '@';
+					}
 				} else if (dock->xpm_master[i][j] == '@') {
 					dock->xpm_master[i][j] = '.';
 				}

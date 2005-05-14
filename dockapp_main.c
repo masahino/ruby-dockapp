@@ -283,6 +283,8 @@ static void dockapp_openwindow(VALUE self)
 
 	GetXPM(wmdockapp, &wmdockapp->text_pixmap, text_xpm);
 
+	GetXPM(wmdockapp, &wmdockapp->parts_pixmap, dockapp_parts_xpm);
+
 
 	/* Create a window to hold the stuff */
 	mysizehints.flags = USSize | USPosition;

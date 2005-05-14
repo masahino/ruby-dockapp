@@ -16,6 +16,52 @@
 
 #include "dockapp.h"
 
+#define LED_TYPE_CIRCLE 1
+#define LED_TYPE_SQUARE 2
+
+#define LED_COLOR_GREEN  1
+#define LED_COLOR_RED    2
+#define LED_COLOR_YELLOW 3
+#define LED_COLOR_OFF    4
+static void dockitem_draw_led(int argc, VALUE *argv, VALUE self)
+{
+	WMDockApp *dock;
+	WMDockItem *dockitem;
+	VALUE x, y, text, vtype, vwidth, vheight;
+	XpmIcon parts_xpm;
+	char *color;
+	int n, width, height, type;
+
+	n = rb_scan_args(argc, argv, "33", &x, &y, &color, &vtype, &vwidth, &vheight);
+	if (n == 3) {
+		type = LED_TYPE_CIRCLE;
+		width = 0;
+		height = 0;
+	} else {
+		Check_Type(vwidth, T_FIXNUM);
+		Check_Type(vheight, T_FIXNUM);
+		Check_Type(vtype, T_STRING);
+		if (strcmp("circle",
+			   StrValuePtr(vtype)) == 0) {
+			type = LED_TYPE_CIRCLE;
+		} else if (strcmp(StrValuePtr(vtype), "square") == 0) {
+			type = LED_TYPE_SQUARE;
+		} else {
+			rb_raise(rb_eRuntimeError, "");
+		}
+		width = FIX2INT(vwidth);
+		height = FIX2INT(vheight);
+	}
+	Check_Type(color, T_STRING);
+	Check_Type(x, T_FIXNUM);
+	Check_Type(y, T_FIXNUM);
+	
+	Data_Get_Struct(self, WMDockItem, dockitem);
+	dock = dockitem->dock;
+
+	draw_ledpoint(dock, x, y, StringValuePtr(color));
+}
+
 static void dockitem_signal_connect(VALUE self, VALUE signal_type)
 {
 
@@ -277,6 +323,8 @@ void dockitem_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockitem_draw_line), 5);
 	rb_define_method(rb_DockItem, "draw_rect",
 			 RUBY_METHOD_FUNC(dockitem_draw_rect), 5);
+	rb_define_method(rb_DockItem, "draw_led",
+			 RUBY_METHOD_FUNC(dockitem_draw_led), -1);
 
 	rb_define_method(rb_DockItem, "signal_connect",
 			 RUBY_METHOD_FUNC(dockitem_signal_connect), 1);

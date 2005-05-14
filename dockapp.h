@@ -57,6 +57,7 @@ typedef struct {
 	GC              NormalGC;
 	XpmIcon         wmgen;
 	XpmIcon         text_pixmap;
+	XpmIcon         parts_pixmap;
 	XFontSet        fontset;
 	Window		iconwin;
 	Window          win;
