@@ -153,6 +153,8 @@ Pixel GetColor(WMDockApp *dock, char *name);
 void createXBMfromXPM(char *xbm_org, char **xpm, int sx, int sy);
 void GetXPMfromFile(XpmIcon *wmgen, char *filename);
 void new_timer(WMDockTimer *timer, int interval);
+void dockitem_signal_connect(VALUE self, VALUE signal_type);
+void draw_ledpoint(WMDockApp *dock, int x, int y, char *color);
 
 /* docktext.c */
 void docktext_init(VALUE rb_DockApp);

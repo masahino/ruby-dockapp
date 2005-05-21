@@ -23,13 +23,32 @@
 #define LED_COLOR_RED    2
 #define LED_COLOR_YELLOW 3
 #define LED_COLOR_OFF    4
+
+
+VALUE dockitem_width(VALUE self, VALUE signal_type)
+{
+
+	WMDockItem *item;
+
+	Data_Get_Struct(self, WMDockItem, item);
+	return INT2FIX(item->width);
+}
+
+VALUE dockitem_height(VALUE self, VALUE signal_type)
+{
+
+	WMDockItem *item;
+
+	Data_Get_Struct(self, WMDockItem, item);
+	return INT2FIX(item->height);
+}
+
 static void dockitem_draw_led(int argc, VALUE *argv, VALUE self)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
-	VALUE x, y, text, vtype, vwidth, vheight;
-	XpmIcon parts_xpm;
-	char *color;
+	VALUE x, y, vtype, vwidth, vheight;
+	VALUE color;
 	int n, width, height, type;
 
 	n = rb_scan_args(argc, argv, "33", &x, &y, &color, &vtype, &vwidth, &vheight);
@@ -42,9 +61,9 @@ static void dockitem_draw_led(int argc, VALUE *argv, VALUE self)
 		Check_Type(vheight, T_FIXNUM);
 		Check_Type(vtype, T_STRING);
 		if (strcmp("circle",
-			   StrValuePtr(vtype)) == 0) {
+			   StringValuePtr(vtype)) == 0) {
 			type = LED_TYPE_CIRCLE;
-		} else if (strcmp(StrValuePtr(vtype), "square") == 0) {
+		} else if (strcmp(StringValuePtr(vtype), "square") == 0) {
 			type = LED_TYPE_SQUARE;
 		} else {
 			rb_raise(rb_eRuntimeError, "");
@@ -62,7 +81,7 @@ static void dockitem_draw_led(int argc, VALUE *argv, VALUE self)
 	draw_ledpoint(dock, x, y, StringValuePtr(color));
 }
 
-static void dockitem_signal_connect(VALUE self, VALUE signal_type)
+void dockitem_signal_connect(VALUE self, VALUE signal_type)
 {
 
 	WMDockItem *item;
@@ -92,6 +111,23 @@ static void dockitem_signal_connect(VALUE self, VALUE signal_type)
 		tmp->next = signal;
 	}
 	signal->next = NULL;
+}
+
+
+void dockitem_callback(VALUE self)
+{
+	WMDockItem *item;
+
+	Data_Get_Struct(self, WMDockItem, item);
+
+	item->callback = rb_block_proc();
+
+/*
+	AddMouseRegion(mouse_region_index, item->x, item->y, 
+		       item->x + item->width, item->y + item->height, 
+		       item);
+	mouse_region_index++;
+*/
 }
 
 static void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)
@@ -147,6 +183,7 @@ static void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
 		  FIX2INT(height),
 		  StringValuePtr(color));
 }
+
 
 static void dockitem_set_pixmap(VALUE self, VALUE filename)
 {
@@ -238,22 +275,6 @@ static void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y,
 	  free(lines);
 }
 
-void dockitem_callback(VALUE self)
-{
-	WMDockItem *item;
-
-	Data_Get_Struct(self, WMDockItem, item);
-
-	item->callback = rb_block_proc();
-
-/*
-	AddMouseRegion(mouse_region_index, item->x, item->y, 
-		       item->x + item->width, item->y + item->height, 
-		       item);
-	mouse_region_index++;
-*/
-}
-
 static void dockitem_clear(VALUE self)
 {
 	WMDockItem *item;
@@ -307,14 +328,11 @@ void dockitem_init(VALUE rb_DockApp)
 
 	rb_DockItem = rb_define_class_under(rb_DockApp, "Item", rb_cObject);
 	rb_define_singleton_method(rb_DockItem, "new",  dockitem_s_new, -1);
+
 	rb_define_method(rb_DockItem, "drawLEDstring", 
 			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), 4);
 	rb_define_method(rb_DockItem, "draw_string", 
 			 RUBY_METHOD_FUNC(dockitem_drawstring), -1);
-	rb_define_method(rb_DockItem, "click_callback",
-			 RUBY_METHOD_FUNC(dockitem_callback), 0);
-	rb_define_method(rb_DockItem, "clear",
-			 RUBY_METHOD_FUNC(dockitem_clear), 0);
 	rb_define_method(rb_DockItem, "set_pixmap",
 			 RUBY_METHOD_FUNC(dockitem_set_pixmap), 1);
 	rb_define_method(rb_DockItem, "draw_point",
@@ -325,7 +343,16 @@ void dockitem_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockitem_draw_rect), 5);
 	rb_define_method(rb_DockItem, "draw_led",
 			 RUBY_METHOD_FUNC(dockitem_draw_led), -1);
+	rb_define_method(rb_DockItem, "clear",
+			 RUBY_METHOD_FUNC(dockitem_clear), 0);
+
+	rb_define_method(rb_DockItem, "width",
+			 RUBY_METHOD_FUNC(dockitem_width), 0);
+	rb_define_method(rb_DockItem, "height",
+			 RUBY_METHOD_FUNC(dockitem_height), 0);
 
 	rb_define_method(rb_DockItem, "signal_connect",
 			 RUBY_METHOD_FUNC(dockitem_signal_connect), 1);
+	rb_define_method(rb_DockItem, "click_callback",
+			 RUBY_METHOD_FUNC(dockitem_callback), 0);
 }

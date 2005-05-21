@@ -25,7 +25,6 @@ static void dockpopup_show(VALUE self, VALUE x, VALUE y)
 	WMDockApp *dock;
 	WMDockItem *popup;
 	int root_x, root_y;
-	XWindowAttributes xwin_att;
 
 	Data_Get_Struct(self, WMDockItem, popup);
 
@@ -59,7 +58,6 @@ static void dockpopup_hide(VALUE self)
 
 	dock = popup->dock;
 
-	printf ("win = %x\n", popup->win);
 	XUnmapWindow(dock->display, popup->win);
 	XFlush(dock->display);
 	popup->visible = DOCKITEM_INVISIBLE;
@@ -71,7 +69,6 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	WMDockItem *popup;
 	VALUE width, height;
 	XSetWindowAttributes att;
-	int color;
 
 	if (rb_scan_args(argc, argv, "20", &width, &height) == 2) {
 		;
@@ -105,16 +102,7 @@ VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_file)
 {
 	VALUE obj;
 	WMDockItem *popup;
-	FILE *fp;
 	XSetWindowAttributes att;
-	XpmAttributes xpmatt;
-	GC gc1;
-	int r;
-	struct Image{
-		Pixmap base;	// イメージ本体
-		Pixmap mask;	// イメージのクリップマスク
-	};	
-	struct Image img1, img2;	// XPM構造体を宣言
 
 	Check_Type(xpm_file, T_STRING);
 
@@ -133,8 +121,7 @@ VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_file)
 					 popup->width, popup->height,
 					 0, BlackPixel(display,0), 
 					 WhitePixel(display,0) );
-	gc1=XCreateGC (display, popup->win, 0, 0);	// GCを作成
-	printf ("width = %d\n", popup->width);
+    	printf ("width = %d\n", popup->width);
 	printf ("height = %d\n", popup->height);
 	att.override_redirect=True;
 	XChangeWindowAttributes (display, popup->win,

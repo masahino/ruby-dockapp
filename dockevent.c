@@ -25,6 +25,20 @@ VALUE dockevent_button(VALUE self)
 	return INT2FIX(3);
 }
 
+VALUE dockevent_x(VALUE self)
+{
+	struct WMDockEvent *event;
+	Data_Get_Struct(self, struct WMDockEvent, event);
+	return INT2FIX(event->event.xbutton.x);
+}
+
+VALUE dockevent_y(VALUE self)
+{
+	struct WMDockEvent *event;
+	Data_Get_Struct(self, struct WMDockEvent, event);
+	return INT2FIX(event->event.xbutton.y);
+}
+
 VALUE dockevent_initialize(VALUE self, XEvent xevent)
 {
 	VALUE obj;
@@ -45,5 +59,10 @@ void dockevent_init(VALUE rb_DockApp)
 	rb_define_singleton_method(rb_DockEvent, "new", dockevent_initialize, 1);
 	rb_define_method(rb_DockEvent, "button",
 			 RUBY_METHOD_FUNC(dockevent_button), 0);
+	
+	rb_define_method(rb_DockEvent, "x",
+			 RUBY_METHOD_FUNC(dockevent_x), 0);
+	rb_define_method(rb_DockEvent, "y",
+			 RUBY_METHOD_FUNC(dockevent_y), 0);
 	
 }
