@@ -47,7 +47,7 @@ static void dockpopup_show(VALUE self, VALUE x, VALUE y)
 		  dock->NormalGC,
 		  0, 0, popup->width, popup->height, 0, 0);
 	get_pointer_position(dock->win, &root_x, &root_y);
-	XMoveWindow(display, popup->win, root_x, root_y);
+	XMoveWindow(display, popup->win, root_x - popup->width/2, root_y);
 }
 
 static void dockpopup_hide(VALUE self)
