@@ -1,20 +1,20 @@
-require 'dockapp'
+require '../dockapp'
 
 class DockSample
 
   def initialize 
     @dockapp = DockApp.new("TestApp") # name
-    @time = DockItem.new(55, 12) # default string, width, height
-    @system_info = DockItem.new(55, 24) 
-    @texttest = DockText.new("", 8, 2, 0) # default string, columns, rows
+    @time = DockApp::Item.new(55, 12) # default string, width, height
+    @system_info = DockApp::Item.new(55, 24) 
+    @texttest = DockApp::Text.new("", 8, 2, 0) # default string, columns, rows
 
     @dockapp.openwindow 
-    @dockapp.add_item(@time, 0, 5) # item, x, y
+    @dockapp.add(0, 5, @time) # item, x, y
  
-    @graphtest = DockItem.new(55, 36)
+    @graphtest = DockApp::Item.new(55, 36)
 #    @dockapp.add_item(@graphtest, 5, 20)
 
-    @dockapp.add_item(@system_info, 0, 20)
+    @dockapp.add(0, 20, @system_info)
 
 #    @dockapp.add_item(@texttest, 10, 36)
     @texttest.set_text("test")
@@ -23,17 +23,20 @@ class DockSample
       puts "clicked"
     end
 
-    @time.set_timer(1) do
+    @time_timer = DockApp::Timer.new(1000) do
       date = `date '+%H:%M:%S'`
-      @time.drawLEDtext(date, 2, 2, 0) # x, y, string
+      @time.drawLEDstring(2, 2, date, 0) # x, y, string
     end
+    @time_timer.start
 
-    @system_info.set_timer(10) do
+    @system_timer = DockApp::Timer.new(10000) do
       data = get_df_value()
-      @system_info.drawLEDtext(data, 2, 2, 0)
+      @system_info.drawLEDstring(2, 2, data, 0)
       data = get_loadavg()
-      @system_info.drawLEDtext(data, 2, 12, 0)
+      @system_info.drawLEDstring(2, 12, data, 0)
     end
+    @system_timer.start
+    
   end
 
   def get_df_value

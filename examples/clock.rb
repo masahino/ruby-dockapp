@@ -1,4 +1,4 @@
-require 'dockapp'
+require '../dockapp'
 
 class DateAndTime
 

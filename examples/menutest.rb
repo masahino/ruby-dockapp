@@ -1,4 +1,4 @@
-require './dockapp'
+require '../dockapp.so'
 require 'gtk2'
 
 def make_popup
@@ -8,41 +8,45 @@ def make_popup
 end
 
 def make_popup2
-window = Gtk::Window.new(Gtk::Window::POPUP)
-menu = Gtk::Menu.new
-menu.append(Gtk::MenuItem.new("Test1"))
-menu.append(Gtk::MenuItem.new("Test2"))
-
-menu.show_all
-window.add_events(Gdk::Event::BUTTON_PRESS_MASK)
-window.signal_connect("button_press_event") do |widget, event|
-	if event.kind_of? Gdk::EventButton
-          if (event.button == 3) 
-            menu.popup(nil, nil, event.button, event.time)
-          end
-	end
+  window = Gtk::Window.new(Gtk::Window::POPUP)
+  menu = Gtk::Menu.new
+  menu.append(Gtk::MenuItem.new("Test1"))
+  menu.append(Gtk::MenuItem.new("Test2"))
+  menu.show_all
+  window.add_events(Gdk::Event::BUTTON_PRESS_MASK)
+  window.signal_connect("button_press_event") do |widget, event|
+        p event.time
+        #                menu.popup(nil, nil, event.button, event.time)
+        #        menu.popup(nil, nil, event.button, Time.now.usec)
+        menu.popup(nil, nil, event.button, Gdk::Event::CURRENT_TIME)
   end
-window.set_default_size(10, 10).show_all
-return [window, menu]
+  window.set_default_size(20, 10)
+  return [window, menu]
 end
-  Gtk.init
+
+
+Gtk.init
 
 menutest = DockApp.new("menutest")
 menutest.openwindow
 item = DockApp::Item.new(20, 20)
 
 menutest.add(10, 10, item)
+(window, popup) = make_popup2
 
 item.click_callback do |x, y, button, x_root, y_root|
-  (window, popup) = make_popup2
-  window.move(x_root, y_root)
-  popup.reposition
-  popup.popup(nil, nil, button, 0) do
-    puts "popup"
-  end
-#  Gtk.main_iteration_do(false)
-  Gtk.main
+  window.move(x_root, y_root).show_all
+  p popup
+#  popup.popup(nil, nil, 0, Gdk::Event::CURRENT_TIME)
 end
+
+timer = DockApp::Timer.new(100) do
+  while (Gtk.events_pending?)
+         Gtk.main_iteration
+       end
+end
+
+timer.start
 
 menutest.start
 
