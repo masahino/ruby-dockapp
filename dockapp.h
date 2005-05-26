@@ -66,6 +66,7 @@ typedef struct {
 	char            **xpm_master;
 	WMDockTimer     *timer;
 	Bool            use_fontset;
+	struct WMDockSignal *signal;
 } WMDockApp;
 
 struct WMDockSignal {
@@ -116,6 +117,8 @@ GC              NormalGC;
 
 
 /* Function Prototypes */
+void docksignal_mark(struct WMDockSignal *signal);
+
 /* dockapp_utils.c */
 void get_pointer_position(Window win, int *x, int *y);
 void draw_point(WMDockApp *dock, int x, int y, char *color);

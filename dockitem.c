@@ -86,6 +86,7 @@ void dockitem_signal_connect(VALUE self, VALUE signal_type)
 
 	WMDockItem *item;
 	struct WMDockSignal *signal, *tmp;
+	VALUE obj;
 
 	Data_Get_Struct(self, WMDockItem, item);
 	Check_Type(signal_type, T_STRING);
@@ -111,6 +112,7 @@ void dockitem_signal_connect(VALUE self, VALUE signal_type)
 		tmp->next = signal;
 	}
 	signal->next = NULL;
+//	obj = Data_Wrap_Struct(self, docksignal_mark, -1, signal);
 }
 
 

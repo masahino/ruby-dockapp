@@ -22,7 +22,9 @@ VALUE rb_DockEvent;
 
 VALUE dockevent_button(VALUE self)
 {
-	return INT2FIX(3);
+	struct WMDockEvent *event;
+	Data_Get_Struct(self, struct WMDockEvent, event);
+	return INT2FIX(event->event.xbutton.button);
 }
 
 VALUE dockevent_x(VALUE self)

@@ -64,11 +64,80 @@ static void sig_int()
 	rb_raise(rb_eInterrupt, "");
 }
 
+void docksignal_mark(struct WMDockSignal *signal)
+{
+	rb_gc_mark(signal->callback);
+}
+
+void dockapp_signal_connect(VALUE self, VALUE signal_type)
+{
+
+	WMDockApp *dock;
+	struct WMDockSignal *signal, *tmp;
+	VALUE obj;
+
+	Data_Get_Struct(self, WMDockApp, dock);
+	Check_Type(signal_type, T_STRING);
+	signal = malloc(sizeof(struct WMDockSignal));
+	memset(signal, 0, sizeof(struct WMDockSignal));
+	if (strcmp(StringValuePtr(signal_type), "button_press_event") == 0) {
+		signal->type = ButtonPress;
+	}  else if (strcmp(StringValuePtr(signal_type), 
+			   "button_release_event") == 0) {
+		signal->type = ButtonRelease;
+	} else {
+		exit(0);
+	}
+	signal->callback = rb_block_proc();
+
+	if (dock->signal == NULL) {
+		dock->signal = signal;
+	} else {
+		tmp = dock->signal;
+		while (tmp->next != NULL) {
+			tmp = tmp->next;
+		}
+		tmp->next = signal;
+	}
+	signal->next = NULL;
+//	obj = Data_Wrap_Struct(self, docksignal_mark, -1, signal);
+}
+
+static VALUE signal_check(struct WMDockSignal *signal, XEvent event)
+{
+	XButtonEvent button_event;
+	while (signal) {
+		if (signal->type == event.type) {
+			VALUE dockevent;
+			printf ("hoge %d\n", event.type);
+			signal->event = event;
+			dockevent = dockevent_initialize(NULL, event);
+			rb_funcall(signal->callback, id_call, 1, dockevent);
+			return Qtrue;
+		}
+		signal = signal->next;
+	}
+	return Qfalse;
+}
+
+static VALUE dockapp_signal_callback(WMDockApp *dock, XEvent event)
+{
+	VALUE ret;
+	XEvent tmp_event = event;
+	if (dock->signal) {
+		struct WMDockSignal *signal;
+		signal = dock->signal;
+		ret = signal_check(signal, tmp_event);
+		printf ("ret = %d\n", ret);
+		return ret;
+	}
+	return Qfalse;
+}
 
 static void signal_callback(WMDockItem *item, XEvent event)
 {
 	XButtonEvent button_event;
-
+	
 	if (item->signal) {
 		struct WMDockSignal *signal;
 		signal = item->signal;
@@ -455,16 +524,22 @@ static void dockapp_start(VALUE self)
                                 //exit(EXIT_SUCCESS);
                                 break;
 			case ButtonPress:
+				/* 1st: check signal of DockApp */
+				dockapp_signal_callback(dock, event);
 				s = CheckMouseRegion(event.xbutton.x,
 						     event.xbutton.y);
 				printf ("ButtonPress: %d(%d, %d)\n", s,
 					event.xbutton.x, event.xbutton.y);
-				if (s != -1 && mouse_region[s].item != NULL) {
+				if (s > 0 && mouse_region[s].item != NULL) {
 					signal_callback(mouse_region[s].item, 
 							event);
 				}
 				break;
 			case ButtonRelease:
+				/* 1st: check signal of DockApp */
+				if (dockapp_signal_callback(dock, event) == Qtrue) {
+					break;
+				}
 				printf ("ButtonRelease: %d(%d, %d)\n", s,
 					event.xbutton.x, event.xbutton.y);
 				signal_callback(mouse_region[s].item, event);
@@ -533,6 +608,9 @@ void Init_dockapp(void) {
 			 RUBY_METHOD_FUNC(dockapp_delete), 1);
 //	rb_define_method(rb_DockApp, "set_timer", 
 //			 RUBY_METHOD_FUNC(dockapp_set_timer), 1);
+
+	rb_define_method(rb_DockApp, "signal_connect",
+			 RUBY_METHOD_FUNC(dockapp_signal_connect), 1);
 
 	dockitem_init(rb_DockApp);
 	docktext_init(rb_DockApp);
