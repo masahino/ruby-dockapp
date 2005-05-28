@@ -20,7 +20,6 @@ extern ID id_call;
 
 static void docktimer_mark(WMDockTimer *timer)
 {
-	printf ("timer mark!!\n");
 	rb_gc_mark(timer->callback);
 }
 

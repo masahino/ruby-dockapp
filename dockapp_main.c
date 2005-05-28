@@ -178,6 +178,12 @@ static void signal_callback(WMDockItem *item, XEvent event)
 #endif 
 }
 
+static VALUE dockapp_name(VALUE self)
+{
+        WMDockApp *dock;
+        Data_Get_Struct(self, WMDockApp, dock);
+        return rb_str_new2(dock->wname);
+}
 
 static void dockapp_delete(VALUE self, VALUE vitem)
 {
@@ -227,6 +233,11 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 
 	Data_Get_Struct(self, WMDockApp, dock);
 	Data_Get_Struct(item, WMDockItem, dockitem);
+
+	if (dock->display == NULL) {
+	  rb_raise(rb_eRuntimeError, "not openwindow");
+	  return;
+	}
 	
 	dockitem->dock = dock;
 	dockitem->x = FIX2INT(x)+margin;
@@ -574,17 +585,22 @@ static void dockapp_destroy(VALUE self)
 	exit(0);
 }
 
-static VALUE dockapp_s_new(VALUE self, VALUE name)
+static VALUE dockapp_s_new(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
 	WMDockApp *dock;
+	VALUE vname;
 
-	Check_Type(name, T_STRING);
-	  
 	dock = malloc(sizeof(WMDockApp));
 	memset(dock, 0, sizeof(*dock));
 
-	dock->wname = strdup(StringValuePtr(name));
+        if (rb_scan_args(argc, argv, "01", &vname) == 0) {
+          dock->wname = strdup("WMDockApp");
+        } else {
+        Check_Type(vname, T_STRING);
+          dock->wname = strdup(StringValuePtr(vname));
+        }
+
 	obj = Data_Wrap_Struct(self, dockapp_mark, -1, dock);
 
 	signal(SIGINT, sig_int);
@@ -603,7 +619,7 @@ void Init_dockapp(void) {
 	mouse_region_index = 0;
 
 	rb_DockApp = rb_define_class("DockApp", rb_cObject);
-	rb_define_singleton_method(rb_DockApp, "new", dockapp_s_new, 1);
+	rb_define_singleton_method(rb_DockApp, "new", dockapp_s_new, -1);
 	rb_define_method(rb_DockApp, "openwindow",
 			 RUBY_METHOD_FUNC(dockapp_openwindow), 0);
 	rb_define_method(rb_DockApp, "start", 
@@ -619,6 +635,8 @@ void Init_dockapp(void) {
 
 	rb_define_method(rb_DockApp, "signal_connect",
 			 RUBY_METHOD_FUNC(dockapp_signal_connect), 1);
+        rb_define_method(rb_DockApp, "name",
+                         RUBY_METHOD_FUNC(dockapp_name), 0);
 
 	dockitem_init(rb_DockApp);
 	docktext_init(rb_DockApp);
