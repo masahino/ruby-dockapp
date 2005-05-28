@@ -11,6 +11,7 @@
 #include "ruby.h"
 
 #include "dockapp.h"
+#include "dockapp_utils.h"
 //#include "pixmap.h"
 
 static void set_text(WMDockItem *dockitem, char *text, int color)

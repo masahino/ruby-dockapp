@@ -15,7 +15,7 @@
 #include "ruby.h"
 
 #include "dockapp.h"
-
+#include "dockapp_utils.h"
 #define LED_TYPE_CIRCLE 1
 #define LED_TYPE_SQUARE 2
 
@@ -86,7 +86,6 @@ void dockitem_signal_connect(VALUE self, VALUE signal_type)
 
 	WMDockItem *item;
 	struct WMDockSignal *signal, *tmp;
-	VALUE obj;
 
 	Data_Get_Struct(self, WMDockItem, item);
 	Check_Type(signal_type, T_STRING);
@@ -112,7 +111,6 @@ void dockitem_signal_connect(VALUE self, VALUE signal_type)
 		tmp->next = signal;
 	}
 	signal->next = NULL;
-//	obj = Data_Wrap_Struct(self, docksignal_mark, -1, signal);
 }
 
 
@@ -291,6 +289,14 @@ static void dockitem_clear(VALUE self)
 void dockitem_mark(WMDockItem *item)
 {
 	rb_gc_mark(item->callback);
+	if (item->signal) {
+		struct WMDockSignal *signal;
+		signal = item->signal;
+		while (signal) {
+			rb_gc_mark(signal->callback);
+			signal = signal->next;
+		}
+	}
 }
 
 static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)

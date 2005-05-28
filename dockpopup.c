@@ -18,7 +18,7 @@
 #include "ruby.h"
 
 #include "dockapp.h"
-
+#include "dockapp_utils.h"
 
 static void dockpopup_show(VALUE self, VALUE x, VALUE y)
 {

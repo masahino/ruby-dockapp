@@ -32,6 +32,7 @@
 #include "ruby.h"
 
 #include "dockapp.h"
+#include "dockapp_utils.h"
 #include "pixmap.h"
 
 int u1 = 0;
@@ -44,6 +45,7 @@ VALUE mDockApp;
 extern WMDockTimer *docktimer;
 
 /* from ruby-gnome2 */
+/*
 static void rbgobj_add_relative_removable(VALUE obj, VALUE relative, 
 					  ID obj_ivar_id, VALUE hash_key)
 {
@@ -58,23 +60,30 @@ static void rbgobj_add_relative_removable(VALUE obj, VALUE relative,
 	}
 	rb_hash_aset(hash, hash_key, relative);
 }
+*/
 
 static void sig_int()
 {
 	rb_raise(rb_eInterrupt, "");
 }
 
-void docksignal_mark(struct WMDockSignal *signal)
+void dockapp_mark(WMDockApp *dock)
 {
-	rb_gc_mark(signal->callback);
+	if (dock->signal) {
+		struct WMDockSignal *signal;
+		signal = dock->signal;
+		while (signal) {
+			rb_gc_mark(signal->callback);
+			signal = signal->next;
+		}
+	}
 }
 
-void dockapp_signal_connect(VALUE self, VALUE signal_type)
+static void dockapp_signal_connect(VALUE self, VALUE signal_type)
 {
 
 	WMDockApp *dock;
 	struct WMDockSignal *signal, *tmp;
-	VALUE obj;
 
 	Data_Get_Struct(self, WMDockApp, dock);
 	Check_Type(signal_type, T_STRING);
@@ -105,13 +114,12 @@ void dockapp_signal_connect(VALUE self, VALUE signal_type)
 
 static VALUE signal_check(struct WMDockSignal *signal, XEvent event)
 {
-	XButtonEvent button_event;
 	while (signal) {
 		if (signal->type == event.type) {
 			VALUE dockevent;
 			printf ("hoge %d\n", event.type);
 			signal->event = event;
-			dockevent = dockevent_initialize(NULL, event);
+			dockevent = dockevent_initialize(Qnil, event);
 			rb_funcall(signal->callback, id_call, 1, dockevent);
 			return Qtrue;
 		}
@@ -128,7 +136,6 @@ static VALUE dockapp_signal_callback(WMDockApp *dock, XEvent event)
 		struct WMDockSignal *signal;
 		signal = dock->signal;
 		ret = signal_check(signal, tmp_event);
-		printf ("ret = %d\n", ret);
 		return ret;
 	}
 	return Qfalse;
@@ -136,7 +143,6 @@ static VALUE dockapp_signal_callback(WMDockApp *dock, XEvent event)
 
 static void signal_callback(WMDockItem *item, XEvent event)
 {
-	XButtonEvent button_event;
 	
 	if (item->signal) {
 		struct WMDockSignal *signal;
@@ -146,7 +152,7 @@ static void signal_callback(WMDockItem *item, XEvent event)
 				VALUE dockevent;
 				printf ("hoge %d\n", event.type);
 				signal->event = event;
-				dockevent = dockevent_initialize(NULL, event);
+				dockevent = dockevent_initialize(Qnil, event);
 
 				rb_funcall(signal->callback, id_call, 1, 
 					   dockevent);
@@ -261,6 +267,7 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	}
 }
 
+/*
 static void _dockapp_set_timer(VALUE self, VALUE interval)
 {
 
@@ -292,6 +299,7 @@ static void _dockapp_set_timer(VALUE self, VALUE interval)
 				      id_relative_callbacks,
 				      INT2FIX(timer_id));
 }
+*/
 
 static void dockapp_openwindow(VALUE self)
 {
@@ -474,7 +482,7 @@ static void dockapp_openwindow(VALUE self)
 static void dockapp_start(VALUE self)
 {
 	XEvent	event;
-	int s;
+	int s = 0;
 	Display *display;
 	WMDockApp *dock;
 	WMDockTimer *timer;
@@ -577,7 +585,7 @@ static VALUE dockapp_s_new(VALUE self, VALUE name)
 	memset(dock, 0, sizeof(*dock));
 
 	dock->wname = strdup(StringValuePtr(name));
-	obj = Data_Wrap_Struct(self, NULL, -1, dock);
+	obj = Data_Wrap_Struct(self, dockapp_mark, -1, dock);
 
 	signal(SIGINT, sig_int);
 

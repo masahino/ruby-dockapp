@@ -27,7 +27,7 @@
 #include "ruby.h"
 
 #include "dockapp.h"
-#include "dockapp_pixmap.h"
+#include "dockapp_utils.h"
 //#include "pixmap.h"
 
 /* Function Prototypes */
@@ -426,7 +426,6 @@ void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
 
 void GetXPM2(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
 {
-	XWindowAttributes	attributes;
 	int			err;
 
 	/* For the colormap */
@@ -506,11 +505,11 @@ void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2)
 	int i, j, x, y;
 	int width = 64;
 	int height = 64;
-	int margin = 4;
+//	int margin = 4;
 	int colors = 5;
 	int base = colors + 1;
 	int radius, radius2;
-	int l1, l2;
+//	int l1, l2;
 	int r, a;
 	int minx, miny, maxx, maxy;
 
