@@ -337,10 +337,10 @@ void dockitem_init(VALUE rb_DockApp)
 	rb_DockItem = rb_define_class_under(rb_DockApp, "Item", rb_cObject);
 	rb_define_singleton_method(rb_DockItem, "new",  dockitem_s_new, -1);
 
-	rb_define_method(rb_DockItem, "drawLEDstring", 
-			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), 4);
 	rb_define_method(rb_DockItem, "draw_string", 
 			 RUBY_METHOD_FUNC(dockitem_drawstring), -1);
+	rb_define_method(rb_DockItem, "drawLEDstring", 
+			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), 4);
 	rb_define_method(rb_DockItem, "set_pixmap",
 			 RUBY_METHOD_FUNC(dockitem_set_pixmap), 1);
 	rb_define_method(rb_DockItem, "draw_point",
