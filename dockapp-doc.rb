@@ -4,7 +4,7 @@
 # 
 
 class DockApp
-  def initialize(window_name)
+  def initialize(window_name="WMDockApp")
   end
 
   # show window
@@ -26,6 +26,11 @@ class DockApp
   def start()
   end
 
+  def signal_connect(signal) # :yields:event
+  end
+  
+  def name()
+  end
 
   # subwindow
   class Item
@@ -49,6 +54,9 @@ class DockApp
 
     def draw_rect(x1, y1, x2, y2, color)
     end
+
+    def draw_led(x, y, color, type="circle", width=nil, height=nil)
+    end
     
     def width()
     end
@@ -56,7 +64,7 @@ class DockApp
     def height()
     end
 
-    def signal_connect() # :yields:event
+    def signal_connect(signal_name) # :yields:event
     end
     
     def click_callback() # :yields: x, y
@@ -126,6 +134,13 @@ class DockApp
     # NOT implement
     def popup
     end
+
+    def show(x, y)
+    end
+    
+    def hide()
+    end
+
   end
 
   # popup window with a XPM image
@@ -133,7 +148,8 @@ class DockApp
 
     def initialize(xpm_filename)
     end
-    
+
+
   end
 
   
