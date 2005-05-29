@@ -37,6 +37,7 @@ void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[]);
 Pixel GetColor(WMDockApp *dock, char *name);
 void createXBMfromXPM(char *xbm_org, char **xpm, int sx, int sy);
 void GetXPMfromFile(XpmIcon *wmgen, char *filename);
+void GetXPMfromData(XpmIcon *wmgen, char *pixmap_bytes[]);
 void new_timer(WMDockTimer *timer, int interval);
 void dockitem_signal_connect(VALUE self, VALUE signal_type);
 void draw_ledpoint(WMDockApp *dock, int x, int y, char *color);

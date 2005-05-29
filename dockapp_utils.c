@@ -444,6 +444,25 @@ void GetXPM2(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
 	}
 }
 
+void GetXPMfromData(XpmIcon *wmgen, char *pixmap_bytes[])
+{
+	XWindowAttributes	attributes;
+	int			err;
+
+	/* For the colormap */
+	XGetWindowAttributes(display, Root, &attributes);
+	wmgen->attributes.valuemask |= (XpmReturnPixels | XpmReturnExtensions);
+
+	err = XpmCreatePixmapFromData(display, Root, 
+				      pixmap_bytes, &(wmgen->pixmap),
+		&(wmgen->mask), &(wmgen->attributes));
+
+	if (err != XpmSuccess) {
+		fprintf(stderr, "Not enough free colorcells.\n");
+		exit(1);
+	}
+}
+
 void GetXPMfromFile(XpmIcon *wmgen, char *filename)
 {
 	XWindowAttributes	attributes;

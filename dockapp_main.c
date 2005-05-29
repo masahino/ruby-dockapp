@@ -235,8 +235,8 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	Data_Get_Struct(item, WMDockItem, dockitem);
 
 	if (dock->display == NULL) {
-	  rb_raise(rb_eRuntimeError, "not openwindow");
-	  return;
+		rb_raise(rb_eRuntimeError, "not openwindow");
+		return;
 	}
 	
 	dockitem->dock = dock;

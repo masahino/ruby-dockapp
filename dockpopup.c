@@ -98,22 +98,33 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	return obj;
 }
 
-VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_file)
+VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_data)
 {
 	VALUE obj;
 	WMDockItem *popup;
 	XSetWindowAttributes att;
 
-	Check_Type(xpm_file, T_STRING);
-
-	/* TODO: xpm_fileの存在確認して、無ければraise) */
-
 	popup = malloc(sizeof(WMDockItem));
 	memset(popup, 0, sizeof(WMDockItem));
-
 	popup->type = TYPE_POPUP;
 
-	GetXPMfromFile(&(popup->xpm), StringValuePtr(xpm_file));
+	if (TYPE(xpm_data) == T_STRING) {
+		/* TODO: xpm_fileの存在確認して、無ければraise) */
+		GetXPMfromFile(&(popup->xpm), StringValuePtr(xpm_data));
+	} else if (TYPE(xpm_data) == T_ARRAY) {
+		char **data;
+		int len;
+		int i;
+		len = RARRAY(xpm_data)->len;
+		printf ("len = %d\n", len);
+		data = malloc(sizeof(char*)*len);
+		for (i = 0; i < len; i++) {
+			data[i] = strdup(StringValuePtr(RARRAY(xpm_data)->ptr[i]));
+		}
+		GetXPMfromData(&(popup->xpm), data);
+	} else {
+		exit(0);
+	}
 	popup->width = popup->xpm.attributes.width;
 	popup->height = popup->xpm.attributes.height;
 	popup->win = XCreateSimpleWindow(display, Root, 
