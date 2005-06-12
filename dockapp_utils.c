@@ -405,6 +405,14 @@ void RedrawWindow(WMDockApp *dock)
 		  dock->wmgen.attributes.height, 0,0);
 }
 
+void RedrawWindow2(Display *display, Pixmap src_pixmap, Window window,
+		   GC gc, int width, int height)
+{
+	flush_expose(display, window);
+	XCopyArea(display, src_pixmap, window,
+		  gc, 0, 0, width, height, 0, 0);
+}
+
 void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
 {
 	XWindowAttributes	attributes;

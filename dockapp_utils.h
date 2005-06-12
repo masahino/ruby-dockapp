@@ -10,6 +10,8 @@ void draw_rect(WMDockApp *dock, int x, int y,
 	       int width, int height, char *color);
 char **strsplit(char *str, char *delimiter, int max);
 void RedrawWindow(WMDockApp *dock);
+void RedrawWindow2(Display *display, Pixmap src_pixmap, Window window,
+		   GC gc, int width, int height);
 void init_pixmap(WMDockApp *dock);
 void AddMouseRegion(int index, int left, int top, int right, int bottom,
 		    WMDockItem *item);

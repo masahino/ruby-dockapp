@@ -20,6 +20,22 @@
 #include "dockapp.h"
 #include "dockapp_utils.h"
 
+static VALUE dockpopup_width(VALUE self)
+{
+	WMDockItem *popup;
+
+	Data_Get_Struct(self, WMDockItem, popup);
+	return INT2FIX(popup->width);
+}
+
+static VALUE dockpopup_height(VALUE self)
+{
+	WMDockItem *popup;
+
+	Data_Get_Struct(self, WMDockItem, popup);
+	return INT2FIX(popup->height);
+}
+
 static void dockpopup_show(VALUE self, VALUE x, VALUE y)
 {
 	WMDockApp *dock;
@@ -43,11 +59,15 @@ static void dockpopup_show(VALUE self, VALUE x, VALUE y)
 		popup->visible = DOCKITEM_VISIBLE;
 
 	}
+/*
 	XCopyArea(display, popup->xpm.pixmap, popup->win,
 		  dock->NormalGC,
 		  0, 0, popup->width, popup->height, 0, 0);
+*/
 	get_pointer_position(dock->win, &root_x, &root_y);
 	XMoveWindow(display, popup->win, root_x - popup->width/2, root_y);
+	RedrawWindow2(display, popup->xpm.pixmap, popup->win,
+		      dock->NormalGC, popup->width, popup->height);
 }
 
 static void dockpopup_hide(VALUE self)
@@ -166,4 +186,8 @@ void dockpopup_init(VALUE rb_DockApp)
 	rb_define_method(rb_DockPopUpImage, "hide",
 			 RUBY_METHOD_FUNC(dockpopup_hide), 0);
 
+	rb_define_method(rb_DockPopUpImage, "width",
+			 RUBY_METHOD_FUNC(dockpopup_width), 0);
+	rb_define_method(rb_DockPopUpImage, "height",
+			 RUBY_METHOD_FUNC(dockpopup_height), 0);
 }
