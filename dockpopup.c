@@ -20,6 +20,27 @@
 #include "dockapp.h"
 #include "dockapp_utils.h"
 
+static VALUE dockpopup_get_index(VALUE self)
+{
+	WMDockItem *popup;
+	WMDockApp *dock;
+	int root_x, root_y;
+
+	Data_Get_Struct(self, WMDockItem, popup);
+	dock = popup->dock;
+	get_pointer_position(dock->win, &root_x, &root_y);
+
+	printf ("x = %d, y = %d\n", root_x, root_y);
+	printf ("px = %d, py = %d\n", popup->x, popup->y);
+	printf ("w = %d, h = %d\n", popup->width, popup->height);
+	if (root_x < popup->x || root_x > popup->x + popup->width ||
+	    root_y < popup->y || root_y > popup->y + popup->height) {
+		return Qnil;
+	}
+	printf ("index = %d\n", (root_y-popup->y)/(LEDCHAR_HEIGHT+1));
+	return INT2FIX((root_y-popup->y)/(LEDCHAR_HEIGHT+1));
+}
+
 static void make_menu_image(WMDockItem *popup)
 {
 	WMDockApp *dock;
@@ -120,6 +141,8 @@ static void dockpopup_show(VALUE self, VALUE x, VALUE y)
 		  0, 0, popup->width, popup->height, 0, 0);
 */
 	get_pointer_position(dock->win, &root_x, &root_y);
+	popup->x = root_x - popup->width/2;
+	popup->y = root_y;
 	XMoveWindow(display, popup->win, root_x - popup->width/2, root_y);
 	RedrawWindow2(display, popup->xpm.pixmap, popup->win,
 		      dock->NormalGC, popup->width, popup->height);
@@ -240,6 +263,8 @@ void dockpopup_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockpopup_show), 2);
 	rb_define_method(rb_DockPopUp, "hide",
 			 RUBY_METHOD_FUNC(dockpopup_hide), 0);
+	rb_define_method(rb_DockPopUp, "get_index",
+			 RUBY_METHOD_FUNC(dockpopup_get_index), 0);
 
 
 	rb_DockPopUpImage = rb_define_class_under(rb_DockApp, "PopUpImage",
