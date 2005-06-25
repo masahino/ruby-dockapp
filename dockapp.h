@@ -93,6 +93,7 @@ typedef struct {
 	int             index; /* unused */
 	int             visible;
 	XpmIcon         xpm;
+	char            **xpm_master; /* test */
 	int             type;
 	Window          win;
 } WMDockItem;

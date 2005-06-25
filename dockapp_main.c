@@ -441,9 +441,10 @@ static void dockapp_openwindow(VALUE self)
 
 		createXBMfromXPM(mask_bits, wmdockapp->xpm_master, 64, 64);
 
-	pixmask = XCreateBitmapFromData(wmdockapp->display, wmdockapp->win, 
-					mask_bits, pixmask_width, 
-					pixmask_height);
+		pixmask = XCreateBitmapFromData(wmdockapp->display,
+						wmdockapp->win, 
+						mask_bits, pixmask_width, 
+						pixmask_height);
 
 /*
 
@@ -452,10 +453,11 @@ static void dockapp_openwindow(VALUE self)
 	XShapeCombineMask(wmdockapp->display, wmdockapp->iconwin, ShapeBounding, 0, 0, pixmask, ShapeSet);
 */
 
-	XShapeCombineMask(wmdockapp->display, wmdockapp->win, ShapeBounding,
-			  0, 0, pixmask, ShapeSet);
-	XShapeCombineMask(wmdockapp->display, wmdockapp->iconwin, 
-			  ShapeBounding, 0, 0, pixmask, ShapeSet);
+		XShapeCombineMask(wmdockapp->display, wmdockapp->win, 
+				  ShapeBounding,
+				  0, 0, pixmask, ShapeSet);
+		XShapeCombineMask(wmdockapp->display, wmdockapp->iconwin, 
+				  ShapeBounding, 0, 0, pixmask, ShapeSet);
 
 	}
 
@@ -549,7 +551,7 @@ static void dockapp_start(VALUE self)
 						     event.xbutton.y);
 				printf ("ButtonPress: %d(%d, %d)\n", s,
 					event.xbutton.x, event.xbutton.y);
-				if (s > 0 && mouse_region[s].item != NULL) {
+				if (s >= 0 && mouse_region[s].item != NULL) {
 					signal_callback(mouse_region[s].item, 
 							event);
 				}
