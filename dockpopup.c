@@ -20,6 +20,61 @@
 #include "dockapp.h"
 #include "dockapp_utils.h"
 
+static void make_menu_image(WMDockItem *popup)
+{
+	WMDockApp *dock;
+	int dest_x = 1;
+	int dest_y = 1;
+	int column = 0;
+	int color = 0;
+	int max_width;
+	int row = 0;
+	int i;
+	char *str_ptr;
+	char **lines;
+
+	lines = strsplit(popup->text, "\n", 0);
+	
+	max_width = 0;
+	for (i = 0; lines[i] != NULL; i++) {
+		if (max_width < strlen(lines[i])) {
+			max_width = strlen(lines[i]);
+		}
+	}
+	if (i == 0) {
+		return;
+	}
+	row = i-1;
+	dock = popup->dock;
+	popup->width = max_width*LEDCHAR_WIDTH + 1;
+	popup->height = row*(LEDCHAR_HEIGHT+1);
+	XResizeWindow(dock->display, Root, 
+		      popup->width, popup->height);
+
+	popup->xpm_master = init_pixmap_with_size(popup->width, popup->height);
+	GetXPM2(&(popup->xpm), popup->xpm_master);
+	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
+
+	for (i = 0; lines[i] != NULL; i++) {
+		drawnLEDString2(dock, popup->xpm, dest_x, 
+				dest_y + i * LEDCHAR_HEIGHT, lines[i], 
+				strlen(lines[i]),
+				color);
+	}
+
+}
+
+static void dockpopup_add_item(VALUE self, VALUE text)
+{
+	WMDockItem *popup;
+
+	Check_Type(text, T_STRING);
+	Data_Get_Struct(self, WMDockItem, popup);
+
+	popup->text = strdup(StringValuePtr(text));
+	make_menu_image(popup);
+}
+
 static VALUE dockpopup_width(VALUE self)
 {
 	WMDockItem *popup;
@@ -83,6 +138,8 @@ static void dockpopup_hide(VALUE self)
 	popup->visible = DOCKITEM_INVISIBLE;
 }
 
+
+
 VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
@@ -112,6 +169,12 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	att.override_redirect=True;
 	XChangeWindowAttributes (display, popup->win,
 				 CWOverrideRedirect, &att);
+
+	popup->xpm_master = init_pixmap_with_size(popup->width, popup->height);
+	GetXPM2(&(popup->xpm), popup->xpm_master);
+	printf ("width=%d,height=%d\n", popup->width, popup->height);
+	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
+
 	obj = Data_Wrap_Struct(self, dockitem_mark, -1, popup);
 
 	
@@ -171,6 +234,8 @@ void dockpopup_init(VALUE rb_DockApp)
 	rb_DockPopUp = rb_define_class_under(rb_DockApp, "PopUp", rb_cObject);
 	rb_define_singleton_method(rb_DockPopUp, "new",
 				   dockpopup_initialize, -1);
+	rb_define_method(rb_DockPopUp, "add_item", 
+			 RUBY_METHOD_FUNC(dockpopup_add_item), 1);
 	rb_define_method(rb_DockPopUp, "show",
 			 RUBY_METHOD_FUNC(dockpopup_show), 2);
 	rb_define_method(rb_DockPopUp, "hide",

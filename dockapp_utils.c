@@ -260,6 +260,69 @@ void drawnLEDString(WMDockApp *dock, int dest_x, int dest_y,
 	RedrawWindow(dock);
 }
 
+void drawnLEDString2(WMDockApp *dock, XpmIcon wmgen, int dest_x, int dest_y,
+		    const char *string, int len, int color)
+{
+	int src_x = 0;
+	int src_y = 0;
+	int i;
+	int color_offset = color * COLOR_OFFSET;
+	for (i = 0; i < len; i++) {
+		if (i >= len) {
+			printf ("hoge 1\n");
+			XCopyArea(dock->display, 
+				  dock->text_pixmap.pixmap,
+				  wmgen.pixmap, 
+				  dock->NormalGC,
+				  1, 27, 5, 9, dest_x, dest_y);
+		} else {
+			if (i > strlen(string)) {
+				src_x = 1;
+				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
+					+ color_offset;
+			} else if (isdigit(string[i])) {
+				src_x = 1+(string[i]-'0')*6;
+				src_y = 0 + color_offset;
+			} else if (isalpha(string[i])) {
+			  if (isupper(string[i])) {
+				  src_x = 1+(string[i]-'A')*6;
+			  } else {
+				  src_x = 1+(string[i]-'a')*6;
+			  }
+				src_y = LEDTEXT_ALPHA_OFFSET*LEDCHAR_HEIGHT
+					+ color_offset;
+			} else if (string[i] == ':') {
+				src_x = 1 + 6;
+				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
+					+ color_offset;
+			} else if (string[i] == '.') {
+				src_x = 1 + 12;
+				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
+					+ color_offset;
+			} else if (string[i] == '/') {
+				src_x = 1 + 18;
+				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
+					+ color_offset;
+			} else if (string[i] == '%') {
+				src_x = 1 + 24;
+				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
+					+ color_offset;
+			} else {
+				src_x = 1;
+				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
+					+ color_offset;
+			}
+
+			XCopyArea(dock->display, dock->text_pixmap.pixmap, 
+				  wmgen.pixmap, dock->NormalGC,
+				  src_x, src_y, 5, 9, dest_x, dest_y);
+
+		}
+		dest_x += 6;
+	}
+	RedrawWindow2(dock->display, wmgen.pixmap, Root, dock->NormalGC, 64, 64);
+}
+
 void drawnString(WMDockApp *dock, int dest_x, int dest_y, const char *string,
                                 char *colorname, char *bgcolorname,
                                 int right_justify, int len)
@@ -342,7 +405,8 @@ int CheckMouseRegion(int x, int y)
 {
 	int	i;
 	printf ("x = %d\ty = %d\n", x, y);
-	for (i=0; i<MAX_MOUSE_REGION; i++) {
+	for (i=0; i< MAX_MOUSE_REGION; i++) {
+		printf ("i = %d\n", i);
 		if (mouse_region[i].enable &&
 			x <= mouse_region[i].right &&
 			x >= mouse_region[i].left &&
@@ -432,19 +496,18 @@ void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
 	}
 }
 
-void GetXPM2(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
+void GetXPM2(XpmIcon *wmgen, char *pixmap_bytes[])
 {
+	XWindowAttributes	attributes;
 	int			err;
 
 	/* For the colormap */
-/*
-	XGetWindowAttributes(dockapp->display, dockapp->Root, &attributes);
+	XGetWindowAttributes(display, Root, &attributes);
 	wmgen->attributes.valuemask |= (XpmReturnPixels | XpmReturnExtensions);
-*/
-	err = XpmCreatePixmapFromData(dockapp->display, dockapp->Root, 
+
+	err = XpmCreatePixmapFromData(display, Root, 
 				      pixmap_bytes, &(wmgen->pixmap),
 		&(wmgen->mask), &(wmgen->attributes));
-
 
 	if (err != XpmSuccess) {
 		fprintf(stderr, "Not enough free colorcells.\n");
@@ -522,6 +585,32 @@ static void mask_window(WMDockApp *dock)
 	XShapeCombineMask(dock->display, dock->win, ShapeBounding,
 			  0, 0, pixmask, ShapeSet);
 	XShapeCombineMask(dock->display, dock->iconwin, 
+			  ShapeBounding, 0, 0, pixmask, ShapeSet);
+
+
+}
+
+void mask_window2(Window window, char **xpm_master, int width, int height)
+{
+	int pixmask_width = 64;
+	int pixmask_height = 64;
+
+	Pixmap pixmask;
+
+//	char mask_bits[64 * 64];
+	char **mask_bits;
+
+	mask_bits = malloc(width*height*(sizeof(char*)));
+
+	createXBMfromXPM(mask_bits, xpm_master, width, height);
+
+	pixmask = XCreateBitmapFromData(display, Root, 
+					mask_bits, pixmask_width, 
+					pixmask_height);
+
+	XShapeCombineMask(display, Root, ShapeBounding,
+			  0, 0, pixmask, ShapeSet);
+	XShapeCombineMask(display, window, 
 			  ShapeBounding, 0, 0, pixmask, ShapeSet);
 
 
@@ -714,5 +803,38 @@ void init_pixmap(WMDockApp *dock)
 		}
 	}
 #endif
+}
+
+char** init_pixmap_with_size(int width, int height)
+{
+//	char **ret = malloc(sizeof(char *) * (64+6) +sizeof(void *));
+	char **ret;
+	int i;
+/*	int margin = 4;*/
+	int colors = 5;
+	int base = colors + 1;
+	const char *background = "#202020";     /* background gray */
+
+	ret = malloc(sizeof(char *) * (height+6) +sizeof(void *));
+	ret[0] = malloc(30);
+	sprintf(ret[0], "%d %d %d %d", width, height, 5, 1);
+//	ret[1] = (char *) " \tc #0000FF";	/* no color */
+	ret[1] = (char *) " \tc None";	/* no color */
+	ret[2] = (char *) ".\tc #202020";	/* background gray */
+	ret[2] = malloc(30);
+	sprintf(ret[2], ".\tc %s", background);
+	ret[3] = (char *) "+\tc #000000";	/* shadowed */
+	ret[4] = (char *) "@\tc #C7C3C7";	/* highlight */
+	ret[5] = (char *) ":\tc #004941";	/* led off */
+	for (i = base; i < base + height; i++) {
+		printf ("%d, %d\n", i, i-base);
+		ret[i] = malloc(width+1);
+		memset(ret[i], 0, width+1);
+
+		memset(ret[i], '.', width);
+	}
+	ret[height + base] = NULL;/* not sure if this is necessary, it just
+				     seemed like a good idea  */
+	return ret;
 }
 

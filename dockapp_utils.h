@@ -44,5 +44,6 @@ void new_timer(WMDockTimer *timer, int interval);
 void dockitem_signal_connect(VALUE self, VALUE signal_type);
 void draw_ledpoint(WMDockApp *dock, int x, int y, char *color);
 void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2);
+void mask_window2(Window window, char **xpm_master, int width, int height);
 
 #endif
