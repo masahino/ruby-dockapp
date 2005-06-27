@@ -269,7 +269,6 @@ void drawnLEDString2(WMDockApp *dock, XpmIcon wmgen, int dest_x, int dest_y,
 	int color_offset = color * COLOR_OFFSET;
 	for (i = 0; i < len; i++) {
 		if (i >= len) {
-			printf ("hoge 1\n");
 			XCopyArea(dock->display, 
 				  dock->text_pixmap.pixmap,
 				  wmgen.pixmap, 
@@ -682,6 +681,7 @@ void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2)
 	   
 	GetXPM(dock, &dock->wmgen, dock->xpm_master);
 	mask_window(dock);
+#ifdef DEBUG
 	{
 		int i, j;
 		for (i = 0; i < base + height; i++) {
@@ -692,6 +692,7 @@ void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2)
 			printf ("\n");
 		}
 	}
+#endif /* DEBUG */
 	
 }
 
@@ -827,7 +828,6 @@ char** init_pixmap_with_size(int width, int height)
 	ret[4] = (char *) "@\tc #C7C3C7";	/* highlight */
 	ret[5] = (char *) ":\tc #004941";	/* led off */
 	for (i = base; i < base + height; i++) {
-		printf ("%d, %d\n", i, i-base);
 		ret[i] = malloc(width+1);
 		memset(ret[i], 0, width+1);
 

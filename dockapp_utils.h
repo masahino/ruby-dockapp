@@ -34,8 +34,11 @@ void drawLEDString(WMDockApp *dock, int dest_x, int dest_y, const char *string,
 		   int color);
 void drawnLEDString(WMDockApp *dock, int dest_x, int dest_y,
 		    const char *string, int len, int color);
+void drawnLEDString2(WMDockApp *dock, XpmIcon wmgen, int dest_x, int dest_y,
+		     const char *string, int len, int color);
 void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2);
 void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[]);
+void GetXPM2(XpmIcon *wmgen, char *pixmap_bytes[]);
 Pixel GetColor(WMDockApp *dock, char *name);
 void createXBMfromXPM(char *xbm_org, char **xpm, int sx, int sy);
 void GetXPMfromFile(XpmIcon *wmgen, char *filename);
@@ -45,5 +48,6 @@ void dockitem_signal_connect(VALUE self, VALUE signal_type);
 void draw_ledpoint(WMDockApp *dock, int x, int y, char *color);
 void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2);
 void mask_window2(Window window, char **xpm_master, int width, int height);
+char** init_pixmap_with_size(int width, int height);
 
 #endif

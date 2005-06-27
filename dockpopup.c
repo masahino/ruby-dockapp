@@ -46,18 +46,20 @@ static void make_menu_image(WMDockItem *popup)
 	WMDockApp *dock;
 	int dest_x = 1;
 	int dest_y = 1;
-	int column = 0;
 	int color = 0;
 	int max_width;
 	int row = 0;
 	int i;
-	char *str_ptr;
 	char **lines;
 
 	lines = strsplit(popup->text, "\n", 0);
 	
 	max_width = 0;
 	for (i = 0; lines[i] != NULL; i++) {
+		printf ("lines[%d] = \"%s\"\n", i, lines[i]);
+		if (lines[i][0] == '\0') {
+			break;
+		}
 		if (max_width < strlen(lines[i])) {
 			max_width = strlen(lines[i]);
 		}
@@ -65,7 +67,7 @@ static void make_menu_image(WMDockItem *popup)
 	if (i == 0) {
 		return;
 	}
-	row = i-1;
+	row = i;
 	dock = popup->dock;
 	popup->width = max_width*LEDCHAR_WIDTH + 1;
 	popup->height = row*(LEDCHAR_HEIGHT+1);
@@ -76,10 +78,11 @@ static void make_menu_image(WMDockItem *popup)
 	GetXPM2(&(popup->xpm), popup->xpm_master);
 	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
 
-	for (i = 0; lines[i] != NULL; i++) {
+	for (i = 0; i < row; i++) {
+		
 		drawnLEDString2(dock, popup->xpm, dest_x, 
-				dest_y + i * LEDCHAR_HEIGHT, lines[i], 
-				strlen(lines[i]),
+				dest_y + i * (LEDCHAR_HEIGHT+1), lines[i], 
+				max_width, 
 				color);
 	}
 
