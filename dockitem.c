@@ -122,12 +122,6 @@ void dockitem_callback(VALUE self)
 
 	item->callback = rb_block_proc();
 
-/*
-	AddMouseRegion(mouse_region_index, item->x, item->y, 
-		       item->x + item->width, item->y + item->height, 
-		       item);
-	mouse_region_index++;
-*/
 }
 
 static void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)

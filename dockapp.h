@@ -35,6 +35,17 @@ struct _rckeys {
 	char		**var;
 };
 
+/* Mouse Regions */
+typedef struct {
+	int	   enable;
+	int	   top;
+	int	   bottom;
+	int	   left;
+	int	   right;
+	void *item;
+} MOUSE_REGION2;
+
+
 typedef struct {
 	Pixmap		pixmap;
 	Pixmap		mask;
@@ -67,6 +78,8 @@ typedef struct {
 	WMDockTimer     *timer;
 	Bool            use_fontset;
 	struct WMDockSignal *signal;
+	MOUSE_REGION2   mouse_region[MAX_MOUSE_REGION];
+	int mouse_region_index;
 } WMDockApp;
 
 struct WMDockSignal {
@@ -98,7 +111,7 @@ typedef struct {
 	Window          win;
 } WMDockItem;
 
-
+#if 0
 /* Mouse Regions */
 typedef struct {
 	int	   enable;
@@ -109,12 +122,15 @@ typedef struct {
 	WMDockItem *item;
 } MOUSE_REGION;
 
+
 MOUSE_REGION	mouse_region[MAX_MOUSE_REGION];
-#define MAX_LIST_LINE 64
 int mouse_region_index;
+#endif
+
+#define MAX_LIST_LINE 64
 Display         *display;
 Window          Root;
-GC              NormalGC;
+//GC              NormalGC;
 
 
 /* Function Prototypes */

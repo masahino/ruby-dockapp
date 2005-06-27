@@ -269,12 +269,19 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	}
 	if (dockitem->type != TYPE_POPUP) {
 		dockitem->visible = DOCKITEM_VISIBLE;
+/*
 		AddMouseRegion(mouse_region_index,
 			       dockitem->x, dockitem->y, 
 			       dockitem->x + dockitem->width, 
 			       dockitem->y + dockitem->height, 
 			       dockitem);
 		mouse_region_index++;
+*/
+		AddMouseRegion(dock,
+			       dockitem->x, dockitem->y, 
+			       dockitem->x + dockitem->width, 
+			       dockitem->y + dockitem->height, 
+			       dockitem);
 	}
 }
 
@@ -547,12 +554,16 @@ static void dockapp_start(VALUE self)
 			case ButtonPress:
 				/* 1st: check signal of DockApp */
 				dockapp_signal_callback(dock, event);
+/*
 				s = CheckMouseRegion(event.xbutton.x,
+						     event.xbutton.y);
+*/
+				s = CheckMouseRegion(dock, event.xbutton.x,
 						     event.xbutton.y);
 				printf ("ButtonPress: %d(%d, %d)\n", s,
 					event.xbutton.x, event.xbutton.y);
-				if (s >= 0 && mouse_region[s].item != NULL) {
-					signal_callback(mouse_region[s].item, 
+				if (s >= 0 && dock->mouse_region[s].item != NULL) {
+					signal_callback(dock->mouse_region[s].item, 
 							event);
 				}
 				break;
@@ -563,7 +574,7 @@ static void dockapp_start(VALUE self)
 				}
 				printf ("ButtonRelease: %d(%d, %d)\n", s,
 					event.xbutton.x, event.xbutton.y);
-				signal_callback(mouse_region[s].item, event);
+				signal_callback(dock->mouse_region[s].item, event);
 				break;
 				
 			}
@@ -617,8 +628,10 @@ void Init_dockapp(void) {
 	mDockApp = rb_define_module("Dock");
 	rb_ivar_set(mDockApp, id_relative_callbacks, Qnil);
 	signal(SIGINT, sig_int);
+/*
 	memset(mouse_region, 0, sizeof(MOUSE_REGION)*MAX_MOUSE_REGION);
 	mouse_region_index = 0;
+*/
 
 	rb_DockApp = rb_define_class("DockApp", rb_cObject);
 	rb_define_singleton_method(rb_DockApp, "new", dockapp_s_new, -1);

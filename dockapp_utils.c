@@ -383,6 +383,7 @@ void parse_rcfile(const char *filename, rckeys *keys)
 	}
 }
 
+#if 0
 void AddMouseRegion(int index, int left, int top, int right, int bottom, 
 		    WMDockItem *item)
 {
@@ -399,7 +400,27 @@ void AddMouseRegion(int index, int left, int top, int right, int bottom,
 		mouse_region[index].item = item;
 	}
 }
+#endif
 
+void AddMouseRegion(WMDockApp *dock, int left, int top, int right, int bottom, 
+		    WMDockItem *item)
+{
+#ifdef DEBUG
+	printf ("index = %d, left = %d, top = %d, right = %d, bottom = %d\n",
+		index, left, top, right, bottom);
+#endif /* DEBUG */
+	if (dock->mouse_region_index < MAX_MOUSE_REGION) {
+		dock->mouse_region[dock->mouse_region_index].enable = 1;
+		dock->mouse_region[dock->mouse_region_index].top = top;
+		dock->mouse_region[dock->mouse_region_index].left = left;
+		dock->mouse_region[dock->mouse_region_index].bottom = bottom;
+		dock->mouse_region[dock->mouse_region_index].right = right;
+		dock->mouse_region[dock->mouse_region_index].item = item;
+		dock->mouse_region_index++;
+	}
+}
+
+/*
 int CheckMouseRegion(int x, int y)
 {
 	int	i;
@@ -411,6 +432,22 @@ int CheckMouseRegion(int x, int y)
 			x >= mouse_region[i].left &&
 			y <= mouse_region[i].bottom &&
 			y >= mouse_region[i].top)
+		     return i;
+	}
+	return -1;
+}
+*/
+int CheckMouseRegion(WMDockApp *dock, int x, int y)
+{
+	int	i;
+	printf ("x = %d\ty = %d\n", x, y);
+	for (i=0; i< MAX_MOUSE_REGION; i++) {
+		printf ("i = %d\n", i);
+		if (dock->mouse_region[i].enable &&
+			x <= dock->mouse_region[i].right &&
+			x >= dock->mouse_region[i].left &&
+			y <= dock->mouse_region[i].bottom &&
+			y >= dock->mouse_region[i].top)
 /*			return (i-1);*/
 		     return i;
 	}
