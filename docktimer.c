@@ -90,7 +90,6 @@ static VALUE docktimer_initialize(VALUE self, VALUE interval)
 	timer->callback = rb_block_proc();
 	timer->status = WMDOCKTIMER_STOP;
 
-	printf ("%x\n", TYPE(timer->callback));
 	if (docktimer == NULL) {
 		docktimer = timer;
 	} else {

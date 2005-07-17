@@ -117,7 +117,6 @@ static VALUE signal_check(struct WMDockSignal *signal, XEvent event)
 	while (signal) {
 		if (signal->type == event.type) {
 			VALUE dockevent;
-			printf ("hoge %d\n", event.type);
 			signal->event = event;
 			dockevent = dockevent_initialize(Qnil, event);
 			rb_funcall(signal->callback, id_call, 1, dockevent);
@@ -150,7 +149,6 @@ static void signal_callback(WMDockItem *item, XEvent event)
 		while (signal) {
 			if (signal->type == event.type) {
 				VALUE dockevent;
-				printf ("hoge %d\n", event.type);
 				signal->event = event;
 				dockevent = dockevent_initialize(Qnil, event);
 
@@ -560,8 +558,10 @@ static void dockapp_start(VALUE self)
 */
 				s = CheckMouseRegion(dock, event.xbutton.x,
 						     event.xbutton.y);
+#ifdef DEBUG
 				printf ("ButtonPress: %d(%d, %d)\n", s,
 					event.xbutton.x, event.xbutton.y);
+#endif 
 				if (s >= 0 && dock->mouse_region[s].item != NULL) {
 					signal_callback(dock->mouse_region[s].item, 
 							event);
@@ -572,8 +572,10 @@ static void dockapp_start(VALUE self)
 				if (dockapp_signal_callback(dock, event) == Qtrue) {
 					break;
 				}
+#ifdef DEBUG
 				printf ("ButtonRelease: %d(%d, %d)\n", s,
 					event.xbutton.x, event.xbutton.y);
+#endif 
 				signal_callback(dock->mouse_region[s].item, event);
 				break;
 				

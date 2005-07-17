@@ -440,9 +440,13 @@ int CheckMouseRegion(int x, int y)
 int CheckMouseRegion(WMDockApp *dock, int x, int y)
 {
 	int	i;
+#ifdef DEBUG
 	printf ("x = %d\ty = %d\n", x, y);
+#endif 
 	for (i=0; i< MAX_MOUSE_REGION; i++) {
+#ifdef DEBUG
 		printf ("i = %d\n", i);
+#endif 
 		if (dock->mouse_region[i].enable &&
 			x <= dock->mouse_region[i].right &&
 			x >= dock->mouse_region[i].left &&
@@ -582,7 +586,7 @@ void GetXPMfromFile(XpmIcon *wmgen, char *filename)
 	err = XpmReadFileToPixmap(display, Root, 
 				  filename, &(wmgen->pixmap),
 				  &(wmgen->mask), &(wmgen->attributes));
-	printf ("error = %d\n", err);
+	fprintf (stderr, "error = %d\n", err);
 	if (err != XpmSuccess) {
 		fprintf(stderr, "Not enough free colorcells.\n");
 		exit(1);
@@ -694,7 +698,9 @@ void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2)
 			}
 		}
 	}
+#ifdef DEBUG
 	printf ("maxx = %d\n", maxx);
+#endif 
 	for (i = 0; i < height; i++) {
 		for (j = 0; j < width; j++) {
 			a = (j-radius)*(j-radius) + (i-radius)*(i-radius);

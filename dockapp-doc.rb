@@ -98,6 +98,9 @@ class DockApp
     def click_callback() # :yields: x, y
     end
 
+    def signal_connect(signal_name) # :yields:event
+    end
+
   end
 
   class Timer
@@ -141,6 +144,12 @@ class DockApp
     def hide()
     end
 
+    def get_index()
+    end
+
+    def add_item(item_list)
+    end
+
   end
 
   # popup window with a XPM image
@@ -149,6 +158,11 @@ class DockApp
     def initialize(xpm_filename)
     end
 
+    def width()
+    end
+
+    def height()
+    end
 
   end
 

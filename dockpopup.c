@@ -20,6 +20,9 @@
 #include "dockapp.h"
 #include "dockapp_utils.h"
 
+#define DOCKPOPUP_DOWN 0
+#define DOCKPOPUP_UP 1
+
 static VALUE dockpopup_get_index(VALUE self)
 {
 	WMDockItem *popup;
@@ -30,14 +33,18 @@ static VALUE dockpopup_get_index(VALUE self)
 	dock = popup->dock;
 	get_pointer_position(dock->win, &root_x, &root_y);
 
+#ifdef DEBUG
 	printf ("x = %d, y = %d\n", root_x, root_y);
 	printf ("px = %d, py = %d\n", popup->x, popup->y);
 	printf ("w = %d, h = %d\n", popup->width, popup->height);
+#endif
 	if (root_x < popup->x || root_x > popup->x + popup->width ||
 	    root_y < popup->y || root_y > popup->y + popup->height) {
 		return Qnil;
 	}
+#ifdef DEBUG
 	printf ("index = %d\n", (root_y-popup->y)/(LEDCHAR_HEIGHT+1));
+#endif
 	return INT2FIX((root_y-popup->y)/(LEDCHAR_HEIGHT+1));
 }
 
@@ -56,7 +63,9 @@ static void make_menu_image(WMDockItem *popup)
 	
 	max_width = 0;
 	for (i = 0; lines[i] != NULL; i++) {
+#ifdef DEBUG
 		printf ("lines[%d] = \"%s\"\n", i, lines[i]);
+#endif
 		if (lines[i][0] == '\0') {
 			break;
 		}
@@ -71,7 +80,7 @@ static void make_menu_image(WMDockItem *popup)
 	dock = popup->dock;
 	popup->width = max_width*LEDCHAR_WIDTH + 1;
 	popup->height = row*(LEDCHAR_HEIGHT+1);
-	XResizeWindow(dock->display, Root, 
+	XResizeWindow(dock->display, popup->win, 
 		      popup->width, popup->height);
 
 	popup->xpm_master = init_pixmap_with_size(popup->width, popup->height);
@@ -115,11 +124,19 @@ static VALUE dockpopup_height(VALUE self)
 	return INT2FIX(popup->height);
 }
 
-static void dockpopup_show(VALUE self, VALUE x, VALUE y)
+static void dockpopup_show(int argc, VALUE *argv, VALUE self)
 {
 	WMDockApp *dock;
 	WMDockItem *popup;
-	int root_x, root_y;
+	VALUE x, y, vdirection;
+	int root_x, root_y, direction;
+
+	if (rb_scan_args(argc, argv, "21", &x, &y, &vdirection) == 2) {
+		direction = DOCKPOPUP_DOWN;
+	} else {
+		Check_Type(vdirection, T_FIXNUM);
+		direction = FIX2INT(vdirection);
+	}
 
 	Data_Get_Struct(self, WMDockItem, popup);
 
@@ -146,7 +163,10 @@ static void dockpopup_show(VALUE self, VALUE x, VALUE y)
 	get_pointer_position(dock->win, &root_x, &root_y);
 	popup->x = root_x - popup->width/2;
 	popup->y = root_y;
-	XMoveWindow(display, popup->win, root_x - popup->width/2, root_y);
+	if (direction == DOCKPOPUP_UP) {
+		popup->y = root_y - popup->height;
+	}
+	XMoveWindow(display, popup->win, popup->x, popup->y);
 	RedrawWindow2(display, popup->xpm.pixmap, popup->win,
 		      dock->NormalGC, popup->width, popup->height);
 }
@@ -198,7 +218,9 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 
 	popup->xpm_master = init_pixmap_with_size(popup->width, popup->height);
 	GetXPM2(&(popup->xpm), popup->xpm_master);
+#ifdef DEBUG
 	printf ("width=%d,height=%d\n", popup->width, popup->height);
+#endif
 	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
 
 	obj = Data_Wrap_Struct(self, dockitem_mark, -1, popup);
@@ -225,7 +247,9 @@ VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_data)
 		int len;
 		int i;
 		len = RARRAY(xpm_data)->len;
+#ifdef DEBUG
 		printf ("len = %d\n", len);
+#endif
 		data = malloc(sizeof(char*)*len);
 		for (i = 0; i < len; i++) {
 			data[i] = strdup(StringValuePtr(RARRAY(xpm_data)->ptr[i]));
@@ -241,8 +265,10 @@ VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_data)
 					 popup->width, popup->height,
 					 0, BlackPixel(display,0), 
 					 WhitePixel(display,0) );
+#ifdef DEBUG
     	printf ("width = %d\n", popup->width);
 	printf ("height = %d\n", popup->height);
+#endif 
 	att.override_redirect=True;
 	XChangeWindowAttributes (display, popup->win,
 				 CWOverrideRedirect, &att);
@@ -263,12 +289,15 @@ void dockpopup_init(VALUE rb_DockApp)
 	rb_define_method(rb_DockPopUp, "add_item", 
 			 RUBY_METHOD_FUNC(dockpopup_add_item), 1);
 	rb_define_method(rb_DockPopUp, "show",
-			 RUBY_METHOD_FUNC(dockpopup_show), 2);
+			 RUBY_METHOD_FUNC(dockpopup_show), -1);
 	rb_define_method(rb_DockPopUp, "hide",
 			 RUBY_METHOD_FUNC(dockpopup_hide), 0);
 	rb_define_method(rb_DockPopUp, "get_index",
 			 RUBY_METHOD_FUNC(dockpopup_get_index), 0);
 
+
+	rb_define_const(rb_DockPopUp, "DOWN", INT2FIX(DOCKPOPUP_DOWN));
+	rb_define_const(rb_DockPopUp, "UP", INT2FIX(DOCKPOPUP_UP));
 
 	rb_DockPopUpImage = rb_define_class_under(rb_DockApp, "PopUpImage",
 					     rb_cObject);
@@ -283,4 +312,6 @@ void dockpopup_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockpopup_width), 0);
 	rb_define_method(rb_DockPopUpImage, "height",
 			 RUBY_METHOD_FUNC(dockpopup_height), 0);
+
+	
 }
