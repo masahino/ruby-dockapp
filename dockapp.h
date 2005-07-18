@@ -132,6 +132,7 @@ Display         *display;
 Window          Root;
 //GC              NormalGC;
 
+ID id_call;
 
 /* Function Prototypes */
 void docksignal_mark(struct WMDockSignal *signal);

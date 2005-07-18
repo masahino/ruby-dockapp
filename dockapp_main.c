@@ -38,7 +38,6 @@
 int u1 = 0;
 int u2 = 0;
 
-ID id_call;
 ID id_relative_callbacks;
 int timer_id = 0;
 VALUE mDockApp;

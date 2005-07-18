@@ -32,6 +32,23 @@
 
 /* Function Prototypes */
 
+int wait_Xevent(WMDockApp *dock, int event_type)
+{
+	XEvent	event;
+	Display *display;
+
+	display = dock->display;
+
+	while (XPending(display)) {
+		XNextEvent(display, &event);
+		if (event.type == event_type) {
+			return 0;
+		}
+		usleep(10000); /* 10ms */
+	}
+	return -1;
+}
+
 void draw_ledpoint(WMDockApp *dock, int x, int y, char *color)
 {
 	int src_x, src_y;

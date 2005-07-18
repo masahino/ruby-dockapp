@@ -23,6 +23,94 @@
 #define DOCKPOPUP_DOWN 0
 #define DOCKPOPUP_UP 1
 
+static int get_menu_index(WMDockItem *popup)
+{
+	WMDockApp *dock;
+	int root_x, root_y;
+	
+	dock = popup->dock;
+	get_pointer_position(dock->win, &root_x, &root_y);
+
+#ifdef DEBUG
+	printf ("x = %d, y = %d\n", root_x, root_y);
+	printf ("px = %d, py = %d\n", popup->x, popup->y);
+	printf ("w = %d, h = %d\n", popup->width, popup->height);
+#endif
+	if (root_x < popup->x || root_x > popup->x + popup->width ||
+	    root_y < popup->y || root_y > popup->y + popup->height) {
+		return Qnil;
+	}
+#ifdef DEBUG
+	printf ("index = %d\n", (root_y-popup->y)/(LEDCHAR_HEIGHT+1));
+#endif
+	return INT2FIX((root_y-popup->y)/(LEDCHAR_HEIGHT+1));
+}
+
+static void dockpopup_hide_menu(WMDockItem *popup)
+{
+	WMDockApp *dock;
+	dock = popup->dock;
+
+	XUnmapWindow(dock->display, popup->win);
+	XFlush(dock->display);
+	popup->visible = DOCKITEM_INVISIBLE;
+}
+
+static void dockpopup_show_menu(WMDockItem *popup, int direction)
+{
+	WMDockApp *dock;
+	int root_x, root_y;
+	
+	dock = popup->dock;
+
+	if (popup->visible != DOCKITEM_VISIBLE) {
+		XMapWindow(display, popup->win);
+		XShapeCombineMask(display, popup->win,
+				  ShapeBounding, 0, 0,
+				  popup->xpm.mask, ShapeSet);
+		popup->visible = DOCKITEM_VISIBLE;
+
+	}
+	get_pointer_position(dock->win, &root_x, &root_y);
+	popup->x = root_x - popup->width/2;
+	popup->y = root_y;
+	if (direction == DOCKPOPUP_UP) {
+		popup->y = root_y - popup->height;
+	}
+	XMoveWindow(display, popup->win, popup->x, popup->y);
+	RedrawWindow2(display, popup->xpm.pixmap, popup->win,
+		      dock->NormalGC, popup->width, popup->height);
+}
+
+static void dockpopup_popup(int argc, VALUE *argv, VALUE self)
+{
+	WMDockItem *popup;
+	VALUE vdirection;
+	int direction;
+	int index;
+
+	if (rb_scan_args(argc, argv, "01", &vdirection) == 0) {
+		direction = DOCKPOPUP_DOWN;
+	} else {
+		Check_Type(vdirection, T_FIXNUM);
+		direction = FIX2INT(vdirection);
+	}
+
+	Data_Get_Struct(self, WMDockItem, popup);
+
+	dockpopup_show_menu(popup, direction);
+	/* event loop */
+	do { /* dangerous */
+		if (wait_Xevent(popup->dock, ButtonRelease) != -1) {
+			break;
+		}
+	} while (1);
+	index = get_menu_index(popup);
+	dockpopup_hide_menu(popup);
+	
+	rb_funcall(rb_block_proc(), id_call, 1, index);
+}
+
 static VALUE dockpopup_get_index(VALUE self)
 {
 	WMDockItem *popup;
@@ -126,10 +214,9 @@ static VALUE dockpopup_height(VALUE self)
 
 static void dockpopup_show(int argc, VALUE *argv, VALUE self)
 {
-	WMDockApp *dock;
 	WMDockItem *popup;
 	VALUE x, y, vdirection;
-	int root_x, root_y, direction;
+	int direction;
 
 	if (rb_scan_args(argc, argv, "21", &x, &y, &vdirection) == 2) {
 		direction = DOCKPOPUP_DOWN;
@@ -142,46 +229,16 @@ static void dockpopup_show(int argc, VALUE *argv, VALUE self)
 
 	Check_Type(x, T_FIXNUM);
 	Check_Type(y, T_FIXNUM);
-	dock = popup->dock;
-	
-	if (popup->visible != DOCKITEM_VISIBLE) {
-		XMapWindow(display, popup->win);
-		XShapeCombineMask(display, popup->win,
-				  ShapeBounding, 0, 0,
-				  popup->xpm.mask, ShapeSet);
-/*
-	XSetClipMask(display, dock->NormalGC, popup->xpm.mask);
-*/
-		popup->visible = DOCKITEM_VISIBLE;
 
-	}
-/*
-	XCopyArea(display, popup->xpm.pixmap, popup->win,
-		  dock->NormalGC,
-		  0, 0, popup->width, popup->height, 0, 0);
-*/
-	get_pointer_position(dock->win, &root_x, &root_y);
-	popup->x = root_x - popup->width/2;
-	popup->y = root_y;
-	if (direction == DOCKPOPUP_UP) {
-		popup->y = root_y - popup->height;
-	}
-	XMoveWindow(display, popup->win, popup->x, popup->y);
-	RedrawWindow2(display, popup->xpm.pixmap, popup->win,
-		      dock->NormalGC, popup->width, popup->height);
+	dockpopup_show_menu(popup, direction);
 }
 
 static void dockpopup_hide(VALUE self)
 {
-	WMDockApp *dock;
 	WMDockItem *popup;
 	Data_Get_Struct(self, WMDockItem, popup);
 
-	dock = popup->dock;
-
-	XUnmapWindow(dock->display, popup->win);
-	XFlush(dock->display);
-	popup->visible = DOCKITEM_INVISIBLE;
+	dockpopup_hide_menu(popup);
 }
 
 
@@ -292,6 +349,8 @@ void dockpopup_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockpopup_show), -1);
 	rb_define_method(rb_DockPopUp, "hide",
 			 RUBY_METHOD_FUNC(dockpopup_hide), 0);
+	rb_define_method(rb_DockPopUp, "popup",
+			 RUBY_METHOD_FUNC(dockpopup_popup), -1);
 	rb_define_method(rb_DockPopUp, "get_index",
 			 RUBY_METHOD_FUNC(dockpopup_get_index), 0);
 
@@ -304,7 +363,7 @@ void dockpopup_init(VALUE rb_DockApp)
 	rb_define_singleton_method(rb_DockPopUpImage, "new", 
 				   dockpopupimage_initialize, 1);
 	rb_define_method(rb_DockPopUpImage, "show",
-			 RUBY_METHOD_FUNC(dockpopup_show), 2);
+			 RUBY_METHOD_FUNC(dockpopup_show), -1);
 	rb_define_method(rb_DockPopUpImage, "hide",
 			 RUBY_METHOD_FUNC(dockpopup_hide), 0);
 
