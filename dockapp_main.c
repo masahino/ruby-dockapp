@@ -28,6 +28,7 @@
 #include <X11/xpm.h>
 #include <X11/extensions/shape.h>
 #include <X11/Xlocale.h>
+#include <X11/Xatom.h>
 
 #include "ruby.h"
 
@@ -88,13 +89,12 @@ static void dockapp_signal_connect(VALUE self, VALUE signal_type)
 	Check_Type(signal_type, T_STRING);
 	signal = malloc(sizeof(struct WMDockSignal));
 	memset(signal, 0, sizeof(struct WMDockSignal));
-	if (strcmp(StringValuePtr(signal_type), "button_press_event") == 0) {
-		signal->type = ButtonPress;
-	}  else if (strcmp(StringValuePtr(signal_type), 
-			   "button_release_event") == 0) {
-		signal->type = ButtonRelease;
-	} else {
-		exit(0);
+	signal->type = get_Xsignal_type(StringValuePtr(signal_type));
+	if (signal_type < 0) {
+		fprintf (stderr, "unknown signal type: %s\n",
+			 StringValuePtr(signal_type));
+		rb_raise(rb_eRuntimeError, "unknown signal type");
+		return;
 	}
 	signal->callback = rb_block_proc();
 
@@ -146,6 +146,7 @@ static void signal_callback(WMDockItem *item, XEvent event)
 		struct WMDockSignal *signal;
 		signal = item->signal;
 		while (signal) {
+			printf ("event->type = %d\n", event.type);
 			if (signal->type == event.type) {
 				VALUE dockevent;
 				signal->event = event;
@@ -534,6 +535,8 @@ static void dockapp_start(VALUE self)
 			item = item->next;
 		}
 */
+		XConvertSelection (display, XA_PRIMARY, XA_STRING, None,
+				   dock->win, CurrentTime);  // w == our window's ID
 		while (XPending(display)) {
 			XNextEvent(display, &event);
 			switch (event.type) {
@@ -578,6 +581,10 @@ static void dockapp_start(VALUE self)
 				signal_callback(dock->mouse_region[s].item, event);
 				break;
 				
+				
+				break;
+			default:
+				printf ("event %d\n", event.type);
 			}
 		}
 		usleep(10000); /* 10ms */
