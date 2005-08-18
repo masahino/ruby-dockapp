@@ -112,7 +112,6 @@ void dockitem_signal_connect(VALUE self, VALUE signal_type)
 	signal->next = NULL;
 }
 
-
 void dockitem_callback(VALUE self)
 {
 	WMDockItem *item;

@@ -14,28 +14,31 @@
 #include "dockapp_utils.h"
 //#include "pixmap.h"
 
+
 static void set_text(WMDockItem *dockitem, char *text, int color)
 {
 	char **lines;
 	int i, dest_x, dest_y;
 	int row, column;
 	WMDockApp *dock;
+
 	dock = dockitem->dock;
 	if (dock == NULL) {
+		printf ("dock == NULL\n");
 		return;
 	}
 	
 	row = (dockitem->height-LEDTEXT_MARGIN)/LEDCHAR_HEIGHT;
 	column = (dockitem->width-LEDTEXT_MARGIN)/LEDCHAR_WIDTH;
-
 	lines = strsplit(text, "\n", 0);
 	dest_x = dockitem->x + 2;
 	dest_y = dockitem->y + 2;
-	for (i = 0; lines[i] != NULL; i++) {
+	
+	printf ("row == %d\n", row);
+	for (i = 0; i < row; i++) {
 		if (strcmp("", lines[i]) == 0) {
-			break;
-		}
-		if (i > row) {
+			drawnLEDString(dock, dest_x, dest_y, "",
+				       column, color);
 			break;
 		}
 		drawnLEDString(dock, dest_x, dest_y, lines[i], 
@@ -45,6 +48,12 @@ static void set_text(WMDockItem *dockitem, char *text, int color)
 	}
 	if (lines)
 	  free(lines);
+}
+
+void redraw_docktext(WMDockItem *dockitem)
+{
+	printf ("called\n");
+	set_text(dockitem, dockitem->text, COLOR_NORMAL);
 }
 
 static void docktext_set_text(int argc, VALUE *argv, VALUE self)
@@ -78,7 +87,7 @@ static VALUE docktext_s_new(int argc, VALUE *argv, VALUE self)
 	int color;
 
 	if (rb_scan_args(argc, argv, "31", &text, &width, &height, &vcolor) == 3) {
-		color = 0;
+		color = COLOR_NORMAL;
 	} else {
 		Check_Type(vcolor, T_FIXNUM);
 		color = FIX2INT(vcolor);
@@ -92,6 +101,7 @@ static VALUE docktext_s_new(int argc, VALUE *argv, VALUE self)
 	wmtext->text = strdup(StringValuePtr(text));
 	wmtext->width = FIX2INT(width)*LEDCHAR_WIDTH + LEDTEXT_MARGIN;
 	wmtext->height = FIX2INT(height)*LEDCHAR_HEIGHT + LEDTEXT_MARGIN;
+	wmtext->redraw_function = &redraw_docktext;
 	obj = Data_Wrap_Struct(self, dockitem_mark, -1, wmtext);
 
 	set_text(wmtext, wmtext->text, color);

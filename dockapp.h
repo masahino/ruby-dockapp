@@ -94,21 +94,22 @@ struct WMDockEvent {
 };
 
 typedef struct {
-	void            *next;
-	WMDockApp       *dock;
-	char            *text;
-	int             x;
-	int             y;
-	int             width;
-	int             height;
-	VALUE           callback;
+	void                *next;
+	WMDockApp           *dock;
+	char                *text; /* DockApp::Text */
+	int                 x;
+	int                 y;
+	int                 width;
+	int                 height;
+	VALUE               callback; /* use signal */
 	struct WMDockSignal *signal;
-	int             index; /* unused */
-	int             visible;
-	XpmIcon         xpm;
-	char            **xpm_master; /* test */
-	int             type;
-	Window          win;
+/*	int                 index; */ /* unused */
+	int                 visible;
+	XpmIcon             xpm;
+	char                **xpm_master; /* test */
+	int                 type;
+	Window              win;
+	void                (*redraw_function)();
 } WMDockItem;
 
 #if 0
@@ -140,6 +141,7 @@ void docksignal_mark(struct WMDockSignal *signal);
 
 /* docktext.c */
 void docktext_init(VALUE rb_DockApp);
+void redraw_docktext(WMDockItem *item);
 
 /* dockitem.c */
 void dockitem_callback(VALUE self);

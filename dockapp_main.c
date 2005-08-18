@@ -281,6 +281,9 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 			       dockitem->y + dockitem->height, 
 			       dockitem);
 	}
+	if (dockitem->redraw_function != NULL) {
+		dockitem->redraw_function(dockitem);
+	}
 }
 
 /*
@@ -584,7 +587,7 @@ static void dockapp_start(VALUE self)
 				
 				break;
 			default:
-				printf ("event %d\n", event.type);
+				break;
 			}
 		}
 		usleep(10000); /* 10ms */
