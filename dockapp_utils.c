@@ -544,6 +544,7 @@ void RedrawWindow2(Display *display, Pixmap src_pixmap, Window window,
 	flush_expose(display, window);
 	XCopyArea(display, src_pixmap, window,
 		  gc, 0, 0, width, height, 0, 0);
+	XMapRaised(display, window);
 }
 
 void GetXPM(WMDockApp *dockapp, XpmIcon *wmgen, char *pixmap_bytes[])
