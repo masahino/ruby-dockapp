@@ -166,8 +166,8 @@ static void make_menu_image(WMDockItem *popup)
 	}
 	row = i;
 	dock = popup->dock;
-	popup->width = max_width*LEDCHAR_WIDTH + 1;
-	popup->height = row*(LEDCHAR_HEIGHT+1);
+	popup->width = max_width*LEDCHAR_WIDTH + 3;
+	popup->height = row*(LEDCHAR_HEIGHT+1) + 3;
 	XResizeWindow(dock->display, popup->win, 
 		      popup->width, popup->height);
 
@@ -175,10 +175,12 @@ static void make_menu_image(WMDockItem *popup)
 	GetXPM2(&(popup->xpm), popup->xpm_master);
 	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
 
+	draw_rect2(dock, popup->xpm, 0, 0, popup->width, popup->height, "#208120812081");
+//"#2081B2CAAEBA");
+	draw_rect2(dock, popup->xpm, 1, 1, popup->width-2, popup->height-2, "#0");
 	for (i = 0; i < row; i++) {
-		
-		drawnLEDString2(dock, popup->xpm, dest_x, 
-				dest_y + i * (LEDCHAR_HEIGHT+1), lines[i], 
+		drawnLEDString2(dock, popup->xpm, dest_x + 1, 
+				dest_y + i * (LEDCHAR_HEIGHT+1) + 1, lines[i], 
 				max_width, 
 				color);
 	}

@@ -8,7 +8,11 @@ void get_pointer_position(Window win, int *x, int *y);
 void draw_point(WMDockApp *dock, int x, int y, char *color);
 void draw_line(WMDockApp *dock, int x1, int y1,
 	       int x2, int y2, char *color);
+void draw_line2(WMDockApp *dock, XpmIcon wmgen, int x1, int y1,
+	       int x2, int y2, char *color);
 void draw_rect(WMDockApp *dock, int x, int y,
+	       int width, int height, char *color);
+void draw_rect2(WMDockApp *dock, XpmIcon wmgen, int x, int y,
 	       int width, int height, char *color);
 char **strsplit(char *str, char *delimiter, int max);
 void RedrawWindow(WMDockApp *dock);

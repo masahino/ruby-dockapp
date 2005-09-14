@@ -118,12 +118,32 @@ void draw_line(WMDockApp *dock, int x1, int y1,
 	RedrawWindow(dock);
 }
 
+void draw_line2(WMDockApp *dock, XpmIcon wmgen, int x1, int y1, int x2, int y2,
+		char *color)
+{
+        XSetForeground(dock->display, dock->NormalGC, 
+		       GetColor(dock, color));
+	XDrawLine(dock->display, wmgen.pixmap,
+		   dock->NormalGC, x1, y1, x2, y2);
+	RedrawWindow(dock);
+}
+
 void draw_rect(WMDockApp *dock, int x, int y,
 	       int width, int height, char *color)
 {
         XSetForeground(dock->display, dock->NormalGC, 
 		       GetColor(dock, color));
 	XFillRectangle(dock->display, dock->wmgen.pixmap,
+		       dock->NormalGC, x, y, width, height);
+	RedrawWindow(dock);
+}
+
+void draw_rect2(WMDockApp *dock, XpmIcon wmgen, int x, int y,
+	       int width, int height, char *color)
+{
+        XSetForeground(dock->display, dock->NormalGC, 
+		       GetColor(dock, color));
+	XFillRectangle(dock->display, wmgen.pixmap,
 		       dock->NormalGC, x, y, width, height);
 	RedrawWindow(dock);
 }
