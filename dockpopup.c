@@ -171,18 +171,24 @@ static void make_menu_image(WMDockItem *popup)
 	XResizeWindow(dock->display, popup->win, 
 		      popup->width, popup->height);
 
+	if (popup->xpm_master != NULL) {
+		free(popup->xpm_master);
+	}
 	popup->xpm_master = init_pixmap_with_size(popup->width, popup->height);
 	GetXPM2(&(popup->xpm), popup->xpm_master);
 	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
 
 	draw_rect2(dock, popup->xpm, 0, 0, popup->width, popup->height, "#208120812081");
 //"#2081B2CAAEBA");
-	draw_rect2(dock, popup->xpm, 1, 1, popup->width-2, popup->height-2, "#0");
+	draw_rect2(dock, popup->xpm, 1, 1, popup->width-2, popup->height-2, "black");
 	for (i = 0; i < row; i++) {
 		drawnLEDString2(dock, popup->xpm, dest_x + 1, 
 				dest_y + i * (LEDCHAR_HEIGHT+1) + 1, lines[i], 
 				max_width, 
 				color);
+	}
+	if (lines) {
+		free(lines);
 	}
 
 }
@@ -194,8 +200,15 @@ static void dockpopup_add_item(VALUE self, VALUE text)
 	Check_Type(text, T_STRING);
 	Data_Get_Struct(self, WMDockItem, popup);
 
-	popup->text = strdup(StringValuePtr(text));
-	make_menu_image(popup);
+	
+	if (popup->text == NULL || 
+	    strcmp(popup->text, StringValuePtr(text)) != 0) {
+		if (popup->text != NULL) {
+			free(popup->text);
+		}
+		popup->text = strdup(StringValuePtr(text));
+		make_menu_image(popup);
+	}
 }
 
 static VALUE dockpopup_width(VALUE self)

@@ -703,7 +703,7 @@ void mask_window2(Window window, char **xpm_master, int width, int height)
 	XShapeCombineMask(display, window, 
 			  ShapeBounding, 0, 0, pixmask, ShapeSet);
 
-
+	free(mask_bits);
 }
 
 void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2)

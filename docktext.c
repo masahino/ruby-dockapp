@@ -46,8 +46,9 @@ static void set_text(WMDockItem *dockitem, char *text, int color)
 			       color);
 		dest_y += LEDCHAR_HEIGHT;
 	}
-	if (lines)
-	  free(lines);
+	if (lines) {
+		free(lines);
+	}
 }
 
 void redraw_docktext(WMDockItem *dockitem)
