@@ -272,6 +272,11 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	}
 	Check_Type(width, T_FIXNUM);
 	Check_Type(height, T_FIXNUM);
+
+	if (display == NULL) {
+		rb_raise(rb_eRuntimeError, "not openwindow");
+		return Qnil;
+	}
 	  
 	popup = malloc(sizeof(WMDockItem));
 	memset(popup, 0, sizeof(WMDockItem));
@@ -282,8 +287,8 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	popup->win = XCreateSimpleWindow(display, Root, 
 					 0, 0,
 					 popup->width, popup->height,
-					 0, BlackPixel(display,0), 
-					 WhitePixel(display,0) );
+					 0, BlackPixel(display, 0), 
+					 WhitePixel(display, 0));
 	att.override_redirect=True;
 	XChangeWindowAttributes (display, popup->win,
 				 CWOverrideRedirect, &att);
