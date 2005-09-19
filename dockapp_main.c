@@ -424,7 +424,8 @@ static void dockapp_openwindow(VALUE self)
 		     PointerMotionMask | StructureNotifyMask);
 	XSelectInput(wmdockapp->display, wmdockapp->iconwin,
 		     ButtonPressMask | ExposureMask | ButtonReleaseMask |
-		     PointerMotionMask | StructureNotifyMask);
+		     PointerMotionMask | StructureNotifyMask |
+		     EnterWindowMask | LeaveWindowMask);
 
 	if (XStringListToTextProperty(&wmdockapp->wname, 1, &name) == 0) {
 		fprintf(stderr, "%s: can't allocate window name\n", 
@@ -583,8 +584,14 @@ static void dockapp_start(VALUE self)
 #endif 
 				signal_callback(dock->mouse_region[s].item, event);
 				break;
-				
-				
+			case EnterNotify:
+				s = CheckMouseRegion(dock, event.xbutton.x,
+						     event.xbutton.y);
+				dockitem_show_tooltips(dock->mouse_region[s].item, event.xbutton.x, event.xbutton.y);
+				break;
+			case LeaveNotify:
+				dockitem_hide_tooltips(dock->mouse_region[s].item);
+				printf ("%d\n", event.type);
 				break;
 			default:
 				break;

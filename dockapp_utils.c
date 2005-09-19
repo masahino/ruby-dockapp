@@ -32,6 +32,29 @@
 
 /* Function Prototypes */
 
+void hide_tooltip_window(Display *display, Window win)
+{
+	XUnmapWindow(display, win);
+
+}
+
+Window create_tooltip_window(int x, int y, char *text)
+{
+	Window win;
+	XSetWindowAttributes att;
+	win = XCreateSimpleWindow(display, Root, 
+					 0, 0,
+					 100, 100,
+					 0, BlackPixel(display, 0), 
+					 WhitePixel(display, 0));
+	att.override_redirect=True;
+	XChangeWindowAttributes (display, win,
+				 CWOverrideRedirect, &att);
+	XMoveWindow(display, win, x, y);
+	XMapWindow(display, win);
+	return win;
+}
+
 int get_Xsignal_type(char *signal_type)
 {
 	if (strcmp(signal_type, "button_press_event") == 0) {

@@ -25,6 +25,31 @@
 #define LED_COLOR_OFF    4
 
 
+void dockitem_hide_tooltips(WMDockItem *item)
+{
+	WMDockApp *dock;
+	printf ("item == %d\n", item);
+	if (item->tip_text == NULL) {
+		return;
+	}
+	dock = item->dock;
+	hide_tooltip_window(dock->display, item->win);
+}
+
+void dockitem_show_tooltips(WMDockItem *item, int x, int y)
+{
+	int root_x, root_y;
+	WMDockApp *dock;
+	printf ("item == %d\n", item);
+	if (item->tip_text == NULL) {
+		return;
+	}
+	dock = item->dock;
+	get_pointer_position(dock->win, &root_x, &root_y);
+	item->win = create_tooltip_window(root_x-10, root_y+10, item->tip_text);
+	printf ("%s\n", item->tip_text);
+}
+
 VALUE dockitem_width(VALUE self, VALUE signal_type)
 {
 
@@ -221,6 +246,7 @@ static void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 	Data_Get_Struct(self, WMDockItem, dockitem);
 	dock = dockitem->dock;
 	if (dock == NULL) {
+		free(color);
 		return;
 	}
 	drawString(dock, dockitem->x+FIX2INT(x), dockitem->y+FIX2INT(y), 
@@ -291,6 +317,19 @@ void dockitem_mark(WMDockItem *item)
 	}
 }
 
+static void dockitem_settip(VALUE self, VALUE text)
+{
+	WMDockItem *item;
+
+	Check_Type(text, T_STRING);
+	Data_Get_Struct(self, WMDockItem, item);
+	
+	if (item->tip_text != NULL) {
+		free(item->text);
+	}
+	item->tip_text = strdup(StringValuePtr(text));
+}
+
 static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
@@ -345,6 +384,8 @@ void dockitem_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockitem_draw_led), -1);
 	rb_define_method(rb_DockItem, "clear",
 			 RUBY_METHOD_FUNC(dockitem_clear), 0);
+	rb_define_method(rb_DockItem, "set_tip",
+			 RUBY_METHOD_FUNC(dockitem_settip), 1);
 
 	rb_define_method(rb_DockItem, "width",
 			 RUBY_METHOD_FUNC(dockitem_width), 0);

@@ -1,6 +1,11 @@
 #ifndef DOCKAPP_H_INCLUDED
 #define DOCKAPP_H_INCLUDED
 
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/xpm.h>
+
 /* Defines */
 #define MAX_MOUSE_REGION (16)
 
@@ -93,6 +98,7 @@ struct WMDockEvent {
 	XEvent event;
 };
 
+
 typedef struct {
 	void                *next;
 	WMDockApp           *dock;
@@ -110,6 +116,7 @@ typedef struct {
 	int                 type;
 	Window              win;
 	void                (*redraw_function)();
+	char                *tip_text;
 } WMDockItem;
 
 #if 0
@@ -122,7 +129,6 @@ typedef struct {
 	int	   right;
 	WMDockItem *item;
 } MOUSE_REGION;
-
 
 MOUSE_REGION	mouse_region[MAX_MOUSE_REGION];
 int mouse_region_index;
