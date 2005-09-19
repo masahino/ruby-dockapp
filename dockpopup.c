@@ -359,6 +359,7 @@ void dockpopup_init(VALUE rb_DockApp)
 {
 	VALUE rb_DockPopUp;
 	VALUE rb_DockPopUpImage;
+	VALUE rb_DockPopUpText;
 
 	rb_DockPopUp = rb_define_class_under(rb_DockApp, "PopUp", rb_cObject);
 	rb_define_singleton_method(rb_DockPopUp, "new",
@@ -378,6 +379,27 @@ void dockpopup_init(VALUE rb_DockApp)
 	rb_define_const(rb_DockPopUp, "DOWN", INT2FIX(DOCKPOPUP_DOWN));
 	rb_define_const(rb_DockPopUp, "UP", INT2FIX(DOCKPOPUP_UP));
 
+
+	/* PopUpText */
+	rb_DockPopUpText = rb_define_class_under(rb_DockApp, "PopUpText", rb_cObject);
+	rb_define_singleton_method(rb_DockPopUpText, "new",
+				   dockpopup_initialize, -1);
+	rb_define_method(rb_DockPopUpText, "add_item", 
+			 RUBY_METHOD_FUNC(dockpopup_add_item), 1);
+	rb_define_method(rb_DockPopUpText, "show",
+			 RUBY_METHOD_FUNC(dockpopup_show), -1);
+	rb_define_method(rb_DockPopUpText, "hide",
+			 RUBY_METHOD_FUNC(dockpopup_hide), 0);
+	rb_define_method(rb_DockPopUpText, "popup",
+			 RUBY_METHOD_FUNC(dockpopup_popup), -1);
+	rb_define_method(rb_DockPopUpText, "get_index",
+			 RUBY_METHOD_FUNC(dockpopup_get_index), 0);
+
+
+	rb_define_const(rb_DockPopUpText, "DOWN", INT2FIX(DOCKPOPUP_DOWN));
+	rb_define_const(rb_DockPopUpText, "UP", INT2FIX(DOCKPOPUP_UP));
+
+	/* PopUpImage */
 	rb_DockPopUpImage = rb_define_class_under(rb_DockApp, "PopUpImage",
 					     rb_cObject);
 	rb_define_singleton_method(rb_DockPopUpImage, "new", 
