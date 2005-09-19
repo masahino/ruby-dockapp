@@ -34,7 +34,7 @@ static void set_text(WMDockItem *dockitem, char *text, int color)
 	dest_x = dockitem->x + 2;
 	dest_y = dockitem->y + 2;
 	
-	printf ("row == %d\n", row);
+/* 	printf ("row == %d\n", row); */
 	for (i = 0; i < row; i++) {
 		if (strcmp("", lines[i]) == 0) {
 			drawnLEDString(dock, dest_x, dest_y, "",
