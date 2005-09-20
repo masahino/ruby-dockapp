@@ -38,20 +38,43 @@ void hide_tooltip_window(Display *display, Window win)
 
 }
 
-Window create_tooltip_window(int x, int y, char *text)
+Window create_tooltip_window(WMDockApp *dock, XpmIcon wmgen,
+			     int x, int y, char *text)
 {
 	Window win;
 	XSetWindowAttributes att;
-	win = XCreateSimpleWindow(display, Root, 
-					 0, 0,
-					 100, 100,
-					 0, BlackPixel(display, 0), 
+	int width, height;
+	XRectangle overall_ink, overall_logical;
+	int padding;
+
+	padding = 2;
+
+	XmbTextExtents(dock->fontset, text, strlen(text), &overall_ink, 
+		       &overall_logical);
+	width = overall_logical.width;
+	height = overall_logical.height;
+	win = XCreateSimpleWindow(dock->display, dock->Root, 
+				  0, 0,
+				  width+padding*2, height+padding*2,
+					 1, BlackPixel(display, 0), 
 					 WhitePixel(display, 0));
+	XSetWindowBackground(dock->display, win, 
+		       GetColor(dock, "#ffffc0"));
+	XClearWindow(dock->display, win);
 	att.override_redirect=True;
-	XChangeWindowAttributes (display, win,
+	XChangeWindowAttributes (dock->display, win,
 				 CWOverrideRedirect, &att);
-	XMoveWindow(display, win, x, y);
-	XMapWindow(display, win);
+	XMoveWindow(dock->display, win, x, y);
+
+        XSetForeground(dock->display, dock->NormalGC,
+		       GetColor(dock, "black"));
+        XSetBackground(dock->display, dock->NormalGC,
+		       GetColor(dock, "#ffffc0"));
+	printf ("%s\n", text);
+	XMapWindow(dock->display, win);
+	XmbDrawString(dock->display, win,
+		      dock->fontset, dock->NormalGC,
+		      padding, height, text, strlen(text));
 	return win;
 }
 
@@ -392,6 +415,25 @@ void drawnLEDString2(WMDockApp *dock, XpmIcon wmgen, int dest_x, int dest_y,
 		dest_x += 6;
 	}
 	RedrawWindow2(dock->display, wmgen.pixmap, Root, dock->NormalGC, 64, 64);
+}
+
+void drawnString2(WMDockApp *dock, XpmIcon wmgen, 
+		  int dest_x, int dest_y, const char *string,
+		  char *colorname, char *bgcolorname,
+		  int right_justify, int len)
+{
+        XSetForeground(dock->display, dock->NormalGC,
+		       GetColor(dock, colorname));
+        XSetBackground(dock->display, dock->NormalGC,
+		       GetColor(dock, bgcolorname));
+	if (dock->use_fontset) {
+		XmbDrawString(dock->display, dock->wmgen.pixmap,
+			      dock->fontset, dock->NormalGC,
+			      dest_x, dest_y, string, len);
+	} else {
+		XDrawString (dock->display, dock->wmgen.pixmap,
+			     dock->NormalGC, dest_x, dest_y, string, len);
+	}
 }
 
 void drawnString(WMDockApp *dock, int dest_x, int dest_y, const char *string,

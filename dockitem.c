@@ -46,7 +46,9 @@ void dockitem_show_tooltips(WMDockItem *item, int x, int y)
 	}
 	dock = item->dock;
 	get_pointer_position(dock->win, &root_x, &root_y);
-	item->win = create_tooltip_window(root_x-10, root_y+10, item->tip_text);
+	item->win = create_tooltip_window(dock, item->xpm,
+					  root_x, root_y+12,
+					  item->tip_text);
 	printf ("%s\n", item->tip_text);
 }
 
