@@ -122,6 +122,7 @@ void docktext_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockitem_callback), 0);
 	rb_define_method(rb_DockText, "signal_connect", 
 			 RUBY_METHOD_FUNC(dockitem_signal_connect), 1);
-
+	rb_define_method(rb_DockText, "set_tip",
+			 RUBY_METHOD_FUNC(dockitem_settip), 1);
 
 }

@@ -153,6 +153,8 @@ void redraw_docktext(WMDockItem *item);
 void dockitem_callback(VALUE self);
 void dockitem_mark(WMDockItem *item);
 void dockitem_init(VALUE rb_DockApp);
+void dockitem_signal_connect(VALUE self, VALUE signal_type);
+void dockitem_settip(VALUE self, VALUE text);
 
 
 /* docktimer.c */

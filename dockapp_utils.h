@@ -1,6 +1,7 @@
 #ifndef DOCKAPP_UTILS_H_INCLUDED
 #define DOCKAPP_UTILS_H_INCLUDED
 #include "dockapp.h"
+
 /* dockapp_utils.c */
 int get_Xsignal_type(char *signal_type);
 int wait_Xevent(WMDockApp *dock, int event_type);
@@ -55,7 +56,6 @@ void createXBMfromXPM(char *xbm_org, char **xpm, int sx, int sy);
 void GetXPMfromFile(XpmIcon *wmgen, char *filename);
 void GetXPMfromData(XpmIcon *wmgen, char *pixmap_bytes[]);
 void new_timer(WMDockTimer *timer, int interval);
-void dockitem_signal_connect(VALUE self, VALUE signal_type);
 void draw_ledpoint(WMDockApp *dock, int x, int y, char *color);
 void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2);
 void mask_window2(Window window, char **xpm_master, int width, int height);

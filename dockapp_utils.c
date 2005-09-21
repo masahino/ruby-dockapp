@@ -38,8 +38,7 @@ void hide_tooltip_window(Display *display, Window win)
 
 }
 
-Window create_tooltip_window(WMDockApp *dock, XpmIcon wmgen,
-			     int x, int y, char *text)
+Window create_tooltip_window(WMDockApp *dock)
 {
 	Window win;
 	XSetWindowAttributes att;
@@ -49,21 +48,42 @@ Window create_tooltip_window(WMDockApp *dock, XpmIcon wmgen,
 
 	padding = 2;
 
-	XmbTextExtents(dock->fontset, text, strlen(text), &overall_ink, 
-		       &overall_logical);
-	width = overall_logical.width;
-	height = overall_logical.height;
 	win = XCreateSimpleWindow(dock->display, dock->Root, 
 				  0, 0,
-				  width+padding*2, height+padding*2,
-					 1, BlackPixel(display, 0), 
-					 WhitePixel(display, 0));
+				  1, 1,
+				  1, BlackPixel(display, 0), 
+				  WhitePixel(display, 0));
 	XSetWindowBackground(dock->display, win, 
 		       GetColor(dock, "#ffffc0"));
 	XClearWindow(dock->display, win);
 	att.override_redirect=True;
 	XChangeWindowAttributes (dock->display, win,
 				 CWOverrideRedirect, &att);
+	return win;
+}
+
+void update_tooltip_window(WMDockApp *dock, Window win,
+			     int x, int y, char *text)
+{
+	int width, height;
+	XRectangle overall_ink, overall_logical;
+	int padding;
+
+	padding = 2;
+
+	XmbTextExtents(dock->fontset, text, strlen(text), &overall_ink, 
+		       &overall_logical);
+	width = overall_logical.width + padding*2;
+	height = overall_logical.height + padding*2;
+
+	XResizeWindow(dock->display, win, width, height);
+	if (x + width > DisplayWidth(dock->display, 0)) {
+		x = DisplayWidth(dock->display, 0) - width - padding;
+	}
+	if (y + height > DisplayHeight(dock->display, 0)) {
+		y = y - height - 16;
+	}
+
 	XMoveWindow(dock->display, win, x, y);
 
         XSetForeground(dock->display, dock->NormalGC,
@@ -74,7 +94,7 @@ Window create_tooltip_window(WMDockApp *dock, XpmIcon wmgen,
 	XMapWindow(dock->display, win);
 	XmbDrawString(dock->display, win,
 		      dock->fontset, dock->NormalGC,
-		      padding, height, text, strlen(text));
+		      padding, height-padding*2, text, strlen(text));
 	return win;
 }
 
