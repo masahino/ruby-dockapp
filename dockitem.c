@@ -25,14 +25,24 @@
 #define LED_COLOR_OFF    4
 
 
-void dockitem_hide_tooltips(WMDockItem *item)
+void dockitem_hide_tooltips(WMDockApp *dock)
 {
-	WMDockApp *dock;
-	if (item->tip_text == NULL) {
-		return;
+	WMDockItem *item;
+	XWindowAttributes attributes;
+
+	item = dock->item;
+	while (item != NULL) {
+		if (item->tip_text == NULL || item->win == 0) {
+			item = item->next;
+			continue;
+		}
+		XGetWindowAttributes(dock->display, item->win, &attributes);
+		if (attributes.map_state == IsViewable) {
+			hide_tooltip_window(dock->display, item->win);
+			break;
+		}
+		item = item->next;
 	}
-	dock = item->dock;
-	hide_tooltip_window(dock->display, item->win);
 }
 
 void dockitem_show_tooltips(WMDockItem *item, int x, int y)
@@ -44,7 +54,7 @@ void dockitem_show_tooltips(WMDockItem *item, int x, int y)
 	}
 	dock = item->dock;
 	get_pointer_position(dock->win, &root_x, &root_y);
-	if (item->win == NULL) {
+	if (item->win == 0) {
 		item->win = create_tooltip_window(dock);
 	}
 	update_tooltip_window(dock, item->win, root_x, root_y+16,

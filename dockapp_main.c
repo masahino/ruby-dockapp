@@ -551,8 +551,7 @@ static void event_dispatch(WMDockApp *dock, XEvent event)
 				       event.xbutton.x, event.xbutton.y);
 		break;
 	case LeaveNotify:
-		dockitem_hide_tooltips(dock->mouse_region[s].item);
-		printf ("%d\n", event.type);
+		dockitem_hide_tooltips(dock);
 		break;
 	default:
 		break;
