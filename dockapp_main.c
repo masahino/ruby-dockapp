@@ -501,10 +501,66 @@ static void dockapp_openwindow(VALUE self)
 	}
 }
 
+static void event_dispatch(WMDockApp *dock, XEvent event)
+{
+	int s = 0;
+
+	switch (event.type) {
+	case Expose:
+		RedrawWindow(dock);
+		/*				printf ("Expose\n");*/
+		break;
+	case DestroyNotify:
+		XCloseDisplay(display);
+		printf ("destroy\n");
+		//exit(EXIT_SUCCESS);
+		break;
+	case ButtonPress:
+		/* 1st: check signal of DockApp */
+		dockapp_signal_callback(dock, event);
+/*
+  s = CheckMouseRegion(event.xbutton.x,
+  event.xbutton.y);
+*/
+		s = CheckMouseRegion(dock, event.xbutton.x,
+				     event.xbutton.y);
+#ifdef DEBUG
+		printf ("ButtonPress: %d(%d, %d)\n", s,
+			event.xbutton.x, event.xbutton.y);
+#endif 
+		if (s >= 0 && dock->mouse_region[s].item != NULL) {
+			signal_callback(dock->mouse_region[s].item, 
+					event);
+		}
+		break;
+	case ButtonRelease:
+		/* 1st: check signal of DockApp */
+		if (dockapp_signal_callback(dock, event) == Qtrue) {
+			break;
+		}
+#ifdef DEBUG
+		printf ("ButtonRelease: %d(%d, %d)\n", s,
+			event.xbutton.x, event.xbutton.y);
+#endif 
+		signal_callback(dock->mouse_region[s].item, event);
+		break;
+	case EnterNotify:
+		s = CheckMouseRegion(dock, event.xbutton.x,
+				     event.xbutton.y);
+		dockitem_show_tooltips(dock->mouse_region[s].item,
+				       event.xbutton.x, event.xbutton.y);
+		break;
+	case LeaveNotify:
+		dockitem_hide_tooltips(dock->mouse_region[s].item);
+		printf ("%d\n", event.type);
+		break;
+	default:
+		break;
+	}
+}
 static void dockapp_start(VALUE self)
 {
 	XEvent	event;
-	int s = 0;
 	Display *display;
 	WMDockApp *dock;
 	WMDockTimer *timer;
@@ -530,72 +586,14 @@ static void dockapp_start(VALUE self)
 			update_timer(timer);
 			timer = timer->next;
 		}
-/*
-		item = dock->item;
-		while (item != NULL) {
-			if (item->timer != NULL) {
-				update_timer(item->timer);
-			}
-			item = item->next;
-		}
-*/
+#if 0
 		XConvertSelection (display, XA_PRIMARY, XA_STRING, None,
-				   dock->win, CurrentTime);  // w == our window's ID
+				   dock->win, CurrentTime);
+#endif
+		/* event */
 		while (XPending(display)) {
 			XNextEvent(display, &event);
-			switch (event.type) {
-			case Expose:
-				RedrawWindow(dock);
-				/*				printf ("Expose\n");*/
-
-
-				break;
-                        case DestroyNotify:
-                                XCloseDisplay(display);
-				printf ("destroy\n");
-                                //exit(EXIT_SUCCESS);
-                                break;
-			case ButtonPress:
-				/* 1st: check signal of DockApp */
-				dockapp_signal_callback(dock, event);
-/*
-				s = CheckMouseRegion(event.xbutton.x,
-						     event.xbutton.y);
-*/
-				s = CheckMouseRegion(dock, event.xbutton.x,
-						     event.xbutton.y);
-#ifdef DEBUG
-				printf ("ButtonPress: %d(%d, %d)\n", s,
-					event.xbutton.x, event.xbutton.y);
-#endif 
-				if (s >= 0 && dock->mouse_region[s].item != NULL) {
-					signal_callback(dock->mouse_region[s].item, 
-							event);
-				}
-				break;
-			case ButtonRelease:
-				/* 1st: check signal of DockApp */
-				if (dockapp_signal_callback(dock, event) == Qtrue) {
-					break;
-				}
-#ifdef DEBUG
-				printf ("ButtonRelease: %d(%d, %d)\n", s,
-					event.xbutton.x, event.xbutton.y);
-#endif 
-				signal_callback(dock->mouse_region[s].item, event);
-				break;
-			case EnterNotify:
-				s = CheckMouseRegion(dock, event.xbutton.x,
-						     event.xbutton.y);
-				dockitem_show_tooltips(dock->mouse_region[s].item, event.xbutton.x, event.xbutton.y);
-				break;
-			case LeaveNotify:
-				dockitem_hide_tooltips(dock->mouse_region[s].item);
-				printf ("%d\n", event.type);
-				break;
-			default:
-				break;
-			}
+			event_dispatch(dock, event);
 		}
 		usleep(10000); /* 10ms */
 	}

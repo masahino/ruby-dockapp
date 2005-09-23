@@ -61,4 +61,11 @@ void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2);
 void mask_window2(Window window, char **xpm_master, int width, int height);
 char** init_pixmap_with_size(int width, int height);
 
+void hide_tooltip_window(Display *display, Window win);
+Window create_tooltip_window(WMDockApp *dock);
+void update_tooltip_window(WMDockApp *dock, Window win,
+			   int x, int y, char *text);
+
+
+
 #endif

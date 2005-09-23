@@ -28,7 +28,6 @@
 void dockitem_hide_tooltips(WMDockItem *item)
 {
 	WMDockApp *dock;
-	printf ("item == %d\n", item);
 	if (item->tip_text == NULL) {
 		return;
 	}
@@ -40,7 +39,6 @@ void dockitem_show_tooltips(WMDockItem *item, int x, int y)
 {
 	int root_x, root_y;
 	WMDockApp *dock;
-	printf ("item == %d\n", item);
 	if (item->tip_text == NULL) {
 		return;
 	}
@@ -51,7 +49,6 @@ void dockitem_show_tooltips(WMDockItem *item, int x, int y)
 	}
 	update_tooltip_window(dock, item->win, root_x, root_y+16,
 			      item->tip_text);
-	printf ("%s\n", item->tip_text);
 }
 
 VALUE dockitem_width(VALUE self, VALUE signal_type)
@@ -329,7 +326,7 @@ void dockitem_settip(VALUE self, VALUE text)
 	Data_Get_Struct(self, WMDockItem, item);
 	
 	if (item->tip_text != NULL) {
-		free(item->text);
+		free(item->tip_text);
 	}
 	item->tip_text = strdup(StringValuePtr(text));
 }
