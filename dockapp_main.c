@@ -322,6 +322,10 @@ static void _dockapp_set_timer(VALUE self, VALUE interval)
 
 static void dockapp_openwindow(VALUE self)
 {
+}
+
+static void openwindow(WMDockApp *wmdockapp)
+{
 	unsigned int	borderwidth = 1;
 	XClassHint	classHint;
 	char		*display_name = NULL;
@@ -344,9 +348,11 @@ static void dockapp_openwindow(VALUE self)
 	char *loc;
 	Pixmap pixmask;
 
+/*
 	WMDockApp *wmdockapp;
 
 	Data_Get_Struct(self, WMDockApp, wmdockapp);
+*/
 	wname = strdup(wmdockapp->wname);
 
 	/* taken from twm.c */
@@ -481,8 +487,6 @@ static void dockapp_openwindow(VALUE self)
 
 	XSetWMHints(wmdockapp->display, wmdockapp->win, &mywmhints);
 
-	XMapWindow(wmdockapp->display, wmdockapp->win);
-
 
 	if (wmdockapp->use_fontset) {
 		char **miss, *def;
@@ -499,6 +503,9 @@ static void dockapp_openwindow(VALUE self)
 			printf ("using substitue font\n");
 		}
 	}
+
+/* 	XMapWindow(wmdockapp->display, wmdockapp->win); */
+
 }
 
 static void event_dispatch(WMDockApp *dock, XEvent event)
@@ -565,6 +572,8 @@ static void dockapp_start(VALUE self)
 	WMDockTimer *timer;
 
 	Data_Get_Struct(self, WMDockApp, dock);
+
+ 	XMapWindow(dock->display, dock->win);
 	
 	if (dock->display == NULL) {
 	  rb_raise(rb_eRuntimeError, "not openwindow");
@@ -632,6 +641,8 @@ static VALUE dockapp_s_new(int argc, VALUE *argv, VALUE self)
 	obj = Data_Wrap_Struct(self, dockapp_mark, -1, dock);
 
 	signal(SIGINT, sig_int);
+
+	openwindow(dock);
 
 	return obj;
 }
