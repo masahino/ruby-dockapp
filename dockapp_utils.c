@@ -76,7 +76,7 @@ void update_tooltip_window(WMDockApp *dock, Window win,
 
 	XResizeWindow(dock->display, win, width, height);
 	if (x + width > DisplayWidth(dock->display, 0)) {
-		x = DisplayWidth(dock->display, 0) - width - padding;
+		x = DisplayWidth(dock->display, 0) - width - 10;
 	}
 	if (y + height > DisplayHeight(dock->display, 0)) {
 		y = y - height - 16;
