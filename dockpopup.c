@@ -193,6 +193,45 @@ static void make_menu_image(WMDockItem *popup)
 
 }
 
+static void dockpopup_add_item2(VALUE self, VALUE text)
+{
+	WMDockItem *popup;
+	VALUE tmp;
+	int i, n;
+	char *str;
+
+	str = malloc(sizeof(char*)*MAX_LIST_LINE);
+	memset(str, 0, MAX_LIST_LINE);
+
+	Check_Type(text, T_ARRAY);
+
+	n = RARRAY(text)->len;
+#ifdef DEBUG
+	printf ("array size = %d\n", n);
+#endif
+	for (i = 0; i < n; i++) {
+		tmp = rb_ary_shift(text);
+		Check_Type(tmp, T_STRING);
+#ifdef DEBUG
+		printf ("%s\n", StringValuePtr(tmp));
+#endif
+		strcat(str, StringValuePtr(tmp));
+		strcat(str, "\n");
+	}
+	Data_Get_Struct(self, WMDockItem, popup);
+
+	
+	if (popup->text == NULL || 
+	    strcmp(popup->text, str) != 0) {
+		if (popup->text != NULL) {
+			free(popup->text);
+		}
+		popup->text = strdup(str);
+		make_menu_image(popup);
+	}
+
+}
+
 static void dockpopup_add_item(VALUE self, VALUE text)
 {
 	WMDockItem *popup;
@@ -365,7 +404,7 @@ void dockpopup_init(VALUE rb_DockApp)
 	rb_define_singleton_method(rb_DockPopUp, "new",
 				   dockpopup_initialize, -1);
 	rb_define_method(rb_DockPopUp, "add_item", 
-			 RUBY_METHOD_FUNC(dockpopup_add_item), 1);
+			 RUBY_METHOD_FUNC(dockpopup_add_item2), 1);
 	rb_define_method(rb_DockPopUp, "show",
 			 RUBY_METHOD_FUNC(dockpopup_show), -1);
 	rb_define_method(rb_DockPopUp, "hide",
