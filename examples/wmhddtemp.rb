@@ -6,14 +6,15 @@ require 'socket'
 host_list = ["panda", "bear", "tiger"]
 
 class HddTemp
-  attr_accessor :host
+  attr_accessor :host, :temp
 
   def initialize(host, port = 7634)
     @host = host
     @port = port
+    @temp = []
   end
   def get()
-    result = []
+    @temp = []
     begin
       str =  TCPSocket.open(@host, @port).gets
     rescue
@@ -26,9 +27,9 @@ class HddTemp
       tempdata.shift
       temp = tempdata.shift
       tempdata.shift
-      result.push(" "+dev+" "+temp+" C")
+      @temp.push(" "+dev+" "+temp+" C")
     end
-    return result
+    return @temp
   end
 end
 
@@ -42,22 +43,27 @@ class WmHddTemp
     host_list.each do |host|
       @hddtemp_list.push(HddTemp.new(host))
     end
-    self.set_timer(@dock, @text, @hddtemp_list)
+    self.set_timer(@dock, @text)
   end
 
-  def get_data(host_list)
-    data = []
-    host_list.each do |host|
-      data.push(host.host())
-      data.push(host.get())
+  def update()
+    @hddtemp_list.each do |host|
+      host.get()
     end
-    return data
   end
 
-  def set_timer(dock, text, hddtemp_list)
+  def show
+    result_str = ""
+    @hddtemp_list.each do |host|
+      result_str += host.host+"\n"+host.temp.join("\n")+"\n"
+    end
+    @text.set_text(result_str)
+  end
+
+  def set_timer(dock, text)
     t1 = DockApp::Timer.new(10000) do 
-      @data = self.get_data(hddtemp_list)
-      @text.set_text(@data.join("\n").chomp)
+      self.update()
+      self.show()
     end
     t1.start
   end
