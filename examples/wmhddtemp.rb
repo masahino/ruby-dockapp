@@ -17,8 +17,10 @@ class HddTemp
     @temp = []
     begin
       str =  TCPSocket.open(@host, @port).gets
-    rescue
-      return "error"
+      puts str
+    rescue 
+      @temp.push(" error")
+      return ["error"]
     end
     tempdata = str.split("|")
     while tempdata.size > 0
