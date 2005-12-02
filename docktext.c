@@ -24,7 +24,7 @@ static void set_text(WMDockItem *dockitem, char *text, int color)
 
 	dock = dockitem->dock;
 	if (dock == NULL) {
-		printf ("dock == NULL\n");
+/*		printf ("dock == NULL\n"); */
 		return;
 	}
 	
@@ -53,7 +53,6 @@ static void set_text(WMDockItem *dockitem, char *text, int color)
 
 void redraw_docktext(WMDockItem *dockitem)
 {
-	printf ("called\n");
 	set_text(dockitem, dockitem->text, COLOR_NORMAL);
 }
 

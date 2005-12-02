@@ -45,7 +45,7 @@ void dockitem_hide_tooltips(WMDockApp *dock)
 	}
 }
 
-void dockitem_show_tooltips(WMDockItem *item, int x, int y)
+void dockitem_show_tooltips(WMDockItem *item)
 {
 	int root_x, root_y;
 	WMDockApp *dock;
@@ -63,7 +63,6 @@ void dockitem_show_tooltips(WMDockItem *item, int x, int y)
 
 VALUE dockitem_width(VALUE self, VALUE signal_type)
 {
-
 	WMDockItem *item;
 
 	Data_Get_Struct(self, WMDockItem, item);
@@ -72,7 +71,6 @@ VALUE dockitem_width(VALUE self, VALUE signal_type)
 
 VALUE dockitem_height(VALUE self, VALUE signal_type)
 {
-
 	WMDockItem *item;
 
 	Data_Get_Struct(self, WMDockItem, item);
@@ -119,7 +117,6 @@ static void dockitem_draw_led(int argc, VALUE *argv, VALUE self)
 
 void dockitem_signal_connect(VALUE self, VALUE signal_type)
 {
-
 	WMDockItem *item;
 	struct WMDockSignal *signal, *tmp;
 
@@ -244,6 +241,7 @@ static void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 	WMDockItem *dockitem;
 	VALUE x, y, text, vcolor;
 	char *color;
+
 	if (rb_scan_args(argc, argv, "31", &x, &y, &text, &vcolor) == 3) {
 		color = strdup(TEXTCOLOR);
 	} else {
@@ -266,6 +264,7 @@ static void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 	free(color);
 }
 
+/* *********** TODO change argument **********/
 /* Todo: color, font */
 /* argv[0]: text string */
 /* argv[1]: x */
