@@ -554,8 +554,7 @@ static void event_dispatch(WMDockApp *dock, XEvent event)
 	case EnterNotify:
 		s = CheckMouseRegion(dock, event.xbutton.x,
 				     event.xbutton.y);
-		dockitem_show_tooltips(dock->mouse_region[s].item,
-				       event.xbutton.x, event.xbutton.y);
+		dockitem_show_tooltips(dock->mouse_region[s].item);
 		break;
 	case LeaveNotify:
 		dockitem_hide_tooltips(dock);
@@ -688,4 +687,6 @@ void Init_dockapp(void) {
 	gtk_dockapp_init();
 #endif
 
+	rb_define_const(rb_DockApp, "VERSION",
+			rb_obj_freeze(rb_str_new2(RUBY_DOCKAPP_VERSION)));
 }

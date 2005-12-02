@@ -7,6 +7,8 @@
 #include <X11/xpm.h>
 
 /* Defines */
+#define RUBY_DOCKAPP_VERSION "0.2.2"
+
 #define MAX_MOUSE_REGION (16)
 
 #define DEFAULT_FONT "-shinonome-gothic-medium-r-normal--12-*-*-*-*-*"
@@ -33,7 +35,6 @@
 #define TYPE_POPUP 10
 
 /* Typedefs */
-typedef struct _rckeys rckeys;
 
 struct _rckeys {
 	const char	*label;
@@ -155,7 +156,7 @@ void dockitem_mark(WMDockItem *item);
 void dockitem_init(VALUE rb_DockApp);
 void dockitem_signal_connect(VALUE self, VALUE signal_type);
 void dockitem_settip(VALUE self, VALUE text);
-void dockitem_show_tooltips(WMDockItem *item, int x, int y);
+void dockitem_show_tooltips(WMDockItem *item);
 void dockitem_hide_tooltips(WMDockApp *dock);
 
 /* docktimer.c */
