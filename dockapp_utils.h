@@ -20,20 +20,14 @@ void RedrawWindow(WMDockApp *dock);
 void RedrawWindow2(Display *display, Pixmap src_pixmap, Window window,
 		   GC gc, int width, int height);
 void init_pixmap(WMDockApp *dock);
-/*
-void AddMouseRegion(int index, int left, int top, int right, int bottom,
-		    WMDockItem *item);
-*/
 void AddMouseRegion(WMDockApp *dock, int left, int top, int right, int bottom, 
 		    WMDockItem *item);
-/* int CheckMouseRegion(int x, int y);*/
 int CheckMouseRegion(WMDockApp *dock, int x, int y);
 void openXwindow(int argc, char *argv[], char **, char *, int, int);
 void RedrawWindowXY(int x, int y);
 void copyXPMArea(int, int, int, int, int, int);
 void copyXBMArea(int, int, int, int, int, int);
 void setMaskXY(int, int);
-void parse_rcfile(const char *, rckeys *);
 void eraseRect(WMDockApp *dock, int x, int y, int x2, int y2,
 	       char *bgcolorname);
 void drawString(WMDockApp *dock, int dest_x, int dest_y, const char *string,

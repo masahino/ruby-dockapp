@@ -88,7 +88,9 @@ void update_tooltip_window(WMDockApp *dock, Window win,
 		       GetColor(dock, "black"));
         XSetBackground(dock->display, dock->NormalGC,
 		       GetColor(dock, "#ffffc0"));
+#ifdef DEBUG
 	printf ("%s\n", text);
+#endif /* DEBUG */
 	XMapWindow(dock->display, win);
 	XmbDrawString(dock->display, win,
 		      dock->fontset, dock->NormalGC,
@@ -486,33 +488,6 @@ void drawString(WMDockApp *dock, int dest_x, int dest_y, const char *string,
 }
 
 
-/* read_rc_file */
-void parse_rcfile(const char *filename, rckeys *keys)
-{
-	char	*p;
-	char	temp[128];
-	char	*tokens = " :	\n";
-	FILE	*fp;
-	int	i,key;
-
-	fp = fopen(filename, "r");
-	if (fp) {
-		while (fgets(temp, 128, fp)) {
-			key = 0;
-				while (key >= 0 && keys[key].label) {
-					if ((p = strstr(temp, keys[key].label))) {
-						p += strlen(keys[key].label);
-						p += strspn(p, tokens);
-						if ((i = strcspn(p, "#\n"))) p[i] = 0;
-						free(*keys[key].var);
-						*keys[key].var = strdup(p);
-						key = -1;
-					} else key++;
-				}
-			}
-		fclose(fp);
-	}
-}
 
 #if 0
 void AddMouseRegion(int index, int left, int top, int right, int bottom, 
@@ -769,7 +744,6 @@ void mask_window2(Window window, char **xpm_master, int width, int height)
 
 	Pixmap pixmask;
 
-//	char mask_bits[64 * 64];
 	char **mask_bits;
 
 	mask_bits = malloc(width*height*(sizeof(char*)));
@@ -797,7 +771,6 @@ void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2)
 	int colors = 5;
 	int base = colors + 1;
 	int radius, radius2;
-//	int l1, l2;
 	int r, a;
 	int minx, miny, maxx, maxy;
 
