@@ -25,7 +25,6 @@ static void docktimer_mark(WMDockTimer *timer)
 
 void new_timer(WMDockTimer *timer, int interval)
 {
-
 	timerclear(&timer->interval);
 	if (interval >= 1000000) {
 		timer->interval.tv_sec = interval/1000000;
