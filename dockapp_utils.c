@@ -95,6 +95,7 @@ void update_tooltip_window(WMDockApp *dock, Window win,
 	XmbDrawString(dock->display, win,
 		      dock->fontset, dock->NormalGC,
 		      padding, height-padding*2, text, strlen(text));
+	XRaiseWindow(dock->display, win);
 }
 
 int get_Xsignal_type(char *signal_type)
