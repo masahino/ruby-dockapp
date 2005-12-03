@@ -646,6 +646,22 @@ static VALUE dockapp_s_new(int argc, VALUE *argv, VALUE self)
 	return obj;
 }
 
+static VALUE dockapp_get_text_width(int argc, VALUE *argv, VALUE self)
+{
+	WMDockApp *dockapp;
+	VALUE vstring, vfontset;
+	int offset;
+
+	if (rb_scan_args(argc, argv, "11", &vstring, &vfontset) == 2) {
+		printf("not implement\n");
+	} 
+	Check_Type(vstring, T_STRING);
+	Data_Get_Struct(self, WMDockApp, dockapp);
+	offset = XmbTextEscapement(dockapp->fontset, StringValuePtr(vstring),
+				   RSTRING(vstring)->len);
+	return INT2FIX(offset);
+}
+
 void Init_dockapp(void) {
 	VALUE rb_DockApp;
 
@@ -677,6 +693,9 @@ void Init_dockapp(void) {
 			 RUBY_METHOD_FUNC(dockapp_signal_connect), 1);
         rb_define_method(rb_DockApp, "name",
                          RUBY_METHOD_FUNC(dockapp_name), 0);
+	rb_define_method(rb_DockApp, "text_width",
+			 RUBY_METHOD_FUNC(dockapp_get_text_width),
+			 -1);
 
 	dockitem_init(rb_DockApp);
 	docktext_init(rb_DockApp);

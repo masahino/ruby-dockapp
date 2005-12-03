@@ -1,3 +1,9 @@
+2005-12-04  HINO Masayuki  <masahino@x24.tky3.3web.ne.jp>
+
+	* dockapp_main.c: add a new method DockApp.text_width
+
+	* dockapp_utils.c: to raise tooltips window
+
 2005-12-03 00:33  masahino
 
 	* examples/wmhddtemp.rb: no comments
