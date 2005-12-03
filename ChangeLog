@@ -1,0 +1,282 @@
+2005-12-03 00:33  masahino
+
+	* examples/wmhddtemp.rb: no comments
+
+2005-12-03 00:32  masahino
+
+	* docktimer.c: delete unused line
+
+2005-12-03 00:31  masahino
+
+	* dockitem.c, docktext.c: delete  debug messages
+
+2005-12-03 00:30  masahino
+
+	* dockapp_utils.c, dockapp_utils.h: delete unsed codes
+
+2005-12-03 00:29  masahino
+
+	* dockapp.h, dockapp_main.c: add version
+
+2005-10-26 23:56  masahino
+
+	* dockpopup.c: change an argument type of the
+	  DockApp::PopUp.add_item
+
+2005-10-26 22:33  masahino
+
+	* examples/wmhddtemp.rb: no comments
+
+2005-10-26 07:37  masahino
+
+	* examples/wmhddtemp.rb: some changes...
+
+2005-10-25 00:27  masahino
+
+	* examples/wmhddtemp.rb: add a new example script
+
+2005-10-20 23:43  masahino
+
+	* examples/kbanner.rb (tags: Release_0_2_1): add new example.
+	  display KANJI characters
+
+2005-10-20 23:37  masahino
+
+	* dockapp_utils.c (tags: Release_0_2_1): change posision of
+	  tooltips window
+
+2005-10-20 23:34  masahino
+
+	* dockapp_main.c (tags: Release_0_2_1): WMDockApp::openwindow has
+	  already become unnecessary.
+
+2005-09-23 14:40  masahino
+
+	* dockapp.h (tags: Release_0_2_1), dockapp_main.c, dockitem.c
+	  (tags: Release_0_2_1): bug fix(hide tooltips window)
+
+2005-09-23 11:19  masahino
+
+	* dockapp.h, dockapp_main.c, dockapp_utils.c, dockapp_utils.h
+	  (tags: Release_0_2_1), dockitem.c: delete debug messages and
+	  warning
+
+2005-09-22 00:32  masahino
+
+	* dockapp.h, dockapp_utils.c, dockapp_utils.h, dockitem.c,
+	  docktext.c (tags: Release_0_2_1): position of a tooltips
+
+2005-09-21 01:13  masahino
+
+	* dockapp_utils.c, dockitem.c: create tooltips function
+
+2005-09-19 22:47  masahino
+
+	* dockapp.h, dockapp_main.c, dockapp_utils.c, dockitem.c: add
+	  tooltips window(it's a just test version)
+
+2005-09-19 22:46  masahino
+
+	* dockpopup.c (tags: Release_0_2_1): create PopUpText class
+
+2005-09-19 22:45  masahino
+
+	* docktext.c: delete debug message
+
+2005-09-16 10:08  masahino
+
+	* dockapp-doc.ja.rb (tags: Release_0_2_1): add japanese document
+
+2005-09-16 09:12  masahino
+
+	* dockpopup.c: check openwindow
+
+2005-09-16 00:20  masahino
+
+	* dockapp_utils.c, dockpopup.c, docktext.c: fix a part of memory
+	  leak
+
+2005-09-15 00:14  masahino
+
+	* dockapp_utils.c, dockpopup.c, dockapp_utils.h: change popup menu
+	  size
+
+2005-09-14 01:11  masahino
+
+	* dockapp_utils.c: add XMapRaised
+
+2005-08-19 05:09  masahino
+
+	* dockapp.h, dockapp_main.c, dockitem.c, docktext.c: implement
+	  redraw_function
+
+2005-07-23 10:02  masahino
+
+	* dockitem.c, dockapp_main.c, dockapp_utils.c, dockapp_utils.h:
+	  Xのイベントの扱いを変更(dockapp_util.cに移動)
+
+2005-07-18 23:47  masahino
+
+	* examples/popuptest.rb (tags: Release_0_2_1), dockapp.h,
+	  dockapp_main.c, dockapp_utils.c, dockapp_utils.h, dockpopup.c:
+	  implement DockApp::PopUp::popup method
+
+2005-07-17 23:59  masahino
+
+	* dockapp-doc.rb (tags: Release_0_2_1), dockapp_main.c,
+	  dockapp_utils.c, dockpopup.c, docktimer.c (tags: Release_0_2_1)
+	  (utags: Release_0_2): delete debug messages
+
+2005-06-28 01:37  masahino
+
+	* dockapp.h (tags: Release_0_2), dockapp_main.c, dockapp_utils.c,
+	  dockapp_utils.h (tags: Release_0_2), dockitem.c (tags:
+	  Release_0_2): change mouse_region
+
+2005-06-28 01:16  masahino
+
+	* dockapp_utils.c, dockapp_utils.h, dockpopup.c: delete warning
+
+2005-06-26 01:34  masahino
+
+	* dockpopup.c: dockpopup->get_index
+
+2005-06-26 01:07  masahino
+
+	* dockapp.h, dockapp_main.c: making popup menu
+
+2005-06-26 01:06  masahino
+
+	* dockapp_utils.c, dockapp_utils.h, dockpopup.c: popup menu
+
+2005-06-12 23:51  masahino
+
+	* dockapp_utils.c, dockapp_utils.h, dockpopup.c: make RedrawWindow2
+	  for popupimage.
+
+2005-05-29 22:19  masahino
+
+	* dockitem.c: no comments
+
+2005-05-29 22:18  masahino
+
+	* dockapp_main.c, dockpopup.c, dockapp_utils.c, dockapp_utils.h:
+	  add xpm
+
+2005-05-29 22:15  masahino
+
+	* dockapp-doc.rb: version 0.1
+
+2005-05-28 18:25  masahino
+
+	* dockapp_utils.h (tags: Release_0_1): add new header
+
+2005-05-28 18:24  masahino
+
+	* dockapp_main.c, docktimer.c (utags: Release_0_1): for new release
+
+2005-05-28 10:13  masahino
+
+	* dockapp.h (tags: Release_0_1), dockapp_main.c, dockapp_utils.c
+	  (tags: Release_0_1), dockitem.c (tags: Release_0_1), dockpopup.c
+	  (tags: Release_0_1), docktext.c (tags: Release_0_2, Release_0_1):
+	  delete compile warnings
+
+2005-05-27 07:28  masahino
+
+	* examples/: clock.rb, load.rb, menutest.rb, test.rb (utags:
+	  Release_0_1, Release_0_2, Release_0_2_1): no comments
+
+2005-05-27 07:27  masahino
+
+	* dockapp.h, dockapp_main.c, dockevent.c (tags: Release_0_2_1,
+	  Release_0_2, Release_0_1), dockitem.c: add signal of DockApp
+	  class
+
+2005-05-25 01:29  masahino
+
+	* dockpopup.c, docktext.c: ...
+
+2005-05-21 22:30  masahino
+
+	* pixmap.h (tags: Release_0_2_1, Release_0_2, Release_0_1): add new
+	  pixmaps(buttons and led signals)
+
+2005-05-21 22:29  masahino
+
+	* dockapp.h, dockevent.c, dockitem.c, dockpopup.c: ...
+
+2005-05-21 22:28  masahino
+
+	* dockapp-doc.rb (tags: Release_0_1): add
+
+2005-05-14 21:46  masahino
+
+	* dockapp.h, dockapp_main.c, dockapp_utils.c, dockitem.c: add LED
+	  point
+
+2005-05-08 15:42  masahino
+
+	* dockapp.h, dockapp_main.c, dockapp_utils.c, dockevent.c,
+	  dockitem.c, dockpopup.c: add popup function
+
+2005-04-26 23:49  masahino
+
+	* dockevent.c: new
+
+2005-04-26 23:48  masahino
+
+	* dockapp.h, dockapp_main.c, dockitem.c: add event
+
+2005-04-26 00:25  masahino
+
+	* dockapp.h, dockapp_main.c, dockapp_utils.c, dockitem.c: implement
+	  circle window
+
+2005-04-23 10:02  masahino
+
+	* dockapp_main.c, dockapp_utils.c, dockitem.c: changes for popup
+	  function
+
+2005-04-23 10:01  masahino
+
+	* dockpopup.c: add new function
+
+2005-04-23 09:57  masahino
+
+	* dockapp.h: [no log message]
+
+2005-04-13 21:55  masahino
+
+	* dockapp_main.c, dockapp_utils.c: add use_fontset flag
+
+2005-04-11 07:36  masahino
+
+	* examples/menutest.rb: add new file
+
+2005-04-10 23:12  masahino
+
+	* dockapp_main.c, dockitem.c, docktext.c, docktimer.c: split init
+	  function
+
+2005-03-31 00:42  masahino
+
+	* COPYING (tags: Release_0_2_1, Release_0_2, Release_0_1): add file
+
+2005-03-31 00:36  masahino
+
+	* depend, dockapp.h, dockapp_main.c, dockapp_utils.c, dockitem.c,
+	  docktext.c, docktimer.c, extconf.rb, pixmap.h, examples/clock.rb,
+	  examples/cover.rb, examples/load.rb, examples/test.rb: Initial
+	  revision
+
+2005-03-31 00:36  masahino
+
+	* depend (tags: Release_0_2_1, Release_0_2, Release_0_1),
+	  dockapp.h, dockapp_main.c, dockapp_utils.c, dockitem.c,
+	  docktext.c, docktimer.c, extconf.rb (tags: Release_0_2_1,
+	  Release_0_2, Release_0_1), pixmap.h, examples/clock.rb,
+	  examples/cover.rb (tags: Release_0_2_1, Release_0_2,
+	  Release_0_1), examples/load.rb, examples/test.rb (utags:
+	  initial): import
+
