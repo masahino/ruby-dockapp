@@ -98,6 +98,7 @@ static void dockpopup_popup(int argc, VALUE *argv, VALUE self)
 
 	Data_Get_Struct(self, WMDockItem, popup);
 
+	dockitem_hide_tooltips(popup->dock);
 	dockpopup_show_menu(popup, direction);
 	/* event loop */
 	do { /* dangerous */
