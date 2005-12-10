@@ -16,7 +16,7 @@ class PopUpTest
     @dock.add(10, 30, @item2)
     @item1.draw_string(1, 10, "UP")
     @item2.draw_string(1, 10, "DOWN")
-    @popup1.add_item("test1\ntest2\ntest3")
+    @popup1.add_item(["test1","test2","test3"])
 
     self.set_action
   end
