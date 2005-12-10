@@ -146,7 +146,9 @@ static void signal_callback(WMDockItem *item, XEvent event)
 		struct WMDockSignal *signal;
 		signal = item->signal;
 		while (signal) {
+#ifdef DEBUG
 			printf ("event->type = %d\n", event.type);
+#endif
 			if (signal->type == event.type) {
 				VALUE dockevent;
 				signal->event = event;
