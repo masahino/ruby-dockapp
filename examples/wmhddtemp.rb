@@ -16,7 +16,9 @@ class HddTemp
   def get()
     @temp = []
     begin
-      str =  TCPSocket.open(@host, @port).gets
+      s =  TCPSocket.open(@host, @port)
+      str = s.gets
+      s.close
       puts str
     rescue 
       @temp.push(" error")
@@ -45,6 +47,10 @@ class WmHddTemp
     host_list.each do |host|
       @hddtemp_list.push(HddTemp.new(host))
     end
+
+    @last_host_index = -1
+    self.update
+    self.show
     self.set_timer(@dock, @text)
   end
 
@@ -54,7 +60,7 @@ class WmHddTemp
     end
   end
 
-  def show
+  def show_old
     result_str = ""
     @hddtemp_list.each do |host|
       result_str += host.host+"\n"+host.temp.join("\n")+"\n"
@@ -62,12 +68,28 @@ class WmHddTemp
     @text.set_text(result_str)
   end
 
+  def show
+    @last_host_index += 1
+    if @last_host_index > @hddtemp_list.size-1
+      @last_host_index = 0
+    end
+    result_str = @hddtemp_list[@last_host_index].host+"\n"+
+      @hddtemp_list[@last_host_index].temp.join("\n")+"\n"
+    @text.set_text(result_str)
+  end
+
   def set_timer(dock, text)
+    # update timer
     t1 = DockApp::Timer.new(10000) do 
       self.update()
-      self.show()
+#      self.show()
     end
     t1.start
+
+    t2 = DockApp::Timer.new(5000) do
+      self.show()
+    end
+    t2.start
   end
 
   def run
