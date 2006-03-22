@@ -82,14 +82,14 @@ class WmHddTemp
     # update timer
     t1 = DockApp::Timer.new(10000) do 
       self.update()
-#      self.show()
+      self.show()
     end
     t1.start
 
     t2 = DockApp::Timer.new(5000) do
       self.show()
     end
-    t2.start
+#    t2.start
   end
 
   def run

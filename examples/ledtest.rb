@@ -1,4 +1,4 @@
-require './dockapp'
+require '../dockapp'
 
 dock = DockApp.new("LED test")
 dock.openwindow
