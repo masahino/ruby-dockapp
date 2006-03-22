@@ -112,7 +112,7 @@ static void dockitem_draw_led(int argc, VALUE *argv, VALUE self)
 	Data_Get_Struct(self, WMDockItem, dockitem);
 	dock = dockitem->dock;
 
-	draw_ledpoint(dock, x, y, StringValuePtr(color));
+	draw_ledpoint(dock, dockitem->x+FIX2INT(x), dockitem->y+FIX2INT(y), StringValuePtr(color));
 }
 
 void dockitem_signal_connect(VALUE self, VALUE signal_type)
