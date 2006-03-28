@@ -1,3 +1,17 @@
+2006-03-28  HINO Masayuki  <masahino@tky3.3web.ne.jp>
+
+	* dockapp_utils.c: change get_pointer position
+
+	* dockitem.c: change drawLEDstring
+
+2006-03-22  HINO Masayuki  <masahino@tky3.3web.ne.jp>
+
+	* dockitem.c: correct position of draw_led
+
+2005-12-10  HINO Masayuki  <masahino@x24.tky3.3web.ne.jp>
+
+	* release 0.2.2
+
 2005-12-10  HINO Masayuki  <masahino@x24.tky3.3web.ne.jp>
 
 	* examples/tooltips.rb: A example script os the tooltips window 
