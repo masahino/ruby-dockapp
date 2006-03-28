@@ -154,14 +154,13 @@ void draw_ledpoint(WMDockApp *dock, int x, int y, char *color)
 
 }
 
-void get_pointer_position(Window win, int *x, int *y)
+void get_pointer_position(Window win, int *root_x, int *root_y, int *win_x, int *win_y)
 {
 	Window dummy_root, dummy_child;
-	int win_x, win_y;
 	unsigned int mask;
 	XQueryPointer(display, win, &dummy_root, &dummy_child,
-		      x, y,
-		      &win_x, &win_y, &mask);
+		      root_x, root_y,
+		      win_x, win_y, &mask);
 }
 
 

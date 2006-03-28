@@ -5,7 +5,7 @@
 /* dockapp_utils.c */
 int get_Xsignal_type(char *signal_type);
 int wait_Xevent(WMDockApp *dock, int event_type);
-void get_pointer_position(Window win, int *x, int *y);
+void get_pointer_position(Window win, int *root_x, int *root_y, int *win_x, int *win_y);
 void draw_point(WMDockApp *dock, int x, int y, char *color);
 void draw_line(WMDockApp *dock, int x1, int y1,
 	       int x2, int y2, char *color);
