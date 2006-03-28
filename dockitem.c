@@ -15,15 +15,8 @@
 #include "ruby.h"
 
 #include "dockapp.h"
+#include "dockitem.h"
 #include "dockapp_utils.h"
-#define LED_TYPE_CIRCLE 1
-#define LED_TYPE_SQUARE 2
-
-#define LED_COLOR_GREEN  1
-#define LED_COLOR_RED    2
-#define LED_COLOR_YELLOW 3
-#define LED_COLOR_OFF    4
-
 
 void dockitem_hide_tooltips(WMDockApp *dock)
 {
@@ -47,13 +40,13 @@ void dockitem_hide_tooltips(WMDockApp *dock)
 
 void dockitem_show_tooltips(WMDockItem *item)
 {
-	int root_x, root_y;
+	int root_x, root_y, win_x, win_y;
 	WMDockApp *dock;
 	if (item->tip_text == NULL) {
 		return;
 	}
 	dock = item->dock;
-	get_pointer_position(dock->win, &root_x, &root_y);
+	get_pointer_position(dock->win, &root_x, &root_y, &win_x, &win_y);
 	if (item->win == 0) {
 		item->win = create_tooltip_window(dock);
 	}
@@ -61,7 +54,7 @@ void dockitem_show_tooltips(WMDockItem *item)
 			      item->tip_text);
 }
 
-VALUE dockitem_width(VALUE self, VALUE signal_type)
+VALUE dockitem_width(VALUE self)
 {
 	WMDockItem *item;
 
@@ -69,7 +62,7 @@ VALUE dockitem_width(VALUE self, VALUE signal_type)
 	return INT2FIX(item->width);
 }
 
-VALUE dockitem_height(VALUE self, VALUE signal_type)
+VALUE dockitem_height(VALUE self)
 {
 	WMDockItem *item;
 
@@ -270,18 +263,26 @@ static void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 /* argv[1]: x */
 /* argv[2]: y */
 /* argv[3]: text type(0 = normal, 1 = Yellow text) */
-static void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y,
-				   VALUE text, VALUE color)
+static void dockitem_drawLEDstring(int argc, VALUE *argv, VALUE self)
+//VALUE self, VALUE x, VALUE y,
+//				   VALUE text, VALUE color)
 {
+	VALUE x, y, text, vcolor;
 	WMDockApp *dock;
 	WMDockItem *dockitem;
 	char **lines;
-	int i, dest_x, dest_y;
+	int i, dest_x, dest_y, color;
+
+	if (rb_scan_args(argc, argv, "31", &x, &y, &text, &vcolor) == 3) {
+		color = 0;
+	} else {
+		Check_Type(vcolor, T_FIXNUM);
+		color = FIX2INT(vcolor);
+	}
 
 	Check_Type(text, T_STRING);
 	Check_Type(x, T_FIXNUM);
 	Check_Type(y, T_FIXNUM);
-	Check_Type(color, T_FIXNUM);
 
 	Data_Get_Struct(self, WMDockItem, dockitem);
 	dock = dockitem->dock;
@@ -296,7 +297,7 @@ static void dockitem_drawLEDstring(VALUE self, VALUE x, VALUE y,
 		if (strcmp("", lines[i]) == 0) {
 			break;
 		}
-		drawLEDString(dock, dest_x, dest_y, lines[i], FIX2INT(color));
+		drawLEDString(dock, dest_x, dest_y, lines[i], color);
 		dest_y += 10;
 	}
 	if (lines)
@@ -381,7 +382,7 @@ void dockitem_init(VALUE rb_DockApp)
 	rb_define_method(rb_DockItem, "draw_string", 
 			 RUBY_METHOD_FUNC(dockitem_drawstring), -1);
 	rb_define_method(rb_DockItem, "drawLEDstring", 
-			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), 4);
+			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), -1);
 	rb_define_method(rb_DockItem, "set_pixmap",
 			 RUBY_METHOD_FUNC(dockitem_set_pixmap), 1);
 	rb_define_method(rb_DockItem, "draw_point",
