@@ -7,7 +7,7 @@
 #include <X11/xpm.h>
 
 /* Defines */
-#define RUBY_DOCKAPP_VERSION "0.2.2"
+#define RUBY_DOCKAPP_VERSION "0.2.3"
 
 #define MAX_MOUSE_REGION (16)
 
@@ -86,6 +86,7 @@ typedef struct {
 	struct WMDockSignal *signal;
 	MOUSE_REGION2   mouse_region[MAX_MOUSE_REGION];
 	int mouse_region_index;
+/*	void            *focused_item;*/
 } WMDockApp;
 
 struct WMDockSignal {
