@@ -2,6 +2,8 @@
   $Id$
   
   Copyright (c) 2005 HINO Masayuki <masahino@tky3.3web.ne.jp>
+
+  TODO: まとめて、タイプで動作を分ける。
  */
 
 #include <stdlib.h>
@@ -23,13 +25,36 @@
 #define DOCKPOPUP_DOWN 0
 #define DOCKPOPUP_UP 1
 
+static int get_menu_index_led(WMDockItem *popup)
+{
+	WMDockApp *dock;
+	int root_x, root_y, win_x, win_y;
+	
+	dock = popup->dock;
+	get_pointer_position(dock->win, &root_x, &root_y, &win_x, &win_y);
+
+#ifdef DEBUG
+	printf ("x = %d, y = %d\n", root_x, root_y);
+	printf ("px = %d, py = %d\n", popup->x, popup->y);
+	printf ("w = %d, h = %d\n", popup->width, popup->height);
+#endif
+	if (root_x < popup->x || root_x > popup->x + popup->width ||
+	    root_y < popup->y || root_y > popup->y + popup->height) {
+		return Qnil;
+	}
+#ifdef DEBUG
+	printf ("index = %d\n", (root_y-popup->y)/(LEDCHAR_HEIGHT+1));
+#endif
+	return INT2FIX((root_y-popup->y)/(LEDCHAR_HEIGHT+1));
+}
+
 static int get_menu_index(WMDockItem *popup)
 {
 	WMDockApp *dock;
-	int root_x, root_y;
+	int root_x, root_y, win_x, win_y;
 	
 	dock = popup->dock;
-	get_pointer_position(dock->win, &root_x, &root_y);
+	get_pointer_position(dock->win, &root_x, &root_y, &win_x, &win_y);
 
 #ifdef DEBUG
 	printf ("x = %d, y = %d\n", root_x, root_y);
@@ -59,7 +84,7 @@ static void dockpopup_hide_menu(WMDockItem *popup)
 static void dockpopup_show_menu(WMDockItem *popup, int direction)
 {
 	WMDockApp *dock;
-	int root_x, root_y;
+	int root_x, root_y, win_x, win_y;
 	
 	dock = popup->dock;
 
@@ -71,7 +96,7 @@ static void dockpopup_show_menu(WMDockItem *popup, int direction)
 		popup->visible = DOCKITEM_VISIBLE;
 
 	}
-	get_pointer_position(dock->win, &root_x, &root_y);
+	get_pointer_position(dock->win, &root_x, &root_y, &win_x, &win_y);
 	popup->x = root_x - popup->width/2;
 	popup->y = root_y;
 	if (direction == DOCKPOPUP_UP) {
@@ -106,7 +131,7 @@ static void dockpopup_popup(int argc, VALUE *argv, VALUE self)
 			break;
 		}
 	} while (1);
-	index = get_menu_index(popup);
+	index = get_menu_index_led(popup);
 	dockpopup_hide_menu(popup);
 	
 	rb_funcall(rb_block_proc(), id_call, 1, index);
@@ -116,11 +141,11 @@ static VALUE dockpopup_get_index(VALUE self)
 {
 	WMDockItem *popup;
 	WMDockApp *dock;
-	int root_x, root_y;
+	int root_x, root_y, win_x, win_y;
 
 	Data_Get_Struct(self, WMDockItem, popup);
 	dock = popup->dock;
-	get_pointer_position(dock->win, &root_x, &root_y);
+	get_pointer_position(dock->win, &root_x, &root_y, &win_x, &win_y);
 
 #ifdef DEBUG
 	printf ("x = %d, y = %d\n", root_x, root_y);
@@ -137,7 +162,7 @@ static VALUE dockpopup_get_index(VALUE self)
 	return INT2FIX((root_y-popup->y)/(LEDCHAR_HEIGHT+1));
 }
 
-static void make_menu_image(WMDockItem *popup)
+static void make_menu_image_led(WMDockItem *popup)
 {
 	WMDockApp *dock;
 	int dest_x = 1;
@@ -194,6 +219,73 @@ static void make_menu_image(WMDockItem *popup)
 
 }
 
+static void make_menu_image(WMDockItem *popup)
+{
+	WMDockApp *dock;
+	int dest_x = 1;
+	int dest_y = 1;
+	int color = 0;
+	int max_width;
+	int max_width_index;
+	int row = 0;
+	int string_height;
+	XFontSetExtents *extent;
+	int i;
+	char **lines;
+
+	lines = strsplit(popup->text, "\n", 0);
+	
+	max_width = 0;
+	max_width_index = 0;
+	for (i = 0; lines[i] != NULL; i++) {
+#ifdef DEBUG
+		printf ("lines[%d] = \"%s\"\n", i, lines[i]);
+#endif
+		if (lines[i][0] == '\0') {
+			break;
+		}
+		if (max_width < strlen(lines[i])) {
+			max_width = strlen(lines[i]);
+			max_width_index = i;
+		}
+	}
+	if (i == 0) {
+		return;
+	}
+	row = i;
+	dock = popup->dock;
+
+	popup->width = XmbTextEscapement(dock->fontset,
+				   lines[max_width_index],max_width) + 3;
+	extent = XExtentsOfFontSet(dock->fontset);
+	string_height = extent->max_logical_extent.height + 2;
+	popup->height = row*string_height + 3;
+
+	XResizeWindow(dock->display, popup->win, 
+		      popup->width, popup->height);
+
+	if (popup->xpm_master != NULL) {
+		free(popup->xpm_master);
+	}
+	popup->xpm_master = init_pixmap_with_size(popup->width, popup->height);
+	GetXPM2(&(popup->xpm), popup->xpm_master);
+	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
+
+	draw_rect2(dock, popup->xpm, 0, 0, popup->width, popup->height, "#208120812081");
+//"#2081B2CAAEBA");
+	draw_rect2(dock, popup->xpm, 1, 1, popup->width-2, popup->height-2, "black");
+	for (i = 0; i < row; i++) {
+		printf("%s\n", TEXTCOLOR);
+		drawnString2(dock, popup->xpm, dest_x + 1,
+			    dest_y + (i+1) * string_height + 1, lines[i],
+			    TEXTCOLOR, BGCOLOR, 0, strlen(lines[i]));
+	}
+	if (lines) {
+		free(lines);
+	}
+
+}
+
 static void dockpopup_add_item2(VALUE self, VALUE text)
 {
 	WMDockItem *popup;
@@ -221,6 +313,44 @@ static void dockpopup_add_item2(VALUE self, VALUE text)
 	}
 	Data_Get_Struct(self, WMDockItem, popup);
 
+	
+	if (popup->text == NULL || 
+	    strcmp(popup->text, str) != 0) {
+		if (popup->text != NULL) {
+			free(popup->text);
+		}
+		popup->text = strdup(str);
+		make_menu_image_led(popup);
+	}
+
+}
+
+static void dockpopuptext_add_item(VALUE self, VALUE text)
+{
+	WMDockItem *popup;
+	VALUE tmp;
+	int i, n;
+	char *str;
+
+	str = malloc(sizeof(char*)*MAX_LIST_LINE);
+	memset(str, 0, MAX_LIST_LINE);
+
+	Check_Type(text, T_ARRAY);
+
+	n = RARRAY(text)->len;
+#ifdef DEBUG
+	printf ("array size = %d\n", n);
+#endif
+	for (i = 0; i < n; i++) {
+		tmp = rb_ary_shift(text);
+		Check_Type(tmp, T_STRING);
+#ifdef DEBUG
+		printf ("%s\n", StringValuePtr(tmp));
+#endif
+		strcat(str, StringValuePtr(tmp));
+		strcat(str, "\n");
+	}
+	Data_Get_Struct(self, WMDockItem, popup);
 	
 	if (popup->text == NULL || 
 	    strcmp(popup->text, str) != 0) {
@@ -305,6 +435,7 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	VALUE width, height;
 	XSetWindowAttributes att;
 
+	/* TODO タイプを引数にとるように */
 	if (rb_scan_args(argc, argv, "20", &width, &height) == 2) {
 		;
 	} else {
@@ -425,7 +556,7 @@ void dockpopup_init(VALUE rb_DockApp)
 	rb_define_singleton_method(rb_DockPopUpText, "new",
 				   dockpopup_initialize, -1);
 	rb_define_method(rb_DockPopUpText, "add_item", 
-			 RUBY_METHOD_FUNC(dockpopup_add_item), 1);
+			 RUBY_METHOD_FUNC(dockpopuptext_add_item), 1);
 	rb_define_method(rb_DockPopUpText, "show",
 			 RUBY_METHOD_FUNC(dockpopup_show), -1);
 	rb_define_method(rb_DockPopUpText, "hide",

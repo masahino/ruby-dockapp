@@ -446,11 +446,11 @@ void drawnString2(WMDockApp *dock, XpmIcon wmgen,
         XSetBackground(dock->display, dock->NormalGC,
 		       GetColor(dock, bgcolorname));
 	if (dock->use_fontset) {
-		XmbDrawString(dock->display, dock->wmgen.pixmap,
+		XmbDrawString(dock->display, wmgen.pixmap,
 			      dock->fontset, dock->NormalGC,
 			      dest_x, dest_y, string, len);
 	} else {
-		XDrawString (dock->display, dock->wmgen.pixmap,
+		XDrawString (dock->display, wmgen.pixmap,
 			     dock->NormalGC, dest_x, dest_y, string, len);
 	}
 }

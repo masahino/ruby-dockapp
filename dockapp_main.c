@@ -44,24 +44,6 @@ int timer_id = 0;
 VALUE mDockApp;
 extern WMDockTimer *docktimer;
 
-/* from ruby-gnome2 */
-/*
-static void rbgobj_add_relative_removable(VALUE obj, VALUE relative, 
-					  ID obj_ivar_id, VALUE hash_key)
-{
-	VALUE hash = Qnil;
-
-	if (RTEST(rb_ivar_defined(obj, obj_ivar_id)))
-		hash = rb_ivar_get(obj, obj_ivar_id);
-
-	if (NIL_P(hash) || TYPE(hash) != T_HASH) {
-		hash = rb_hash_new();
-		rb_ivar_set(obj, obj_ivar_id, hash);
-	}
-	rb_hash_aset(hash, hash_key, relative);
-}
-*/
-
 static void sig_int()
 {
 	rb_raise(rb_eInterrupt, "");
@@ -599,10 +581,25 @@ static void dockapp_start(VALUE self)
 		XConvertSelection (display, XA_PRIMARY, XA_STRING, None,
 				   dock->win, CurrentTime);
 #endif
-		/* event */
+		/* X event */
 		while (XPending(display)) {
 			XNextEvent(display, &event);
 			event_dispatch(dock, event);
+		}
+
+		/*
+		  XのEventで拾うのではなく、
+		  マウスポインタの場所を調べてtooltips表示をコントロール
+		*/
+		if (0) {
+			/* check pointer position */
+			int root_x, root_y, win_x, win_y;
+			int s;
+			get_pointer_position(dock->iconwin, &root_x, &root_y, &win_x, &win_y);
+			s = CheckMouseRegion(dock, win_x, win_y);
+			if (s >= 0 && dock->mouse_region[s].item != NULL) {
+				dockitem_show_tooltips(dock->mouse_region[s].item);
+			}
 		}
 		usleep(10000); /* 10ms */
 	}

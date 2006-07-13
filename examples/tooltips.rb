@@ -1,4 +1,4 @@
-require './dockapp.so'
+require '../dockapp.so'
 
 dock = DockApp.new("tooltips")
 dock.openwindow
