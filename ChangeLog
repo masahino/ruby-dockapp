@@ -1,3 +1,7 @@
+2006-07-15  HINO Masayuki  <masahino@tky3.3web.ne.jp>
+
+	* dockpopup.c: 2 byte character can be displayed. 
+
 2006-03-28  HINO Masayuki  <masahino@tky3.3web.ne.jp>
 
 	* dockapp_utils.c: change get_pointer position

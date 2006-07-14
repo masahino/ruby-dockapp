@@ -22,35 +22,15 @@
 #include "dockapp.h"
 #include "dockapp_utils.h"
 
-#define DOCKPOPUP_DOWN 0
-#define DOCKPOPUP_UP 1
-
-static int get_menu_index_led(WMDockItem *popup)
-{
-	WMDockApp *dock;
-	int root_x, root_y, win_x, win_y;
-	
-	dock = popup->dock;
-	get_pointer_position(dock->win, &root_x, &root_y, &win_x, &win_y);
-
-#ifdef DEBUG
-	printf ("x = %d, y = %d\n", root_x, root_y);
-	printf ("px = %d, py = %d\n", popup->x, popup->y);
-	printf ("w = %d, h = %d\n", popup->width, popup->height);
-#endif
-	if (root_x < popup->x || root_x > popup->x + popup->width ||
-	    root_y < popup->y || root_y > popup->y + popup->height) {
-		return Qnil;
-	}
-#ifdef DEBUG
-	printf ("index = %d\n", (root_y-popup->y)/(LEDCHAR_HEIGHT+1));
-#endif
-	return INT2FIX((root_y-popup->y)/(LEDCHAR_HEIGHT+1));
-}
+typedef enum {
+	DockPopUpDirection_Down,
+	DockPopUpDirection_Up,
+} DockPopUpDirection;
 
 static int get_menu_index(WMDockItem *popup)
 {
 	WMDockApp *dock;
+	WMDockPopUpOption *option;
 	int root_x, root_y, win_x, win_y;
 	
 	dock = popup->dock;
@@ -65,10 +45,8 @@ static int get_menu_index(WMDockItem *popup)
 	    root_y < popup->y || root_y > popup->y + popup->height) {
 		return Qnil;
 	}
-#ifdef DEBUG
-	printf ("index = %d\n", (root_y-popup->y)/(LEDCHAR_HEIGHT+1));
-#endif
-	return INT2FIX((root_y-popup->y)/(LEDCHAR_HEIGHT+1));
+	option = popup->option;
+	return INT2FIX(root_y-popup->y)/(option->row_height);
 }
 
 static void dockpopup_hide_menu(WMDockItem *popup)
@@ -99,7 +77,7 @@ static void dockpopup_show_menu(WMDockItem *popup, int direction)
 	get_pointer_position(dock->win, &root_x, &root_y, &win_x, &win_y);
 	popup->x = root_x - popup->width/2;
 	popup->y = root_y;
-	if (direction == DOCKPOPUP_UP) {
+	if (direction == DockPopUpDirection_Up) {
 		popup->y = root_y - popup->height;
 	}
 	XMoveWindow(display, popup->win, popup->x, popup->y);
@@ -115,7 +93,7 @@ static void dockpopup_popup(int argc, VALUE *argv, VALUE self)
 	int index;
 
 	if (rb_scan_args(argc, argv, "01", &vdirection) == 0) {
-		direction = DOCKPOPUP_DOWN;
+		direction = DockPopUpDirection_Down;
 	} else {
 		Check_Type(vdirection, T_FIXNUM);
 		direction = FIX2INT(vdirection);
@@ -131,7 +109,7 @@ static void dockpopup_popup(int argc, VALUE *argv, VALUE self)
 			break;
 		}
 	} while (1);
-	index = get_menu_index_led(popup);
+	index = get_menu_index(popup);
 	dockpopup_hide_menu(popup);
 	
 	rb_funcall(rb_block_proc(), id_call, 1, index);
@@ -162,81 +140,24 @@ static VALUE dockpopup_get_index(VALUE self)
 	return INT2FIX((root_y-popup->y)/(LEDCHAR_HEIGHT+1));
 }
 
-static void make_menu_image_led(WMDockItem *popup)
-{
-	WMDockApp *dock;
-	int dest_x = 1;
-	int dest_y = 1;
-	int color = 0;
-	int max_width;
-	int row = 0;
-	int i;
-	char **lines;
-
-	lines = strsplit(popup->text, "\n", 0);
-	
-	max_width = 0;
-	for (i = 0; lines[i] != NULL; i++) {
-#ifdef DEBUG
-		printf ("lines[%d] = \"%s\"\n", i, lines[i]);
-#endif
-		if (lines[i][0] == '\0') {
-			break;
-		}
-		if (max_width < strlen(lines[i])) {
-			max_width = strlen(lines[i]);
-		}
-	}
-	if (i == 0) {
-		return;
-	}
-	row = i;
-	dock = popup->dock;
-	popup->width = max_width*LEDCHAR_WIDTH + 3;
-	popup->height = row*(LEDCHAR_HEIGHT+1) + 3;
-	XResizeWindow(dock->display, popup->win, 
-		      popup->width, popup->height);
-
-	if (popup->xpm_master != NULL) {
-		free(popup->xpm_master);
-	}
-	popup->xpm_master = init_pixmap_with_size(popup->width, popup->height);
-	GetXPM2(&(popup->xpm), popup->xpm_master);
-	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
-
-	draw_rect2(dock, popup->xpm, 0, 0, popup->width, popup->height, "#208120812081");
-//"#2081B2CAAEBA");
-	draw_rect2(dock, popup->xpm, 1, 1, popup->width-2, popup->height-2, "black");
-	for (i = 0; i < row; i++) {
-		drawnLEDString2(dock, popup->xpm, dest_x + 1, 
-				dest_y + i * (LEDCHAR_HEIGHT+1) + 1, lines[i], 
-				max_width, 
-				color);
-	}
-	if (lines) {
-		free(lines);
-	}
-
-}
-
 static void make_menu_image(WMDockItem *popup)
 {
 	WMDockApp *dock;
+	WMDockPopUpOption *option;
 	int dest_x = 1;
 	int dest_y = 1;
 	int color = 0;
 	int max_width;
-	int max_width_index;
-	int row = 0;
-	int string_height;
+	int max_width_index = 0;
 	XFontSetExtents *extent;
+	int row = 0;
+	int string_height = 0;
 	int i;
 	char **lines;
 
 	lines = strsplit(popup->text, "\n", 0);
 	
 	max_width = 0;
-	max_width_index = 0;
 	for (i = 0; lines[i] != NULL; i++) {
 #ifdef DEBUG
 		printf ("lines[%d] = \"%s\"\n", i, lines[i]);
@@ -254,12 +175,28 @@ static void make_menu_image(WMDockItem *popup)
 	}
 	row = i;
 	dock = popup->dock;
+	option = popup->option;
+	switch (popup->type) {
+	case ItemType_PopUp_Led:
+		popup->width = max_width*LEDCHAR_WIDTH + 3;
+		popup->height = row*(LEDCHAR_HEIGHT+1) + 3;
+		option->row_height = LEDCHAR_HEIGHT+1;
+		break;
+	case ItemType_PopUp_Text:
+		popup->width = XmbTextEscapement(dock->fontset,
+						 lines[max_width_index],
+						 max_width) + 3;
+		extent = XExtentsOfFontSet(dock->fontset);
+		string_height = extent->max_logical_extent.height + 2;
+		popup->height = row*string_height + 3;
+		option->row_height = string_height;
+		break;
+	case ItemType_PopUp_Image:
+		break;
+	default:
+		break;
+	}
 
-	popup->width = XmbTextEscapement(dock->fontset,
-				   lines[max_width_index],max_width) + 3;
-	extent = XExtentsOfFontSet(dock->fontset);
-	string_height = extent->max_logical_extent.height + 2;
-	popup->height = row*string_height + 3;
 
 	XResizeWindow(dock->display, popup->win, 
 		      popup->width, popup->height);
@@ -275,10 +212,24 @@ static void make_menu_image(WMDockItem *popup)
 //"#2081B2CAAEBA");
 	draw_rect2(dock, popup->xpm, 1, 1, popup->width-2, popup->height-2, "black");
 	for (i = 0; i < row; i++) {
-		printf("%s\n", TEXTCOLOR);
+		printf ("type = %d\n", popup->type);
+	switch (popup->type) {
+	case ItemType_PopUp_Led:
+		drawnLEDString2(dock, popup->xpm, dest_x + 1, 
+				dest_y + i * (LEDCHAR_HEIGHT+1) + 1, lines[i], 
+				max_width, 
+				color);
+		break;
+	case ItemType_PopUp_Text:
 		drawnString2(dock, popup->xpm, dest_x + 1,
-			    dest_y + (i+1) * string_height + 1, lines[i],
+			    dest_y + (i+1) * string_height, lines[i],
 			    TEXTCOLOR, BGCOLOR, 0, strlen(lines[i]));
+		break;
+	case ItemType_PopUp_Image:
+		break;
+	default:
+		break;
+	}
 	}
 	if (lines) {
 		free(lines);
@@ -286,24 +237,30 @@ static void make_menu_image(WMDockItem *popup)
 
 }
 
-static void dockpopup_add_item2(VALUE self, VALUE text)
+static void dockpopup_add_item(VALUE self, VALUE item_list)
 {
 	WMDockItem *popup;
+	WMDockPopUpOption *option;
 	VALUE tmp;
 	int i, n;
 	char *str;
 
+	Data_Get_Struct(self, WMDockItem, popup);
 	str = malloc(sizeof(char*)*MAX_LIST_LINE);
 	memset(str, 0, MAX_LIST_LINE);
 
-	Check_Type(text, T_ARRAY);
+	Check_Type(item_list, T_ARRAY);
 
-	n = RARRAY(text)->len;
+	n = RARRAY(item_list)->len;
+	option = popup->option;
+	option->item_num = n;
+	/* TODO: 無理矢理、1つの文字列にしているので、 */
+	/*       配列のまま扱うようにする              */
 #ifdef DEBUG
 	printf ("array size = %d\n", n);
 #endif
 	for (i = 0; i < n; i++) {
-		tmp = rb_ary_shift(text);
+		tmp = rb_ary_shift(item_list);
 		Check_Type(tmp, T_STRING);
 #ifdef DEBUG
 		printf ("%s\n", StringValuePtr(tmp));
@@ -311,46 +268,7 @@ static void dockpopup_add_item2(VALUE self, VALUE text)
 		strcat(str, StringValuePtr(tmp));
 		strcat(str, "\n");
 	}
-	Data_Get_Struct(self, WMDockItem, popup);
 
-	
-	if (popup->text == NULL || 
-	    strcmp(popup->text, str) != 0) {
-		if (popup->text != NULL) {
-			free(popup->text);
-		}
-		popup->text = strdup(str);
-		make_menu_image_led(popup);
-	}
-
-}
-
-static void dockpopuptext_add_item(VALUE self, VALUE text)
-{
-	WMDockItem *popup;
-	VALUE tmp;
-	int i, n;
-	char *str;
-
-	str = malloc(sizeof(char*)*MAX_LIST_LINE);
-	memset(str, 0, MAX_LIST_LINE);
-
-	Check_Type(text, T_ARRAY);
-
-	n = RARRAY(text)->len;
-#ifdef DEBUG
-	printf ("array size = %d\n", n);
-#endif
-	for (i = 0; i < n; i++) {
-		tmp = rb_ary_shift(text);
-		Check_Type(tmp, T_STRING);
-#ifdef DEBUG
-		printf ("%s\n", StringValuePtr(tmp));
-#endif
-		strcat(str, StringValuePtr(tmp));
-		strcat(str, "\n");
-	}
-	Data_Get_Struct(self, WMDockItem, popup);
 	
 	if (popup->text == NULL || 
 	    strcmp(popup->text, str) != 0) {
@@ -361,24 +279,6 @@ static void dockpopuptext_add_item(VALUE self, VALUE text)
 		make_menu_image(popup);
 	}
 
-}
-
-static void dockpopup_add_item(VALUE self, VALUE text)
-{
-	WMDockItem *popup;
-
-	Check_Type(text, T_STRING);
-	Data_Get_Struct(self, WMDockItem, popup);
-
-	
-	if (popup->text == NULL || 
-	    strcmp(popup->text, StringValuePtr(text)) != 0) {
-		if (popup->text != NULL) {
-			free(popup->text);
-		}
-		popup->text = strdup(StringValuePtr(text));
-		make_menu_image(popup);
-	}
 }
 
 static VALUE dockpopup_width(VALUE self)
@@ -404,7 +304,7 @@ static void dockpopup_show(int argc, VALUE *argv, VALUE self)
 	int direction;
 
 	if (rb_scan_args(argc, argv, "21", &x, &y, &vdirection) == 2) {
-		direction = DOCKPOPUP_DOWN;
+		direction = DockPopUpDirection_Down;
 	} else {
 		Check_Type(vdirection, T_FIXNUM);
 		direction = FIX2INT(vdirection);
@@ -432,14 +332,16 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
 	WMDockItem *popup;
-	VALUE width, height;
+	WMDockPopUpOption *option;
+	VALUE width, height, vtype;
 	XSetWindowAttributes att;
+	int type;
 
 	/* TODO タイプを引数にとるように */
-	if (rb_scan_args(argc, argv, "20", &width, &height) == 2) {
-		;
+	if (rb_scan_args(argc, argv, "21", &width, &height, &vtype) == 2) {
+		type = ItemType_PopUp_Led;
 	} else {
-		;
+		type = FIX2INT(vtype);
 	}
 	Check_Type(width, T_FIXNUM);
 	Check_Type(height, T_FIXNUM);
@@ -453,7 +355,7 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	memset(popup, 0, sizeof(WMDockItem));
 	popup->width = FIX2INT(width);
 	popup->height = FIX2INT(height);
-	popup->type = TYPE_POPUP;
+	popup->type = type;
 
 	popup->win = XCreateSimpleWindow(display, Root, 
 					 0, 0,
@@ -471,8 +373,9 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 #endif
 	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
 
+	option = malloc(sizeof(WMDockPopUpOption));
+	popup->option = option;
 	obj = Data_Wrap_Struct(self, dockitem_mark, -1, popup);
-
 	
 	return obj;
 }
@@ -485,7 +388,7 @@ VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_data)
 
 	popup = malloc(sizeof(WMDockItem));
 	memset(popup, 0, sizeof(WMDockItem));
-	popup->type = TYPE_POPUP;
+	popup->type = ItemType_PopUp_Image;
 
 	if (TYPE(xpm_data) == T_STRING) {
 		/* TODO: xpm_file縺ｮ蟄伜惠遒ｺ隱阪＠縺ｦ縲∫┌縺代ｌ縺ｰraise) */
@@ -530,13 +433,12 @@ void dockpopup_init(VALUE rb_DockApp)
 {
 	VALUE rb_DockPopUp;
 	VALUE rb_DockPopUpImage;
-	VALUE rb_DockPopUpText;
 
 	rb_DockPopUp = rb_define_class_under(rb_DockApp, "PopUp", rb_cObject);
 	rb_define_singleton_method(rb_DockPopUp, "new",
 				   dockpopup_initialize, -1);
 	rb_define_method(rb_DockPopUp, "add_item", 
-			 RUBY_METHOD_FUNC(dockpopup_add_item2), 1);
+			 RUBY_METHOD_FUNC(dockpopup_add_item), 1);
 	rb_define_method(rb_DockPopUp, "show",
 			 RUBY_METHOD_FUNC(dockpopup_show), -1);
 	rb_define_method(rb_DockPopUp, "hide",
@@ -547,28 +449,14 @@ void dockpopup_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockpopup_get_index), 0);
 
 
-	rb_define_const(rb_DockPopUp, "DOWN", INT2FIX(DOCKPOPUP_DOWN));
-	rb_define_const(rb_DockPopUp, "UP", INT2FIX(DOCKPOPUP_UP));
+	rb_define_const(rb_DockPopUp, "DOWN", INT2FIX(DockPopUpDirection_Down));
+	rb_define_const(rb_DockPopUp, "UP", INT2FIX(DockPopUpDirection_Up));
 
 
-	/* PopUpText */
-	rb_DockPopUpText = rb_define_class_under(rb_DockApp, "PopUpText", rb_cObject);
-	rb_define_singleton_method(rb_DockPopUpText, "new",
-				   dockpopup_initialize, -1);
-	rb_define_method(rb_DockPopUpText, "add_item", 
-			 RUBY_METHOD_FUNC(dockpopuptext_add_item), 1);
-	rb_define_method(rb_DockPopUpText, "show",
-			 RUBY_METHOD_FUNC(dockpopup_show), -1);
-	rb_define_method(rb_DockPopUpText, "hide",
-			 RUBY_METHOD_FUNC(dockpopup_hide), 0);
-	rb_define_method(rb_DockPopUpText, "popup",
-			 RUBY_METHOD_FUNC(dockpopup_popup), -1);
-	rb_define_method(rb_DockPopUpText, "get_index",
-			 RUBY_METHOD_FUNC(dockpopup_get_index), 0);
+	rb_define_const(rb_DockPopUp, "Text", INT2FIX(ItemType_PopUp_Text));
+	rb_define_const(rb_DockPopUp, "Led", INT2FIX(ItemType_PopUp_Led));
+	rb_define_const(rb_DockPopUp, "Image", INT2FIX(ItemType_PopUp_Image));
 
-
-	rb_define_const(rb_DockPopUpText, "DOWN", INT2FIX(DOCKPOPUP_DOWN));
-	rb_define_const(rb_DockPopUpText, "UP", INT2FIX(DOCKPOPUP_UP));
 
 	/* PopUpImage */
 	rb_DockPopUpImage = rb_define_class_under(rb_DockApp, "PopUpImage",

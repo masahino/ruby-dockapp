@@ -32,7 +32,11 @@
 #define ITEMTYPE_RECTANGLE 0
 #define ITEMTYPE_CIRCLE 1
 
-#define TYPE_POPUP 10
+typedef enum {
+	ItemType_PopUp_Led,
+	ItemType_PopUp_Text,
+	ItemType_PopUp_Image,
+} ItemType;
 
 /* Typedefs */
 
@@ -119,7 +123,13 @@ typedef struct {
 	Window              win;
 	void                (*redraw_function)();
 	char                *tip_text;
+	void                *option;
 } WMDockItem;
+
+typedef struct {
+	int item_num;
+	int row_height;
+} WMDockPopUpOption;
 
 #if 0
 /* Mouse Regions */

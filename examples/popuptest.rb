@@ -8,7 +8,7 @@ class PopUpTest
     @dock.openwindow
     
     @popup1 = DockApp::PopUp.new(1, 1)
-    @popup2 = DockApp::PopUpText.new(1, 1)
+    @popup2 = DockApp::PopUp.new(1, 1, DockApp::PopUp::Text)
     @item1 = DockApp::Item.new(20, 12)
     @item2 = DockApp::Item.new(30, 12)
     @item3 = DockApp::Item.new(30, 12)
