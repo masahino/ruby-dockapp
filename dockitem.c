@@ -11,6 +11,9 @@
 #include <X11/Xlib.h>
 #include <X11/xpm.h>
 #include <X11/extensions/shape.h>
+#ifdef HAVE_IMLIB2_H
+#include <Imlib2.h>
+#endif
 
 #include "ruby.h"
 
@@ -203,6 +206,55 @@ static void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
 }
 
 
+#ifdef HAVE_IMLIB2_H
+static void dockitem_set_image(VALUE self, VALUE filename)
+{
+	WMDockApp *dock;
+	WMDockItem *dockitem;
+	Imlib_Image image;
+	Pixmap *mask;
+	Visual  *vis;
+
+	
+	Check_Type(filename, T_STRING);
+
+	Data_Get_Struct(self, WMDockItem, dockitem);
+	dock = dockitem->dock;
+	if (dock == NULL) {
+		return;
+	}
+         vis   = DefaultVisual(dock->display, DefaultScreen(dock->display));
+/*         depth = DefaultDepth(disp, DefaultScreen(disp));
+	   cm    = DefaultColormap(disp, DefaultScreen(disp));*/
+
+/*	depth = DefaultDepth(dock->display, DefaultScreen(dock->display));*/
+	imlib_context_set_display(dock->display);
+         imlib_context_set_visual(vis);
+/*         imlib_context_set_colormap(cm);
+ */
+         imlib_context_set_drawable(dock->win);
+
+	image = imlib_load_image(StringValuePtr(filename));
+
+	imlib_context_set_image(image);
+	imlib_render_pixmaps_for_whole_image_at_size(&(dockitem->xpm.pixmap),
+					     &(dockitem->xpm.mask),
+						     16, 16);
+/*	GetXPMfromFile(&(dockitem->xpm), StringValuePtr(filename));*/
+
+	XCopyArea(dock->display, 
+		  dockitem->xpm.pixmap,
+		  dock->wmgen.pixmap, 
+		  dock->NormalGC,
+		  0, 0, 16, 16,
+		  dockitem->x, dockitem->y);
+	RedrawWindow(dock);
+
+}
+
+
+#endif /* HAVE_IMLIB2_H */
+
 static void dockitem_set_pixmap(VALUE self, VALUE filename)
 {
 	WMDockApp *dock;
@@ -385,6 +437,10 @@ void dockitem_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockitem_drawLEDstring), -1);
 	rb_define_method(rb_DockItem, "set_pixmap",
 			 RUBY_METHOD_FUNC(dockitem_set_pixmap), 1);
+#ifdef HAVE_IMLIB2_H
+	rb_define_method(rb_DockItem, "set_image",
+			 RUBY_METHOD_FUNC(dockitem_set_image), 1);
+#endif /* HAVE_IMLIB2_H */
 	rb_define_method(rb_DockItem, "draw_point",
 			 RUBY_METHOD_FUNC(dockitem_draw_point), 3);
 	rb_define_method(rb_DockItem, "draw_line",
