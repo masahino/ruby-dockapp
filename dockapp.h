@@ -29,14 +29,24 @@
 
 #define DOCKITEM_INVISIBLE 0
 #define DOCKITEM_VISIBLE 1
-#define ITEMTYPE_RECTANGLE 0
-#define ITEMTYPE_CIRCLE 1
 
 typedef enum {
+	ItemType_Item,
+	ItemType_Text,
 	ItemType_PopUp_Led,
 	ItemType_PopUp_Text,
 	ItemType_PopUp_Image,
 } ItemType;
+
+typedef enum {
+	DockItemShape_Box,
+	DockItemShape_Circle,
+} DockItemShape;
+
+typedef enum {
+	DockItemStyle_Normal,
+	DockItemStyle_Button,
+} DockItemStyle;
 
 /* Typedefs */
 
@@ -108,28 +118,38 @@ struct WMDockEvent {
 typedef struct {
 	void                *next;
 	WMDockApp           *dock;
+	struct WMDockSignal *signal;
+	VALUE               callback; /* use signal */
+	void                (*redraw_function)();
+	XpmIcon             xpm;
+	Window              win;
+	char                **xpm_master; /* test */
 	char                *text; /* DockApp::Text */
 	int                 x;
 	int                 y;
 	int                 width;
 	int                 height;
-	VALUE               callback; /* use signal */
-	struct WMDockSignal *signal;
-/*	int                 index; */ /* unused */
 	int                 visible;
-	XpmIcon             xpm;
-	char                **xpm_master; /* test */
 	int                 type;
-	Window              win;
-	void                (*redraw_function)();
+	int                 shape; /* item option */
+	int                 style; /* item option */
 	char                *tip_text;
 	void                *option;
 } WMDockItem;
 
 typedef struct {
+	int shape;
+	int style;
+} WMDockItemOption;
+
+typedef struct {
 	int item_num;
 	int row_height;
 } WMDockPopUpOption;
+
+typedef struct {
+	char *text;
+} WMDockTextOption;
 
 #if 0
 /* Mouse Regions */
@@ -152,6 +172,8 @@ Window          Root;
 //GC              NormalGC;
 
 ID id_call;
+
+VALUE rb_DockItem;
 
 /* Function Prototypes */
 void docksignal_mark(struct WMDockSignal *signal);

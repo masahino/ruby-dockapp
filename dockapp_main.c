@@ -225,15 +225,21 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	dockitem->x = FIX2INT(x)+margin;
 	dockitem->y = FIX2INT(y)+margin;
 
-	if (dockitem->type != TYPE_POPUP) {
-		if (dockitem->type == ITEMTYPE_RECTANGLE) {
+	if (dockitem->type <= ItemType_Text) {
+		switch (dockitem->shape) {
+		case DockItemShape_Box:
 			set_pixmap(dock, dockitem->x, dockitem->y, 
 				   dockitem->x + dockitem->width,
 				   dockitem->y + dockitem->height);
-		} else {
+			break;
+		case DockItemShape_Circle:
 			set_pixmap_circle(dock, dockitem->x, dockitem->y, 
 					  dockitem->x + dockitem->width,
 					  dockitem->y + dockitem->height);
+			break;
+		default:
+			/* error */
+			break;
 		}
 	}
 	if (search_dockitem(dock, dockitem) == NULL) {
@@ -249,7 +255,7 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 		}
 		dockitem->next = NULL;
 	}
-	if (dockitem->type != TYPE_POPUP) {
+	if (dockitem->type < ItemType_PopUp_Led) {
 		dockitem->visible = DOCKITEM_VISIBLE;
 /*
 		AddMouseRegion(mouse_region_index,

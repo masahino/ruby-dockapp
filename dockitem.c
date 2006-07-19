@@ -21,6 +21,7 @@
 #include "dockitem.h"
 #include "dockapp_utils.h"
 
+
 void dockitem_hide_tooltips(WMDockApp *dock)
 {
 	WMDockItem *item;
@@ -396,17 +397,24 @@ void dockitem_settip(VALUE self, VALUE text)
 static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
-	VALUE width, height, rtype;
+	VALUE width, height, rshape, rstyle;
 	WMDockItem *item;
-	int type; 
+	int shape, style; 
 
-	if (rb_scan_args(argc, argv, "21", &width, &height, &rtype) == 2) {
-		type = ITEMTYPE_RECTANGLE;
+	if (rb_scan_args(argc, argv, "22",
+			 &width, &height, &rshape, &rstyle) == 2) {
+		shape = DockItemShape_Box;
+		style = DockItemStyle_Normal; 
 	} else {
-		if (strcmp(StringValuePtr(rtype), "circle") == 0) {
-			type = ITEMTYPE_CIRCLE;
+		if (rshape == rb_iv_get(self, "Circle")) {
+			shape = DockItemShape_Circle;
 		} else {
-			type = ITEMTYPE_RECTANGLE;
+			shape = DockItemShape_Box;
+		}
+		if (rstyle == rb_iv_get(self, "Button")) {
+			style = DockItemStyle_Button;
+		} else {
+			style = DockItemStyle_Normal;
 		}
 	}
 
@@ -419,15 +427,15 @@ static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 	item->text = NULL;
 	item->width = FIX2INT(width);
 	item->height = FIX2INT(height);
-	item->type = type;
+	item->type = ItemType_Item;
+	item->shape = shape;
+	item->style = style;
 	obj = Data_Wrap_Struct(self, dockitem_mark, -1, item);
 	return obj;
 }
 
 void dockitem_init(VALUE rb_DockApp)
 {
-	VALUE rb_DockItem;
-
 	rb_DockItem = rb_define_class_under(rb_DockApp, "Item", rb_cObject);
 	rb_define_singleton_method(rb_DockItem, "new",  dockitem_s_new, -1);
 
@@ -463,4 +471,7 @@ void dockitem_init(VALUE rb_DockApp)
 			 RUBY_METHOD_FUNC(dockitem_signal_connect), 1);
 	rb_define_method(rb_DockItem, "click_callback",
 			 RUBY_METHOD_FUNC(dockitem_callback), 0);
+
+	rb_define_const(rb_DockItem, "Button", INT2FIX(DockItemStyle_Button));
+	rb_define_const(rb_DockItem, "Circle", INT2FIX(DockItemShape_Circle));
 }

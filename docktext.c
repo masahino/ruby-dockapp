@@ -96,12 +96,15 @@ static VALUE docktext_s_new(int argc, VALUE *argv, VALUE self)
 	Check_Type(width, T_FIXNUM);
 	Check_Type(height, T_FIXNUM);
 	  
-	wmtext = malloc(sizeof(WMDockItem));
+	wmtext = ALLOC(WMDockItem);
 	memset(wmtext, 0, sizeof(WMDockItem));
 	wmtext->text = strdup(StringValuePtr(text));
 	wmtext->width = FIX2INT(width)*LEDCHAR_WIDTH + LEDTEXT_MARGIN;
 	wmtext->height = FIX2INT(height)*LEDCHAR_HEIGHT + LEDTEXT_MARGIN;
 	wmtext->redraw_function = &redraw_docktext;
+	wmtext->type = ItemType_Text;
+	wmtext->shape = DockItemShape_Box;
+	wmtext->style = DockItemStyle_Normal;
 	obj = Data_Wrap_Struct(self, dockitem_mark, -1, wmtext);
 
 	set_text(wmtext, wmtext->text, color);
@@ -113,15 +116,8 @@ void docktext_init(VALUE rb_DockApp)
 {
 	VALUE rb_DockText;
 
-	rb_DockText = rb_define_class_under(rb_DockApp, "Text", rb_cObject);
+	rb_DockText = rb_define_class_under(rb_DockApp, "Text", rb_DockItem);
 	rb_define_singleton_method(rb_DockText, "new", docktext_s_new, -1);
 	rb_define_method(rb_DockText, "set_text",
 			 RUBY_METHOD_FUNC(docktext_set_text), -1);
-	rb_define_method(rb_DockText, "click_callback",
-			 RUBY_METHOD_FUNC(dockitem_callback), 0);
-	rb_define_method(rb_DockText, "signal_connect", 
-			 RUBY_METHOD_FUNC(dockitem_signal_connect), 1);
-	rb_define_method(rb_DockText, "set_tip",
-			 RUBY_METHOD_FUNC(dockitem_settip), 1);
-
 }

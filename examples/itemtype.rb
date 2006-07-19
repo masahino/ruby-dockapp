@@ -2,7 +2,7 @@ require '../dockapp.so'
 
 dock = DockApp.new("itemtype")
 dock.openwindow
-item = DockApp::Item.new(25, 25, "circle")
+item = DockApp::Item.new(25, 25, DockApp::Item::Circle)
 box = DockApp::Item.new(30, 24)
 dock.add(0, 0, item)
 dock.add(25, 0, box)
