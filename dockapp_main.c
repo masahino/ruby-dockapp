@@ -225,12 +225,25 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	dockitem->x = FIX2INT(x)+margin;
 	dockitem->y = FIX2INT(y)+margin;
 
+	printf ("style = %d\n", dockitem->style);
 	if (dockitem->type <= ItemType_Text) {
 		switch (dockitem->shape) {
 		case DockItemShape_Box:
-			set_pixmap(dock, dockitem->x, dockitem->y, 
-				   dockitem->x + dockitem->width,
-				   dockitem->y + dockitem->height);
+			switch (dockitem->style) {
+			case DockItemStyle_Normal:
+				set_pixmap(dock, dockitem->x, dockitem->y, 
+					   dockitem->x + dockitem->width,
+					   dockitem->y + dockitem->height);
+				break;
+			case DockItemStyle_Button:
+				set_pixmap_button(dock, dockitem->x, 
+						  dockitem->y, 
+						  dockitem->x + dockitem->width,
+						  dockitem->y + dockitem->height);
+				break;
+			default:
+				break;
+			}
 			break;
 		case DockItemShape_Circle:
 			set_pixmap_circle(dock, dockitem->x, dockitem->y, 

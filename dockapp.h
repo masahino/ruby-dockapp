@@ -140,6 +140,7 @@ typedef struct {
 typedef struct {
 	int shape;
 	int style;
+	char *bgcolor;
 } WMDockItemOption;
 
 typedef struct {

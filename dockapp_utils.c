@@ -762,13 +762,22 @@ void mask_window2(Window window, char **xpm_master, int width, int height)
 	free(mask_bits);
 }
 
+void mask_window3(Window window, Pixmap pixmask, int width, int height)
+{
+	XShapeCombineMask(display, Root, ShapeBounding,
+			  0, 0, pixmask, ShapeSet);
+	XShapeCombineMask(display, window, 
+			  ShapeBounding, 0, 0, pixmask, ShapeSet);
+
+}
+
 void set_pixmap_circle(WMDockApp *dock, int x1, int y1, int x2, int y2)
 {
 	int i, j, x, y;
 	int width = 64;
 	int height = 64;
 //	int margin = 4;
-	int colors = 5;
+	int colors = 6;
 	int base = colors + 1;
 	int radius, radius2;
 	int r, a;
@@ -850,7 +859,7 @@ void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2)
 	int width = 64;
 	int height = 64;
 	int margin = 4;
-	int colors = 5;
+	int colors = 6;
 	int base = colors + 1;
 
 #ifdef DEBUG
@@ -862,7 +871,7 @@ void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2)
 /*
                 x1      x2
 		+++++++++  y1
-		+       @
+		+.......@
 		@@@@@@@@@  y2
 */
 /* あふれた場合の処理を追加しないとヤバい */
@@ -913,19 +922,104 @@ void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2)
 #endif /* DEBUG */
 }
 
+void set_pixmap_button(WMDockApp *dock, int x1, int y1, int x2, int y2)
+{
+	int i;
+	int width = 64;
+	int height = 64;
+	int margin = 4;
+	int colors = 6;
+	int base = colors + 1;
+
+#ifdef DEBUG
+	printf ("x1 = %d, y1 = %d, x2 = %d, y2 = %d\n", 
+		x1, y1, x2, y2);
+#endif /* DEBUG */
+
+	for (i = base + margin; i < height + base - margin; i++) {
+/*
+               x1        x2
+               ........... y1
+	       .@@@@@@@@+@ 
+	       .@*******+@
+               .@*******+@
+	       .+++++++++@  
+               @@@@@@@@@@@ y2
+*/
+/* あふれた場合の処理を追加しないとヤバい */
+		if ((i - base) == y1) {
+			memset(dock->xpm_master[i] + x1,
+			       '.', x2 - x1);
+		}
+		if ((i - base) == y1+1) {
+			int j;
+			memset(dock->xpm_master[i] + x1,'.', 1);
+			for (j = x1+1; j < x2; j++) {
+				if (dock->xpm_master[i][j] == ' ') {
+					dock->xpm_master[i][j] = '@';
+					if (j == x2-2) {
+						dock->xpm_master[i][j] = '+';
+					}
+					if (j == x2-1) {
+						dock->xpm_master[i][j] = '@';
+					}
+				}
+				if (j > width) {
+					break;
+				}
+			}
+		} else if (y1+1 < (i - base) && (i - base) < y2-1) {
+			dock->xpm_master[i][x1] = '.';
+			if (dock->xpm_master[i][x1+1] == ' ') {
+				dock->xpm_master[i][x1+1] = '@';
+			} else if (dock->xpm_master[i][x1+1] == '+') {
+				dock->xpm_master[i][x1+1] = '*';
+			}				
+/*			memset(dock->xpm_master[i] + margin + x1, '+', 1);*/
+			memset(dock->xpm_master[i] + x1 + 2,
+			       '*', x2 - x1 - 2);
+			memset(dock->xpm_master[i] + x2 - 2, '+', 1);
+			memset(dock->xpm_master[i] + x2 - 1, '@', 1);
+		} else if ((i - base) == y2-1) {
+			memset(dock->xpm_master[i] + x1 , '.', 1);
+			memset(dock->xpm_master[i] + x1+1,  '+',
+			       x2 - x1 -2);
+			memset(dock->xpm_master[i] + x2-1, '@', 1);
+		} else if ((i - base) == y2) {
+			memset(dock->xpm_master[i] + x1, '@',
+			       x2 - x1);
+		}
+			
+	}
+	GetXPM(dock, &dock->wmgen, dock->xpm_master);
+	mask_window(dock);
+//#ifdef DEBUG
+	{
+		int i, j;
+		for (i = 0; i < base + height; i++) {
+			for (j = 0; j < width; j++) {
+				printf ("%c", dock->xpm_master[i][j]);
+//			printf ("%02d\"%s\"\n", i, dock->xpm_master[i]);
+			}
+			printf ("\n");
+		}
+	}
+//#endif /* DEBUG */
+}
+
 void init_pixmap(WMDockApp *dock)
 {
-	char **ret = malloc(sizeof(char *) * (64+6) +sizeof(void *));
+	char **ret = malloc(sizeof(char *) * (64+7) +sizeof(void *));
 	int i;
 	int width = 64;
 	int height = 64;
 /*	int margin = 4;*/
-	int colors = 5;
+	int colors = 6;
 	int base = colors + 1;
 	const char *background = "#202020";     /* background gray */
 
 	ret[0] = malloc(30);
-	sprintf(ret[0], "%d %d %d %d", 64, 64, 5, 1);
+	sprintf(ret[0], "%d %d %d %d", 64, 64, colors, 1);
 	ret[1] = (char *) " \tc #0000FF";	/* no color */
 	ret[2] = (char *) ".\tc #202020";	/* background gray */
 	ret[2] = malloc(30);
@@ -933,6 +1027,7 @@ void init_pixmap(WMDockApp *dock)
 	ret[3] = (char *) "+\tc #000000";	/* shadowed */
 	ret[4] = (char *) "@\tc #C7C3C7";	/* highlight */
 	ret[5] = (char *) ":\tc #004941";	/* led off */
+	ret[6] = (char *) "*\tc #AEAAAE";       /* button */
 	for (i = base; i < base + height; i++) {
 		ret[i] = malloc(width);
 		memset(ret[i], ' ', width);

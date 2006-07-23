@@ -208,7 +208,9 @@ static void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
 
 
 #ifdef HAVE_IMLIB2_H
-static void dockitem_set_image(VALUE self, VALUE filename)
+static void dockitem_set_image_at_size(VALUE self, VALUE filename,
+				       VALUE x, VALUE y,
+				       VALUE width, VALUE height)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
@@ -216,8 +218,11 @@ static void dockitem_set_image(VALUE self, VALUE filename)
 	Pixmap *mask;
 	Visual  *vis;
 
-	
 	Check_Type(filename, T_STRING);
+	Check_Type(x, T_FIXNUM);
+	Check_Type(y, T_FIXNUM);
+	Check_Type(width, T_FIXNUM);
+	Check_Type(height, T_FIXNUM);
 
 	Data_Get_Struct(self, WMDockItem, dockitem);
 	dock = dockitem->dock;
@@ -233,15 +238,17 @@ static void dockitem_set_image(VALUE self, VALUE filename)
          imlib_context_set_visual(vis);
 /*         imlib_context_set_colormap(cm);
  */
-         imlib_context_set_drawable(dock->win);
+
+//         imlib_context_set_drawable(dock->win);
+         imlib_context_set_drawable(dock->wmgen.pixmap);
 
 	image = imlib_load_image(StringValuePtr(filename));
 
 	imlib_context_set_image(image);
+/*
 	imlib_render_pixmaps_for_whole_image_at_size(&(dockitem->xpm.pixmap),
 					     &(dockitem->xpm.mask),
 						     16, 16);
-/*	GetXPMfromFile(&(dockitem->xpm), StringValuePtr(filename));*/
 
 	XCopyArea(dock->display, 
 		  dockitem->xpm.pixmap,
@@ -249,7 +256,18 @@ static void dockitem_set_image(VALUE self, VALUE filename)
 		  dock->NormalGC,
 		  0, 0, 16, 16,
 		  dockitem->x, dockitem->y);
+*/
+	imlib_render_image_on_drawable_at_size(dockitem->x+2+FIX2INT(x),
+					       dockitem->y+2+FIX2INT(y),
+					       FIX2INT(width), 
+					       FIX2INT(height));
+
 	RedrawWindow(dock);
+
+}
+
+static void dockitem_set_image(VALUE self, VALUE filename)
+{
 
 }
 
@@ -360,11 +378,13 @@ static void dockitem_drawLEDstring(int argc, VALUE *argv, VALUE self)
 static void dockitem_clear(VALUE self)
 {
 	WMDockItem *item;
+	WMDockItemOption *option;
 
 	Data_Get_Struct(self, WMDockItem, item);
 
+	option = item->option;
 	eraseRect(item->dock, item->x, item->y, item->x + item->width-1,
-		  item->y + item->height, BGCOLOR);
+		  item->y + item->height, option->bgcolor);
 	
 }
 
@@ -399,6 +419,7 @@ static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 	VALUE obj;
 	VALUE width, height, rshape, rstyle;
 	WMDockItem *item;
+	WMDockItemOption *option;
 	int shape, style; 
 
 	if (rb_scan_args(argc, argv, "22",
@@ -413,11 +434,11 @@ static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 		}
 		if (rstyle == rb_iv_get(self, "Button")) {
 			style = DockItemStyle_Button;
+	printf ("style = %d\n", style);
 		} else {
 			style = DockItemStyle_Normal;
 		}
 	}
-
 	Check_Type(width, T_FIXNUM);
 	Check_Type(height, T_FIXNUM);
 	
@@ -430,6 +451,14 @@ static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 	item->type = ItemType_Item;
 	item->shape = shape;
 	item->style = style;
+	
+	option = ALLOC(WMDockItemOption);
+	if (item->style == DockItemStyle_Button) {
+		option->bgcolor = strdup("#AEAAAE");
+	} else {
+		option->bgcolor = strdup(BGCOLOR);
+	}	
+	item->option = option;
 	obj = Data_Wrap_Struct(self, dockitem_mark, -1, item);
 	return obj;
 }
@@ -446,8 +475,8 @@ void dockitem_init(VALUE rb_DockApp)
 	rb_define_method(rb_DockItem, "set_pixmap",
 			 RUBY_METHOD_FUNC(dockitem_set_pixmap), 1);
 #ifdef HAVE_IMLIB2_H
-	rb_define_method(rb_DockItem, "set_image",
-			 RUBY_METHOD_FUNC(dockitem_set_image), 1);
+	rb_define_method(rb_DockItem, "set_image_at_size",
+			 RUBY_METHOD_FUNC(dockitem_set_image_at_size), 5);
 #endif /* HAVE_IMLIB2_H */
 	rb_define_method(rb_DockItem, "draw_point",
 			 RUBY_METHOD_FUNC(dockitem_draw_point), 3);
@@ -474,4 +503,5 @@ void dockitem_init(VALUE rb_DockApp)
 
 	rb_define_const(rb_DockItem, "Button", INT2FIX(DockItemStyle_Button));
 	rb_define_const(rb_DockItem, "Circle", INT2FIX(DockItemShape_Circle));
+	rb_define_const(rb_DockItem, "Box", INT2FIX(DockItemShape_Box));
 }
