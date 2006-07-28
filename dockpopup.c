@@ -21,6 +21,8 @@
 
 #include "dockapp.h"
 #include "dockapp_utils.h"
+#include "dockapp_draw.h"
+#include "dockapp_event.h"
 
 typedef enum {
 	DockPopUpDirection_Down,
@@ -197,14 +199,13 @@ static void make_menu_image(WMDockItem *popup)
 		break;
 	}
 
-
 	XResizeWindow(dock->display, popup->win, 
 		      popup->width, popup->height);
 
 	if (popup->xpm_master != NULL) {
 		free(popup->xpm_master);
 	}
-	popup->xpm_master = init_pixmap_with_size(popup->width, popup->height);
+	popup->xpm_master = init_pixmap_with_size_and_background(popup->width, popup->height, '.');
 	GetXPM2(&(popup->xpm), popup->xpm_master);
 	mask_window2(popup->win, popup->xpm_master, popup->width, popup->height);
 
@@ -212,7 +213,6 @@ static void make_menu_image(WMDockItem *popup)
 //"#2081B2CAAEBA");
 	draw_rect2(dock, popup->xpm, 1, 1, popup->width-2, popup->height-2, "black");
 	for (i = 0; i < row; i++) {
-		printf ("type = %d\n", popup->type);
 	switch (popup->type) {
 	case ItemType_PopUp_Led:
 		drawnLEDString2(dock, popup->xpm, dest_x + 1, 

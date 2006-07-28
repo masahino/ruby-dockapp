@@ -6,6 +6,8 @@
 #include <X11/Xutil.h>
 #include <X11/xpm.h>
 
+#include <ruby.h>
+
 /* Defines */
 #define RUBY_DOCKAPP_VERSION "0.2.3"
 

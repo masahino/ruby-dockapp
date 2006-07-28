@@ -1,3 +1,4 @@
+/* */
 /*	wmgeneral was taken from wmppp.
 
 	It has a lot of routines which most of the wm* programs use.
@@ -28,131 +29,7 @@
 
 #include "dockapp.h"
 #include "dockapp_utils.h"
-//#include "pixmap.h"
 
-/* Function Prototypes */
-
-void hide_tooltip_window(Display *display, Window win)
-{
-	XUnmapWindow(display, win);
-
-}
-
-Window create_tooltip_window(WMDockApp *dock)
-{
-	Window win;
-	XSetWindowAttributes att;
-	int padding;
-
-	padding = 2;
-
-	win = XCreateSimpleWindow(dock->display, dock->Root, 
-				  0, 0,
-				  1, 1,
-				  1, BlackPixel(display, 0), 
-				  WhitePixel(display, 0));
-	XSetWindowBackground(dock->display, win, 
-		       GetColor(dock, "#ffffc0"));
-	XClearWindow(dock->display, win);
-	att.override_redirect=True;
-	XChangeWindowAttributes (dock->display, win,
-				 CWOverrideRedirect, &att);
-	return win;
-}
-
-void update_tooltip_window(WMDockApp *dock, Window win,
-			     int x, int y, char *text)
-{
-	int width, height;
-	XRectangle overall_ink, overall_logical;
-	int padding;
-
-	padding = 2;
-
-	XmbTextExtents(dock->fontset, text, strlen(text), &overall_ink, 
-		       &overall_logical);
-	width = overall_logical.width + padding*2;
-	height = overall_logical.height + padding*2;
-
-	XResizeWindow(dock->display, win, width, height);
-	if (x + width > DisplayWidth(dock->display, 0)) {
-		x = DisplayWidth(dock->display, 0) - width - 10;
-	}
-	if (y + height > DisplayHeight(dock->display, 0)) {
-		y = y - height - 16;
-	}
-
-	XMoveWindow(dock->display, win, x, y);
-
-        XSetForeground(dock->display, dock->NormalGC,
-		       GetColor(dock, "black"));
-        XSetBackground(dock->display, dock->NormalGC,
-		       GetColor(dock, "#ffffc0"));
-#ifdef DEBUG
-	printf ("%s\n", text);
-#endif /* DEBUG */
-	XMapWindow(dock->display, win);
-	XmbDrawString(dock->display, win,
-		      dock->fontset, dock->NormalGC,
-		      padding, height-padding*2, text, strlen(text));
-	XRaiseWindow(dock->display, win);
-}
-
-int get_Xsignal_type(char *signal_type)
-{
-	if (strcmp(signal_type, "button_press_event") == 0) {
-		return ButtonPress;
-	} else if (strcmp(signal_type, "button_release_event") == 0) {
-		return ButtonRelease;
-	} else if (strcmp(signal_type, "selection_notify_event") == 0) {
-		return SelectionNotify;
-	}
-	return -1;
-}
-
-int wait_Xevent(WMDockApp *dock, int event_type)
-{
-	XEvent	event;
-	Display *display;
-
-	display = dock->display;
-
-	while (XPending(display)) {
-		XNextEvent(display, &event);
-		if (event.type == event_type) {
-			return 0;
-		}
-		usleep(10000); /* 10ms */
-	}
-	return -1;
-}
-
-void draw_ledpoint(WMDockApp *dock, int x, int y, char *color)
-{
-	int src_x, src_y;
-	if (strcmp("green", color) == 0) {
-		src_x = 50;
-		src_y =  6;
-	} else if (strcmp("red", color) == 0) {
-		src_x = 56;
-		src_y =  1;
-	} else if (strcmp("yellow", color) == 0) {
-		src_x = 56;
-		src_y =  6;
-	} else if (strcmp("off", color) == 0) {
-		src_x = 50;
-		src_y =  1;
-	} else {
-		/* error */
-		return;
-	}
-	XCopyArea(dock->display, 
-		  dock->parts_pixmap.pixmap,
-		  dock->wmgen.pixmap, 
-		  dock->NormalGC,
-		  src_x, src_y, 4, 4, x, y); // off
-
-}
 
 void get_pointer_position(Window win, int *root_x, int *root_y, int *win_x, int *win_y)
 {
@@ -161,56 +38,6 @@ void get_pointer_position(Window win, int *root_x, int *root_y, int *win_x, int 
 	XQueryPointer(display, win, &dummy_root, &dummy_child,
 		      root_x, root_y,
 		      win_x, win_y, &mask);
-}
-
-
-void draw_point(WMDockApp *dock, int x, int y, char *color)
-{
-        XSetForeground(dock->display, dock->NormalGC, 
-		       GetColor(dock, color));
-	XDrawPoint(dock->display, dock->wmgen.pixmap,
-		   dock->NormalGC, x, y);
-	RedrawWindow(dock);
-}
-
-void draw_line(WMDockApp *dock, int x1, int y1,
-	       int x2, int y2, char *color)
-{
-        XSetForeground(dock->display, dock->NormalGC, 
-		       GetColor(dock, color));
-	XDrawLine(dock->display, dock->wmgen.pixmap,
-		   dock->NormalGC, x1, y1, x2, y2);
-	RedrawWindow(dock);
-}
-
-void draw_line2(WMDockApp *dock, XpmIcon wmgen, int x1, int y1, int x2, int y2,
-		char *color)
-{
-        XSetForeground(dock->display, dock->NormalGC, 
-		       GetColor(dock, color));
-	XDrawLine(dock->display, wmgen.pixmap,
-		   dock->NormalGC, x1, y1, x2, y2);
-	RedrawWindow(dock);
-}
-
-void draw_rect(WMDockApp *dock, int x, int y,
-	       int width, int height, char *color)
-{
-        XSetForeground(dock->display, dock->NormalGC, 
-		       GetColor(dock, color));
-	XFillRectangle(dock->display, dock->wmgen.pixmap,
-		       dock->NormalGC, x, y, width, height);
-	RedrawWindow(dock);
-}
-
-void draw_rect2(WMDockApp *dock, XpmIcon wmgen, int x, int y,
-	       int width, int height, char *color)
-{
-        XSetForeground(dock->display, dock->NormalGC, 
-		       GetColor(dock, color));
-	XFillRectangle(dock->display, wmgen.pixmap,
-		       dock->NormalGC, x, y, width, height);
-	RedrawWindow(dock);
 }
 
 /*****************************************************************************\
@@ -306,208 +133,6 @@ void eraseRect(WMDockApp *dock, int x, int y, int x2, int y2,
 		       dock->NormalGC, x, y, x2 - x, y2 - y);
 }
 
-void drawLEDString(WMDockApp *dock, int dest_x, int dest_y, 
-		   const char *string, int color)
-{
-	int len = strlen(string);
-	drawnLEDString(dock, dest_x, dest_y, string, len, color);
-}
-
-void drawnLEDString(WMDockApp *dock, int dest_x, int dest_y,
-		    const char *string, int len, int color)
-{
-	int src_x = 0;
-	int src_y = 0;
-	int i;
-	int color_offset = color * COLOR_OFFSET;
-	for (i = 0; i < len; i++) {
-		if (i >= len) {
-			XCopyArea(dock->display, 
-				  dock->text_pixmap.pixmap,
-				  dock->wmgen.pixmap, 
-				  dock->NormalGC,
-				  1, 27, 5, 9, dest_x, dest_y);
-		} else {
-			if (i > strlen(string)) {
-				src_x = 1;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (isdigit(string[i])) {
-				src_x = 1+(string[i]-'0')*6;
-				src_y = 0 + color_offset;
-			} else if (isalpha(string[i])) {
-			  if (isupper(string[i])) {
-				  src_x = 1+(string[i]-'A')*6;
-			  } else {
-				  src_x = 1+(string[i]-'a')*6;
-			  }
-				src_y = LEDTEXT_ALPHA_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (string[i] == ':') {
-				src_x = 1 + 6;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (string[i] == '.') {
-				src_x = 1 + 12;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (string[i] == '/') {
-				src_x = 1 + 18;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (string[i] == '%') {
-				src_x = 1 + 24;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else {
-				src_x = 1;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			}
-			
-			XCopyArea(dock->display, dock->text_pixmap.pixmap, 
-				  dock->wmgen.pixmap, dock->NormalGC,
-				  src_x,  src_y, 5, 9, dest_x, dest_y);
-		}
-		dest_x += 6;
-	}
-	RedrawWindow(dock);
-}
-
-void drawnLEDString2(WMDockApp *dock, XpmIcon wmgen, int dest_x, int dest_y,
-		    const char *string, int len, int color)
-{
-	int src_x = 0;
-	int src_y = 0;
-	int i;
-	int color_offset = color * COLOR_OFFSET;
-	for (i = 0; i < len; i++) {
-		if (i >= len) {
-			XCopyArea(dock->display, 
-				  dock->text_pixmap.pixmap,
-				  wmgen.pixmap, 
-				  dock->NormalGC,
-				  1, 27, 5, 9, dest_x, dest_y);
-		} else {
-			if (i > strlen(string)) {
-				src_x = 1;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (isdigit(string[i])) {
-				src_x = 1+(string[i]-'0')*6;
-				src_y = 0 + color_offset;
-			} else if (isalpha(string[i])) {
-			  if (isupper(string[i])) {
-				  src_x = 1+(string[i]-'A')*6;
-			  } else {
-				  src_x = 1+(string[i]-'a')*6;
-			  }
-				src_y = LEDTEXT_ALPHA_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (string[i] == ':') {
-				src_x = 1 + 6;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (string[i] == '.') {
-				src_x = 1 + 12;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (string[i] == '/') {
-				src_x = 1 + 18;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else if (string[i] == '%') {
-				src_x = 1 + 24;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			} else {
-				src_x = 1;
-				src_y = LEDTEXT_SYMBOL_OFFSET*LEDCHAR_HEIGHT
-					+ color_offset;
-			}
-
-			XCopyArea(dock->display, dock->text_pixmap.pixmap, 
-				  wmgen.pixmap, dock->NormalGC,
-				  src_x, src_y, 5, 9, dest_x, dest_y);
-
-		}
-		dest_x += 6;
-	}
-	RedrawWindow2(dock->display, wmgen.pixmap, Root, dock->NormalGC, 64, 64);
-}
-
-void drawnString2(WMDockApp *dock, XpmIcon wmgen, 
-		  int dest_x, int dest_y, const char *string,
-		  char *colorname, char *bgcolorname,
-		  int right_justify, int len)
-{
-        XSetForeground(dock->display, dock->NormalGC,
-		       GetColor(dock, colorname));
-        XSetBackground(dock->display, dock->NormalGC,
-		       GetColor(dock, bgcolorname));
-	if (dock->use_fontset) {
-		XmbDrawString(dock->display, wmgen.pixmap,
-			      dock->fontset, dock->NormalGC,
-			      dest_x, dest_y, string, len);
-	} else {
-		XDrawString (dock->display, wmgen.pixmap,
-			     dock->NormalGC, dest_x, dest_y, string, len);
-	}
-}
-
-void drawnString(WMDockApp *dock, int dest_x, int dest_y, const char *string,
-                                char *colorname, char *bgcolorname,
-                                int right_justify, int len)
-{
-        XSetForeground(dock->display, dock->NormalGC,
-		       GetColor(dock, colorname));
-        XSetBackground(dock->display, dock->NormalGC,
-		       GetColor(dock, bgcolorname));
-/*
-        if (right_justify)
-                dest_x -= XTextWidth(f, string, len);
-*/
-	if (dock->use_fontset) {
-		XmbDrawString(dock->display, dock->wmgen.pixmap,
-			      dock->fontset, dock->NormalGC,
-			      dest_x, dest_y, string, len);
-	} else {
-		XDrawString (dock->display, dock->wmgen.pixmap,
-			     dock->NormalGC, dest_x, dest_y, string, len);
-	}
-}
-
-void drawString(WMDockApp *dock, int dest_x, int dest_y, const char *string,
-		char *colorname, char *bgcolorname,
-                                int right_justify)
-{
-
-        int len = strlen(string);
-	drawnString(dock, dest_x, dest_y, string, colorname, bgcolorname,
-		    right_justify, len);
-}
-
-
-
-#if 0
-void AddMouseRegion(int index, int left, int top, int right, int bottom, 
-		    WMDockItem *item)
-{
-#ifdef DEBUG
-	printf ("index = %d, left = %d, top = %d, right = %d, bottom = %d\n",
-		index, left, top, right, bottom);
-#endif /* DEBUG */
-	if (index < MAX_MOUSE_REGION) {
-		mouse_region[index].enable = 1;
-		mouse_region[index].top = top;
-		mouse_region[index].left = left;
-		mouse_region[index].bottom = bottom;
-		mouse_region[index].right = right;
-		mouse_region[index].item = item;
-	}
-}
-#endif
-
 void AddMouseRegion(WMDockApp *dock, int left, int top, int right, int bottom, 
 		    WMDockItem *item)
 {
@@ -526,23 +151,6 @@ void AddMouseRegion(WMDockApp *dock, int left, int top, int right, int bottom,
 	}
 }
 
-/*
-int CheckMouseRegion(int x, int y)
-{
-	int	i;
-	printf ("x = %d\ty = %d\n", x, y);
-	for (i=0; i< MAX_MOUSE_REGION; i++) {
-		printf ("i = %d\n", i);
-		if (mouse_region[i].enable &&
-			x <= mouse_region[i].right &&
-			x >= mouse_region[i].left &&
-			y <= mouse_region[i].bottom &&
-			y >= mouse_region[i].top)
-		     return i;
-	}
-	return -1;
-}
-*/
 int CheckMouseRegion(WMDockApp *dock, int x, int y)
 {
 	int	i;
@@ -563,19 +171,6 @@ int CheckMouseRegion(WMDockApp *dock, int x, int y)
 	}
 	return -1;
 }
-
-/*
-void copyXPMArea(int x, int y, int sx, int sy, int dx, int dy)
-{
-	XCopyArea(display, wmgen.pixmap, wmgen.pixmap, NormalGC, x, y, sx, sy, dx, dy);
-}
-
-void copyXBMArea(int x, int y, int sx, int sy, int dx, int dy)
-{
-	XCopyArea(display, wmgen.mask, wmgen.pixmap, NormalGC, x, y, sx, sy, dx, dy);
-}
-*/
-
 
 Pixel GetColor(WMDockApp *dock, char *name)
 {
@@ -890,17 +485,16 @@ void set_pixmap(WMDockApp *dock, int x1, int y1, int x2, int y2)
 					break;
 				}
 			}
-		} else if (y1 < (i - base) && (i - base) < y2) {
+		} else if (y1 < (i - base) && (i - base) < y2-1) {
 			if (dock->xpm_master[i][x1] == ' ') {
 				dock->xpm_master[i][x1] = '+';
 			} else if (dock->xpm_master[i][x1] == '@') {
 				dock->xpm_master[i][x1] = '.';
 			}				
-/*			memset(dock->xpm_master[i] + margin + x1, '+', 1);*/
 			memset(dock->xpm_master[i] + x1 + 1,
 			       '.', x2 - x1 - 2);
 			memset(dock->xpm_master[i] + x2 - 1, '@', 1);
-		} else if ((i - base) == y2) {
+		} else if ((i - base) == y2-1) {
 			memset(dock->xpm_master[i] + x1, '@',
 			       x2 - x1);
 		}
@@ -968,7 +562,7 @@ void set_pixmap_button(WMDockApp *dock, int x1, int y1, int x2, int y2)
 					break;
 				}
 			}
-		} else if (y1+1 < (i - base) && (i - base) < y2-1) {
+		} else if (y1+1 < (i - base) && (i - base) < y2-2) {
 			dock->xpm_master[i][x1] = '.';
 			if (dock->xpm_master[i][x1+1] == ' ') {
 				dock->xpm_master[i][x1+1] = '@';
@@ -980,12 +574,12 @@ void set_pixmap_button(WMDockApp *dock, int x1, int y1, int x2, int y2)
 			       '*', x2 - x1 - 2);
 			memset(dock->xpm_master[i] + x2 - 2, '+', 1);
 			memset(dock->xpm_master[i] + x2 - 1, '@', 1);
-		} else if ((i - base) == y2-1) {
+		} else if ((i - base) == y2-2) {
 			memset(dock->xpm_master[i] + x1 , '.', 1);
 			memset(dock->xpm_master[i] + x1+1,  '+',
 			       x2 - x1 -2);
 			memset(dock->xpm_master[i] + x2-1, '@', 1);
-		} else if ((i - base) == y2) {
+		} else if ((i - base) == y2-1) {
 			memset(dock->xpm_master[i] + x1, '@',
 			       x2 - x1);
 		}
@@ -993,7 +587,7 @@ void set_pixmap_button(WMDockApp *dock, int x1, int y1, int x2, int y2)
 	}
 	GetXPM(dock, &dock->wmgen, dock->xpm_master);
 	mask_window(dock);
-//#ifdef DEBUG
+#ifdef DEBUG
 	{
 		int i, j;
 		for (i = 0; i < base + height; i++) {
@@ -1004,10 +598,55 @@ void set_pixmap_button(WMDockApp *dock, int x1, int y1, int x2, int y2)
 			printf ("\n");
 		}
 	}
-//#endif /* DEBUG */
+#endif /* DEBUG */
+}
+
+char** init_pixmap_with_size_and_background(int width, int height,
+					    char background_char)
+{
+//	char **ret = malloc(sizeof(char *) * (64+6) +sizeof(void *));
+	char **ret;
+	int i;
+/*	int margin = 4;*/
+	int colors = 6;
+	int base = colors + 1;
+	const char *background = "#202020";     /* background gray */
+
+	ret = malloc(sizeof(char *) * (height+7) +sizeof(void *));
+	ret[0] = malloc(30);
+	sprintf(ret[0], "%d %d %d %d", width, height, 6, 1);
+//	ret[1] = (char *) " \tc #0000FF";	/* no color */
+	ret[1] = (char *) " \tc None";	/* no color */
+	ret[2] = (char *) ".\tc #202020";	/* background gray */
+	ret[2] = malloc(30);
+	sprintf(ret[2], ".\tc %s", background);
+	ret[3] = (char *) "+\tc #000000";	/* shadowed */
+	ret[4] = (char *) "@\tc #C7C3C7";	/* highlight */
+	ret[5] = (char *) ":\tc #004941";	/* led off */
+	ret[6] = (char *) "*\tc #AEAAAE";       /* button */
+	for (i = base; i < base + height; i++) {
+		ret[i] = malloc(width+1);
+		memset(ret[i], 0, width+1);
+
+		memset(ret[i], background_char, width);
+	}
+	ret[height + base] = NULL;/* not sure if this is necessary, it just
+				     seemed like a good idea  */
+	return ret;
+}
+
+
+char** init_pixmap_with_size(int width, int height)
+{
+	return init_pixmap_with_size_and_background(width, height, ' ');
 }
 
 void init_pixmap(WMDockApp *dock)
+{
+	dock->xpm_master = init_pixmap_with_size(64, 64);
+	
+}
+void _init_pixmap(WMDockApp *dock)
 {
 	char **ret = malloc(sizeof(char *) * (64+7) +sizeof(void *));
 	int i;
@@ -1048,36 +687,3 @@ void init_pixmap(WMDockApp *dock)
 	}
 #endif
 }
-
-char** init_pixmap_with_size(int width, int height)
-{
-//	char **ret = malloc(sizeof(char *) * (64+6) +sizeof(void *));
-	char **ret;
-	int i;
-/*	int margin = 4;*/
-	int colors = 5;
-	int base = colors + 1;
-	const char *background = "#202020";     /* background gray */
-
-	ret = malloc(sizeof(char *) * (height+6) +sizeof(void *));
-	ret[0] = malloc(30);
-	sprintf(ret[0], "%d %d %d %d", width, height, 5, 1);
-//	ret[1] = (char *) " \tc #0000FF";	/* no color */
-	ret[1] = (char *) " \tc None";	/* no color */
-	ret[2] = (char *) ".\tc #202020";	/* background gray */
-	ret[2] = malloc(30);
-	sprintf(ret[2], ".\tc %s", background);
-	ret[3] = (char *) "+\tc #000000";	/* shadowed */
-	ret[4] = (char *) "@\tc #C7C3C7";	/* highlight */
-	ret[5] = (char *) ":\tc #004941";	/* led off */
-	for (i = base; i < base + height; i++) {
-		ret[i] = malloc(width+1);
-		memset(ret[i], 0, width+1);
-
-		memset(ret[i], '.', width);
-	}
-	ret[height + base] = NULL;/* not sure if this is necessary, it just
-				     seemed like a good idea  */
-	return ret;
-}
-

@@ -12,7 +12,7 @@
 
 #include "dockapp.h"
 #include "dockapp_utils.h"
-//#include "pixmap.h"
+#include "dockapp_draw.h"
 
 
 static void set_text(WMDockItem *dockitem, char *text, int color)

@@ -35,6 +35,7 @@
 #include "dockapp.h"
 #include "dockapp_utils.h"
 #include "pixmap.h"
+#include "dockapp_event.h"
 
 int u1 = 0;
 int u2 = 0;
@@ -225,7 +226,6 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 	dockitem->x = FIX2INT(x)+margin;
 	dockitem->y = FIX2INT(y)+margin;
 
-	printf ("style = %d\n", dockitem->style);
 	if (dockitem->type <= ItemType_Text) {
 		switch (dockitem->shape) {
 		case DockItemShape_Box:

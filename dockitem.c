@@ -20,7 +20,9 @@
 #include "dockapp.h"
 #include "dockitem.h"
 #include "dockapp_utils.h"
-
+#include "dockapp_tooltips.h"
+#include "dockapp_event.h"
+#include "dockapp_draw.h"
 
 void dockitem_hide_tooltips(WMDockApp *dock)
 {
@@ -384,7 +386,7 @@ static void dockitem_clear(VALUE self)
 
 	option = item->option;
 	eraseRect(item->dock, item->x, item->y, item->x + item->width-1,
-		  item->y + item->height, option->bgcolor);
+		  item->y + item->height-1, option->bgcolor);
 	
 }
 
@@ -434,7 +436,6 @@ static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 		}
 		if (rstyle == rb_iv_get(self, "Button")) {
 			style = DockItemStyle_Button;
-	printf ("style = %d\n", style);
 		} else {
 			style = DockItemStyle_Normal;
 		}
