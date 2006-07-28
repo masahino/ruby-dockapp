@@ -113,7 +113,6 @@ static void dockpopup_popup(int argc, VALUE *argv, VALUE self)
 	} while (1);
 	index = get_menu_index(popup);
 	dockpopup_hide_menu(popup);
-	
 	rb_funcall(rb_block_proc(), id_call, 1, index);
 }
 
@@ -222,7 +221,7 @@ static void make_menu_image(WMDockItem *popup)
 		break;
 	case ItemType_PopUp_Text:
 		drawnString2(dock, popup->xpm, dest_x + 1,
-			    dest_y + (i+1) * string_height, lines[i],
+			    dest_y + (i+1) * string_height-2, lines[i],
 			    TEXTCOLOR, BGCOLOR, 0, strlen(lines[i]));
 		break;
 	case ItemType_PopUp_Image:

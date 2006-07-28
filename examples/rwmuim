@@ -487,50 +487,133 @@ class WmUIMHelper2 < UIMHelper
 end
 
 class WmUIMHelperIcon < WmUIMHelper
+  ButtonSize = 18
+  InputStateSize = 27
   def create_toolbar
     # 共通
     @dockapp = DockApp.new("WMUIM")
     @dockapp.openwindow
 
-    box_size = 24
-    @input_mode_item = DockApp::Item.new(box_size, box_size)
-    @input_method_item = DockApp::Item.new(box_size, box_size)
-    @im_item = DockApp::Item.new(box_size, box_size, DockApp::Item::Box,
-                                           DockApp::Item::Button)
-    @config_item = DockApp::Item.new(box_size, box_size, DockApp::Item::Box,
-                                           DockApp::Item::Button)
+    @input_mode_item = DockApp::Item.new(InputStateSize, InputStateSize,
+                                         DockApp::Item::Box,
+                                         DockApp::Item::Button)
+    @input_method_item = DockApp::Item.new(InputStateSize, InputStateSize,
+                                         DockApp::Item::Box,
+                                         DockApp::Item::Button)
+    @im_item = DockApp::Item.new(ButtonSize, ButtonSize, DockApp::Item::Box,
+                                 DockApp::Item::Button)
+    @config_item = DockApp::Item.new(ButtonSize, ButtonSize,
+                                     DockApp::Item::Box,
+                                     DockApp::Item::Button)
+    @im_item = DockApp::Item.new(ButtonSize, ButtonSize, DockApp::Item::Box,
+                                 DockApp::Item::Button)
+    @dict_item = DockApp::Item.new(ButtonSize, ButtonSize, DockApp::Item::Box,
+                                   DockApp::Item::Button)
 
-    #    @menu_popup = DockApp::PopUp.new(200, 200)
-    #    @im_popup = DockApp::PopUp.new(100, 100)
+    @im_popup = DockApp::PopUp.new(1, 1, DockApp::PopUp::Text)
+    @input_method_popup = DockApp::PopUp.new(1, 1, DockApp::PopUp::Text)
+    @input_mode_popup = DockApp::PopUp.new(1, 1, DockApp::PopUp::Text)
 
-    @dockapp.add( 2,  2, @input_mode_item)
-    @dockapp.add( 2, 29, @im_item)
-    @dockapp.add(30,  2, @input_method_item)
-    @dockapp.add(30, 29, @config_item)
+    @dockapp.add( 0,  4, @input_mode_item)
+    @dockapp.add(29,  4, @input_method_item)
+    @dockapp.add( 0, 37, @im_item)
+    @dockapp.add(19, 37, @config_item)
+    @dockapp.add(38, 37, @dict_item)
     @config_item.set_image_at_size(UIMIcon_dir+"/uim-icon.png", 0, 0,
-                                   20, 20)
-    #    @dockapp.add( 0,  0, @menu_popup)
-    #    @dockapp.add( 0,  0, @im_popup)
+                                   ButtonSize-4, ButtonSize-4)
+    @dict_item.set_image_at_size(UIMIcon_dir+"/uim-dict.png", 0, 0,
+                                   ButtonSize-4, ButtonSize-4)
+    @dockapp.add( 0,  0, @im_popup)
+    @dockapp.add( 0,  0, @input_method_popup)
+    @dockapp.add( 0,  0, @input_mode_popup)
 
     #    @menu_popup.add_item(["preference", "dictonary", "IM switch"])
     #    @menu_command = [$uim_pref, $uim_dict, $uim_im_switcher]
     #    set_timer
-    #    set_button_callback
+    set_button_callback
+  end
+
+  def set_button_callback
+    @input_method_item.signal_connect("button_press_event") do |event|
+      case event.button
+      when 1
+        @input_method_popup.popup() do |n|
+          pp n
+          if n != nil && n != false
+            @uim_helper.prop_activate(@input_method_list[n][:action_id])
+          end
+        end
+      else
+      end
+    end
+
+    @input_mode_item.signal_connect("button_press_event") do |event|
+      case event.button
+      when 1
+        @input_mode_popup.popup() do |n|
+          pp n
+          if n != nil && n != false
+            @uim_helper.prop_activate(@input_mode_list[n][:action_id])
+          end
+        end
+      else
+      end
+    end
+
+    @im_item.signal_connect("button_press_event") do |event|
+      case event.button
+      when 1
+        @im_popup.popup() do |n|
+          pp n
+          if n != nil && n != false
+            im = @im_list[n][:imname]
+            self.im_change(im)
+          end
+        end
+      else
+      end
+    end
+
   end
 
   def update_input_mode(input_mode_list, update)
-    pp update
-    @input_mode_item.draw_string(0, 20, update[:iconic_label])
+    icon_filename = UIMIcon_dir+"/"+update[:indication_id]+".png"
+    @input_mode_item.draw_rect(2, 2,
+                               InputStateSize-4, InputStateSize-4, "#AEAAAE")
+    @input_mode_item.set_image_at_size(icon_filename, 1, 1,
+                                       InputStateSize-6, InputStateSize-6)
+    @input_mode_item.set_tip(update[:label_string])
+    a = []
+    input_mode_list.each do |m|
+      a.push(m[:label_string])
+    end
+    @input_mode_popup.add_item(a)
   end
 
   def update_input_method(input_method_list, update)
-    @input_method_item.draw_string(2, 20, update[:iconic_label])
+    icon_filename = UIMIcon_dir+"/"+update[:indication_id]+".png"
+    @input_method_item.draw_rect(2, 2,
+                               InputStateSize-4, InputStateSize-4, "#AEAAAE")
+    @input_method_item.set_image_at_size(icon_filename, 1, 1,
+                                       InputStateSize-6, InputStateSize-6)
+    @input_method_item.set_tip(update[:label_string])
+    a = []
+    input_method_list.each do |m|
+      a.push(m[:label_string])
+    end
+    @input_method_popup.add_item(a)
   end
 
   def update_im(im_list, update)
     icon_filename = UIMIcon_dir+"/"+update[:imname]+".png"
-    @im_item.draw_rect(2, 2, 19, 19, "#AEAAAE")
-    @im_item.set_image_at_size(icon_filename, 0, 0, 19, 19)
+    @im_item.draw_rect(2, 2, ButtonSize-4, ButtonSize-4, "#AEAAAE")
+    @im_item.set_image_at_size(icon_filename, 0, 0, ButtonSize-4, ButtonSize-4)
+    @im_item.set_tip(update[:imshort_description])
+    im_a = []
+    im_list.each do |im|
+      im_a.push(im[:imname])
+    end
+    @im_popup.add_item(im_a)
   end
 end
 
@@ -542,6 +625,12 @@ opt.parse!(ARGV)
 
 puts style
 # オプションで表示方法を変える。
-#wmuim = WmUIMHelperIcon.new(ARGV)
-wmuim = WmUIMHelper2.new(ARGV)
+case style
+when 'icon'
+  wmuim = WmUIMHelperIcon.new(ARGV)
+when 'text'
+  wmuim = WmUIMHelper2.new(ARGV)
+else
+  wmuim = WmUIMHelper.new(ARGV)
+end  
 wmuim.start
