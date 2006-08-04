@@ -680,6 +680,16 @@ static VALUE dockapp_get_text_width(int argc, VALUE *argv, VALUE self)
 	return INT2FIX(offset);
 }
 
+static VALUE dockapp_width(VALUE self)
+{
+	return INT2FIX(64);
+}
+
+static VALUE dockapp_height(VALUE self)
+{
+	return INT2FIX(64);
+}
+
 void Init_dockapp(void) {
 	VALUE rb_DockApp;
 
@@ -714,6 +724,10 @@ void Init_dockapp(void) {
 	rb_define_method(rb_DockApp, "text_width",
 			 RUBY_METHOD_FUNC(dockapp_get_text_width),
 			 -1);
+        rb_define_method(rb_DockApp, "width",
+                         RUBY_METHOD_FUNC(dockapp_width), 0);
+        rb_define_method(rb_DockApp, "height",
+                         RUBY_METHOD_FUNC(dockapp_height), 0);
 
 	dockitem_init(rb_DockApp);
 	docktext_init(rb_DockApp);
