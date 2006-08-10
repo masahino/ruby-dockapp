@@ -43,7 +43,7 @@ end
 
 class UIMHelper
   UIMIcon_dir = '/usr/share/uim/pixmaps'
-  # $B6&DLItJ,(B
+  # ∂¶ƒÃ…Ù ¨
   def initialize(argv)
     @uim_helper = UIM::Helper.new
     @uim_helper.init_client
@@ -206,7 +206,7 @@ class UIMHelper
 end
 
 class WmUIMHelper < UIMHelper
-  # $B0J2<$O2hLL4X78(B
+  # ∞ ≤º§œ≤ËÃÃ¥ÿ∑∏
   def create_toolbar
     @dockapp = DockApp.new("WMUIM")
     @dockapp.openwindow
@@ -356,7 +356,7 @@ class WmUIMHelper < UIMHelper
 end
 
 class WmUIMHelper2 < UIMHelper
-  # $B0J2<$O2hLL4X78(B
+  # ∞ ≤º§œ≤ËÃÃ¥ÿ∑∏
   def create_toolbar
     @dockapp = DockApp.new("WMUIM")
     @dockapp.openwindow
@@ -490,7 +490,7 @@ class WmUIMHelperIcon < WmUIMHelper
   ButtonSize = 18
   InputStateSize = 27
   def create_toolbar
-    # $B6&DL(B
+    # ∂¶ƒÃ
     @dockapp = DockApp.new("WMUIM")
     @dockapp.openwindow
 
@@ -527,6 +527,8 @@ class WmUIMHelperIcon < WmUIMHelper
     @dockapp.add( 0,  0, @input_method_popup)
     @dockapp.add( 0,  0, @input_mode_popup)
 
+    @config_item.set_tip("¿ﬂƒÍ•ƒ°º•ÎµØ∆∞")
+    @dict_item.set_tip("º≠ΩÒ•ƒ°º•ÎµØ∆∞")
     #    @menu_popup.add_item(["preference", "dictonary", "IM switch"])
     #    @menu_command = [$uim_pref, $uim_dict, $uim_im_switcher]
     #    set_timer
@@ -624,7 +626,7 @@ opt.on('-s [normal|icon|text]') {|v| style = v}
 opt.parse!(ARGV)
 
 puts style
-# $B%*%W%7%g%s$GI=<(J}K!$rJQ$($k!#(B
+# •™•◊•∑•Á•Û§«…Ωº® ˝À°§Ú —§®§Î°£
 case style
 when 'icon'
   wmuim = WmUIMHelperIcon.new(ARGV)
