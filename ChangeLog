@@ -1,3 +1,7 @@
+2006-07-18  HINO Masayuki  <masahino@tky3.3web.ne.jp>
+
+	* add new method(DockItem::set_image_at_size).
+
 2006-07-15  HINO Masayuki  <masahino@tky3.3web.ne.jp>
 
 	* dockpopup.c: 2 byte character can be displayed. 
