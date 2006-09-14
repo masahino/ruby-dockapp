@@ -16,17 +16,17 @@
 
 	* dockitem.c: correct position of draw_led
 
-2005-12-10  HINO Masayuki  <masahino@x24.tky3.3web.ne.jp>
+2005-12-10  HINO Masayuki  <masahino@tky3.3web.ne.jp>
 
 	* release 0.2.2
 
-2005-12-10  HINO Masayuki  <masahino@x24.tky3.3web.ne.jp>
+2005-12-10  HINO Masayuki  <masahino@tky3.3web.ne.jp>
 
 	* examples/tooltips.rb: A example script os the tooltips window 
 
 	* dockapp_popup.c: hide tooltips window when popup menu is drawn
 
-2005-12-04  HINO Masayuki  <masahino@x24.tky3.3web.ne.jp>
+2005-12-04  HINO Masayuki  <masahino@tky3.3web.ne.jp>
 
 	* dockapp_main.c: add a new method DockApp.text_width
 
