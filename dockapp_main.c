@@ -30,7 +30,7 @@
 #include <X11/Xlocale.h>
 #include <X11/Xatom.h>
 
-#include "ruby.h"
+#include <ruby.h>
 
 #include "dockapp.h"
 #include "dockapp_utils.h"
