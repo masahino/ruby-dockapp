@@ -71,7 +71,7 @@ static void docktext_set_text(int argc, VALUE *argv, VALUE self)
 	Check_Type(text, T_STRING);
 
 	Data_Get_Struct(self, WMDockItem, dockitem);
-	set_text(dockitem, StringValuePtr(text), FIX2INT(color));
+	set_text(dockitem, StringValuePtr(text), color);
 	if (strcmp(dockitem->text, StringValuePtr(text)) != 0) {
 		free(dockitem->text);
 		dockitem->text = strdup(StringValuePtr(text));
