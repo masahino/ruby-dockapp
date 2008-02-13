@@ -170,13 +170,13 @@ int mouse_region_index;
 #endif
 
 #define MAX_LIST_LINE 64
-Display         *display;
-Window          Root;
+/*Display         *display;*/
+/*Window          Root;*/
 //GC              NormalGC;
 
-ID id_call;
+/*ID id_call;*/
 
-VALUE rb_DockItem;
+/*VALUE rb_DockItem;*/
 
 /* Function Prototypes */
 void docksignal_mark(struct WMDockSignal *signal);

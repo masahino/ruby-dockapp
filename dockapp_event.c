@@ -28,12 +28,12 @@ int get_Xsignal_type(char *signal_type)
 int wait_Xevent(WMDockApp *dock, int event_type)
 {
 	XEvent	event;
-	Display *display;
+	Display *d;
 
-	display = dock->display;
+	d = dock->display;
 
-	while (XPending(display)) {
-		XNextEvent(display, &event);
+	while (XPending(d)) {
+		XNextEvent(d, &event);
 		if (event.type == event_type) {
 			return 0;
 		}

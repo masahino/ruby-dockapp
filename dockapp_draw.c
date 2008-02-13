@@ -10,8 +10,6 @@
 #include <X11/xpm.h>
 #include <X11/extensions/shape.h>
 
-#include "ruby.h"
-
 #include "dockapp.h"
 #include "dockapp_utils.h"
 

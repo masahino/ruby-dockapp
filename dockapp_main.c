@@ -40,9 +40,14 @@
 int u1 = 0;
 int u2 = 0;
 
+Display         *display;
+Window Root;
+
+ID id_call;
 ID id_relative_callbacks;
 int timer_id = 0;
 VALUE mDockApp;
+VALUE rb_DockItem;
 extern WMDockTimer *docktimer;
 
 static void sig_int()

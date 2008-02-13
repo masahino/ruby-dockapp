@@ -31,8 +31,8 @@ Window create_tooltip_window(WMDockApp *dock)
 	win = XCreateSimpleWindow(dock->display, dock->Root, 
 				  0, 0,
 				  1, 1,
-				  1, BlackPixel(display, 0), 
-				  WhitePixel(display, 0));
+				  1, BlackPixel(dock->display, 0), 
+				  WhitePixel(dock->display, 0));
 	XSetWindowBackground(dock->display, win, 
 		       GetColor(dock, "#ffffc0"));
 	XClearWindow(dock->display, win);

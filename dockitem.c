@@ -24,6 +24,9 @@
 #include "dockapp_event.h"
 #include "dockapp_draw.h"
 
+extern VALUE rb_DockItem;
+
+
 void dockitem_hide_tooltips(WMDockApp *dock)
 {
 	WMDockItem *item;

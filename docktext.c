@@ -14,6 +14,8 @@
 #include "dockapp_utils.h"
 #include "dockapp_draw.h"
 
+extern VALUE rb_DockItem;
+
 
 static void set_text(WMDockItem *dockitem, char *text, int color)
 {

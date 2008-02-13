@@ -24,6 +24,10 @@
 #include "dockapp_draw.h"
 #include "dockapp_event.h"
 
+extern Display *display;
+extern Window Root;
+extern ID id_call;
+
 typedef enum {
 	DockPopUpDirection_Down,
 	DockPopUpDirection_Up,

@@ -30,6 +30,8 @@
 #include "dockapp.h"
 #include "dockapp_utils.h"
 
+extern Display *display;
+extern Window Root;
 
 void get_pointer_position(Window win, int *root_x, int *root_y, int *win_x, int *win_y)
 {
