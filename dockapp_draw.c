@@ -143,7 +143,9 @@ void drawnLEDString2(WMDockApp *dock, XpmIcon wmgen, int dest_x, int dest_y,
 		}
 		dest_x += 6;
 	}
-	RedrawWindow2(dock->display, wmgen.pixmap, Root, dock->NormalGC, 64, 64);
+	/*
+	RedrawWindow2(dock->display, wmgen.pixmap, dock->Root, dock->NormalGC, 64, 64);
+	*/
 	RedrawWindow(dock);
 }
 
