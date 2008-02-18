@@ -32,6 +32,7 @@ void new_timer(WMDockTimer *timer, int interval)
 	}
 	timer->interval.tv_usec = interval;
 	gettimeofday(&timer->next_time, NULL);
+	timeradd(&timer->next_time, &timer->interval, &timer->next_time);
 }
 
 void update_timer(WMDockTimer *timer)
@@ -40,9 +41,14 @@ void update_timer(WMDockTimer *timer)
 	if (timer->status == WMDOCKTIMER_STOP) {
 		return;
 	}
+	//	printf ("interval = %u\n", timer->interval.tv_sec);
+	//	printf ("next_time = %u\n", timer->next_time.tv_sec);
+
 	gettimeofday(&current, NULL);
+	//	printf ("current = %u\n", current.tv_sec);
 	if (timercmp(&current, &timer->next_time, >)) {
 		timeradd(&current, &timer->interval, &timer->next_time);
+		//		printf ("rb_funcall\n");
 		rb_funcall(timer->callback, id_call, 0);
 	}
 }

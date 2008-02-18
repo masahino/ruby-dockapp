@@ -33,6 +33,12 @@
 #define DOCKITEM_VISIBLE 1
 
 typedef enum {
+  DockAppStatusDestroy,
+  DockAppStatusOpen,
+  DockAppStatusRun,
+} DockAppStatus;
+
+typedef enum {
 	ItemType_Item,
 	ItemType_Text,
 	ItemType_PopUp_Led,
@@ -102,6 +108,7 @@ typedef struct {
 	struct WMDockSignal *signal;
 	MOUSE_REGION2   mouse_region[MAX_MOUSE_REGION];
 	int mouse_region_index;
+        int             status
 /*	void            *focused_item;*/
 } WMDockApp;
 
