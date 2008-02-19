@@ -33,143 +33,143 @@
 #define DOCKITEM_VISIBLE 1
 
 typedef enum {
-  DockAppStatusDestroy,
-  DockAppStatusOpen,
-  DockAppStatusRun,
+     DockAppStatusDestroy,
+     DockAppStatusOpen,
+     DockAppStatusRun,
 } DockAppStatus;
 
 typedef enum {
-	ItemType_Item,
-	ItemType_Text,
-	ItemType_PopUp_Led,
-	ItemType_PopUp_Text,
-	ItemType_PopUp_Image,
+     ItemType_Item,
+     ItemType_Text,
+     ItemType_PopUp_Led,
+     ItemType_PopUp_Text,
+     ItemType_PopUp_Image,
 } ItemType;
 
 typedef enum {
-	DockItemShape_Box,
-	DockItemShape_Circle,
+     DockItemShape_Box,
+     DockItemShape_Circle,
 } DockItemShape;
 
 typedef enum {
-	DockItemStyle_Normal,
-	DockItemStyle_Button,
+     DockItemStyle_Normal,
+     DockItemStyle_Button,
 } DockItemStyle;
 
 /* Typedefs */
 
 struct _rckeys {
-	const char	*label;
-	char		**var;
+     const char	*label;
+     char		**var;
 };
 
 /* Mouse Regions */
 typedef struct {
-	int	   enable;
-	int	   top;
-	int	   bottom;
-	int	   left;
-	int	   right;
-	void *item;
+     int	   enable;
+     int	   top;
+     int	   bottom;
+     int	   left;
+     int	   right;
+     void *item;
 } MOUSE_REGION2;
 
 
 typedef struct {
-	Pixmap		pixmap;
-	Pixmap		mask;
-	XpmAttributes	attributes;
+     Pixmap		pixmap;
+     Pixmap		mask;
+     XpmAttributes	attributes;
 } XpmIcon;
 
 /* Global variable */
 typedef struct {
-	void   *next;
-	VALUE  callback;
-	struct timeval interval;
-	struct timeval next_time;
-	int status;
+     void   *next;
+     VALUE  callback;
+     struct timeval interval;
+     struct timeval next_time;
+     int status;
 } WMDockTimer;
 
 typedef struct {
-	void            *item;
-	Display         *display;
-	Window          Root;
-	GC              NormalGC;
-	XpmIcon         wmgen;
-	XpmIcon         text_pixmap;
-	XpmIcon         parts_pixmap;
-	XFontSet        fontset;
-	Window		iconwin;
-	Window          win;
-	Pixmap		pixmask;
-	char            *wname;
-	char            **xpm_master;
-	WMDockTimer     *timer;
-	Bool            use_fontset;
-	struct WMDockSignal *signal;
-	MOUSE_REGION2   mouse_region[MAX_MOUSE_REGION];
-	int mouse_region_index;
-        int             status
+     void            *item;
+     Display         *display;
+     Window          Root;
+     GC              NormalGC;
+     XpmIcon         wmgen;
+     XpmIcon         text_pixmap;
+     XpmIcon         parts_pixmap;
+     XFontSet        fontset;
+     Window		iconwin;
+     Window          win;
+     Pixmap		pixmask;
+     char            *wname;
+     char            **xpm_master;
+     WMDockTimer     *timer;
+     Bool            use_fontset;
+     struct WMDockSignal *signal;
+     MOUSE_REGION2   mouse_region[MAX_MOUSE_REGION];
+     int mouse_region_index;
+     int             status;
 /*	void            *focused_item;*/
 } WMDockApp;
 
 struct WMDockSignal {
-	void *next;
-	int type;
-	XEvent event;
-	VALUE callback;
+     void *next;
+     int type;
+     XEvent event;
+     VALUE callback;
 };
 
 struct WMDockEvent {
-	XEvent event;
+     XEvent event;
 };
 
 
 typedef struct {
-	void                *next;
-	WMDockApp           *dock;
-	struct WMDockSignal *signal;
-	VALUE               callback; /* use signal */
-	void                (*redraw_function)();
-	XpmIcon             xpm;
-	Window              win;
-	char                **xpm_master; /* test */
-	char                *text; /* DockApp::Text */
-	int                 x;
-	int                 y;
-	int                 width;
-	int                 height;
-	int                 visible;
-	int                 type;
-	int                 shape; /* item option */
-	int                 style; /* item option */
-	char                *tip_text;
-	void                *option;
+     void                *next;
+     WMDockApp           *dock;
+     struct WMDockSignal *signal;
+     VALUE               callback; /* use signal */
+     void                (*redraw_function)();
+     XpmIcon             xpm;
+     Window              win;
+     char                **xpm_master; /* test */
+     char                *text; /* DockApp::Text */
+     int                 x;
+     int                 y;
+     int                 width;
+     int                 height;
+     int                 visible;
+     int                 type;
+     int                 shape; /* item option */
+     int                 style; /* item option */
+     char                *tip_text;
+     void                *option;
 } WMDockItem;
 
 typedef struct {
-	int shape;
-	int style;
-	char *bgcolor;
+     int shape;
+     int style;
+     char *bgcolor;
 } WMDockItemOption;
 
 typedef struct {
-	int item_num;
-	int row_height;
+     int item_num;
+     int row_height;
 } WMDockPopUpOption;
 
 typedef struct {
-	char *text;
+     char *text;
 } WMDockTextOption;
 
 #if 0
 /* Mouse Regions */
 typedef struct {
-	int	   enable;
-	int	   top;
-	int	   bottom;
-	int	   left;
-	int	   right;
-	WMDockItem *item;
+     int	   enable;
+     int	   top;
+     int	   bottom;
+     int	   left;
+     int	   right;
+     WMDockItem *item;
 } MOUSE_REGION;
 
 MOUSE_REGION	mouse_region[MAX_MOUSE_REGION];

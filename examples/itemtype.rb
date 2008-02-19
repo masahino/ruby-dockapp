@@ -12,7 +12,7 @@ mbtest = DockApp::Item.new(55, 16)
 
 dock.add(0, 40, mbtest)
 
-mbtest.draw_string(2, 12, "���Ϥ褦")
+mbtest.draw_string(2, 12, "おはよう")
 
 box.drawLEDstring(2, 2, "test", 0)
 box.draw_string(2, 20, "test", "red")

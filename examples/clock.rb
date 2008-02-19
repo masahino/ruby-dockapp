@@ -42,9 +42,6 @@ class DateAndTime
     @t1 = DockApp::Timer.new(100) do
       time_str = `date '+%H:%M:%S'`.chomp
       time.set_text(time_str)
-    end
-
-    @t2 = DockApp::Timer.new(60000) do
       w = `date '+%w'`.to_i
       week.set_text(day_of_week[w])
       date_str = `date '+%y/%m/%d'`.chomp
