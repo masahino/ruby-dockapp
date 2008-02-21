@@ -59,7 +59,7 @@ void dockitem_show_tooltips(WMDockItem *item)
 	if (item->win == 0) {
 		item->win = create_tooltip_window(dock);
 	}
-	update_tooltip_window(dock, item->win, root_x, root_y+16,
+	update_tooltip_window(dock, item->win, root_x, root_y + 16,
 			      item->tip_text);
 }
 

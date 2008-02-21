@@ -36,8 +36,8 @@ Window create_tooltip_window(WMDockApp *dock)
 	XSetWindowBackground(dock->display, win, 
 		       GetColor(dock, "#ffffc0"));
 	XClearWindow(dock->display, win);
-	att.override_redirect=True;
-	XChangeWindowAttributes (dock->display, win,
+	att.override_redirect = True;
+	XChangeWindowAttributes(dock->display, win,
 				 CWOverrideRedirect, &att);
 	return win;
 }
@@ -61,7 +61,7 @@ void update_tooltip_window(WMDockApp *dock, Window win,
 		x = DisplayWidth(dock->display, 0) - width - 10;
 	}
 	if (y + height > DisplayHeight(dock->display, 0)) {
-		y = y - height - 16;
+		y = y - height - 24;
 	}
 
 	XMoveWindow(dock->display, win, x, y);
