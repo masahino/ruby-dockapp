@@ -2,6 +2,8 @@
   $Id$
 */
 
+#include "extconf.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,7 +20,7 @@
 #include "ruby.h"
 
 #include "dockapp.h"
-#include "dockitem.h"
+#include "dockapp_item.h"
 #include "dockapp_utils.h"
 #include "dockapp_tooltips.h"
 #include "dockapp_event.h"
