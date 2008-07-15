@@ -13,8 +13,14 @@ require 'mkmf'
 have_header('Imlib2.h')
 find_library('Imlib2', 'imlib_context_new')
 
+have_header('wraster.h')
+find_library('wraster', 'RSupportedFileFormats')
+
+
+
 if have_header("X11/Xlib.h") and find_library('X11', 'XOpenDisplay', '/usr/X11R6/lib') and find_library('Xpm', 'XpmCreatePixmapFromData', '/usr/X11R6/lib')  and find_library('Xext', 'XShapeCombineMask', '/usr/X11R6/lib')
-	create_makefile('dockapp')
+  create_header()
+  create_makefile('dockapp')
 end
 
 
