@@ -20,6 +20,7 @@
 #include "ruby.h"
 
 #include "dockapp.h"
+#include "dockapp_item.h"
 #include "dockapp_utils.h"
 #include "dockapp_draw.h"
 #include "dockapp_event.h"
@@ -91,7 +92,12 @@ static void dockpopup_show_menu(WMDockItem *popup, int direction)
 		      dock->NormalGC, popup->width, popup->height);
 }
 
-static void dockpopup_popup(int argc, VALUE *argv, VALUE self)
+/*
+ * call-seq:
+ *   popup(direction = DockApp::PopUp::Down)
+ *
+ */
+static VALUE dockpopup_popup(int argc, VALUE *argv, VALUE self)
 {
 	WMDockItem *popup;
 	VALUE vdirection;
@@ -118,8 +124,14 @@ static void dockpopup_popup(int argc, VALUE *argv, VALUE self)
 	index = get_menu_index(popup);
 	dockpopup_hide_menu(popup);
 	rb_funcall(rb_block_proc(), id_call, 1, index);
+	return Qtrue;
 }
 
+/* 
+ * call-seq:
+ *   get_index
+ *
+ */
 static VALUE dockpopup_get_index(VALUE self)
 {
 	WMDockItem *popup;
@@ -240,7 +252,12 @@ static void make_menu_image(WMDockItem *popup)
 
 }
 
-static void dockpopup_add_item(VALUE self, VALUE item_list)
+/*
+ * call-seq:
+ *   add_item(item_list)
+ *
+ */
+static VALUE dockpopup_add_item(VALUE self, VALUE item_list)
 {
 	WMDockItem *popup;
 	WMDockPopUpOption *option;
@@ -284,6 +301,11 @@ static void dockpopup_add_item(VALUE self, VALUE item_list)
 
 }
 
+/*
+ * call-seq:
+ *   width
+ *
+ */
 static VALUE dockpopup_width(VALUE self)
 {
 	WMDockItem *popup;
@@ -292,6 +314,11 @@ static VALUE dockpopup_width(VALUE self)
 	return INT2FIX(popup->width);
 }
 
+/*
+ * call-seq:
+ *   height
+ *
+ */
 static VALUE dockpopup_height(VALUE self)
 {
 	WMDockItem *popup;
@@ -300,7 +327,12 @@ static VALUE dockpopup_height(VALUE self)
 	return INT2FIX(popup->height);
 }
 
-static void dockpopup_show(int argc, VALUE *argv, VALUE self)
+/*
+ * call-seq:
+ *   show(x, y, direction = DockApp::PopUp::Down)
+ *
+ */
+static VALUE dockpopup_show(int argc, VALUE *argv, VALUE self)
 {
 	WMDockItem *popup;
 	VALUE x, y, vdirection;
@@ -319,9 +351,15 @@ static void dockpopup_show(int argc, VALUE *argv, VALUE self)
 	Check_Type(y, T_FIXNUM);
 
 	dockpopup_show_menu(popup, direction);
+	return Qtrue;
 }
 
-static void dockpopup_hide(VALUE self)
+/*
+ * call-seq:
+ *   hide
+ *
+ */
+static VALUE dockpopup_hide(VALUE self)
 {
 	WMDockItem *popup;
 	Data_Get_Struct(self, WMDockItem, popup);
@@ -329,8 +367,11 @@ static void dockpopup_hide(VALUE self)
 	dockpopup_hide_menu(popup);
 }
 
-
-
+/*
+ * call-seq:
+ *   new(width, height, type = DockApp::PopUp::Led)
+ *
+ */
 VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
@@ -383,6 +424,11 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	return obj;
 }
 
+/*
+ * call-seq:
+ *   new(xpm_data)
+ *
+ */
 VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_data)
 {
 	VALUE obj;
@@ -437,6 +483,9 @@ void dockpopup_init(VALUE rb_DockApp)
 	VALUE rb_DockPopUp;
 	VALUE rb_DockPopUpImage;
 
+#if 0 /* RDoc */
+	rb_DockApp = rb_define_class("DockApp", rb_cObject);
+#endif
 	rb_DockPopUp = rb_define_class_under(rb_DockApp, "PopUp", rb_cObject);
 	rb_define_singleton_method(rb_DockPopUp, "new",
 				   dockpopup_initialize, -1);

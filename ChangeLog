@@ -1,5 +1,9 @@
 2008-07-17  HINO Masayuki  <masahino@gmail.com>
 
+	* dockapp_timer.c: added comments for RDoc
+
+	* dockapp_text.c, dockapp_popup.c: added comments for RDoc
+
 	* dockapp_event.c, dockapp_item.c, dockapp_main.c: add RDoc comments
 
 2008-07-15  HINO Masayuki  <masahino@gmail.com>

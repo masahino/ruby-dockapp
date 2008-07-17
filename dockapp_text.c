@@ -11,6 +11,7 @@
 #include "ruby.h"
 
 #include "dockapp.h"
+#include "dockapp_item.h"
 #include "dockapp_utils.h"
 #include "dockapp_draw.h"
 
@@ -58,7 +59,12 @@ void redraw_docktext(WMDockItem *dockitem)
 	set_text(dockitem, dockitem->text, COLOR_NORMAL);
 }
 
-static void docktext_set_text(int argc, VALUE *argv, VALUE self)
+/*
+ * call-seq:
+ *   set_text(text, color = 0)
+ *
+ */
+static VALUE docktext_set_text(int argc, VALUE *argv, VALUE self)
 {
 	WMDockItem *dockitem;
 	VALUE text, vcolor;
@@ -78,9 +84,14 @@ static void docktext_set_text(int argc, VALUE *argv, VALUE self)
 		free(dockitem->text);
 		dockitem->text = strdup(StringValuePtr(text));
 	}
+	return Qtrue;
 }
 
-
+/*
+ * call-seq:
+ *   new(text, width, height, color = 0)
+ *
+ */
 static VALUE docktext_s_new(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
@@ -118,6 +129,9 @@ void docktext_init(VALUE rb_DockApp)
 {
 	VALUE rb_DockText;
 
+#if 0 /* RDoc */
+	rb_DockApp = rb_define_class("DockApp", rb_cObject)
+#endif
 	rb_DockText = rb_define_class_under(rb_DockApp, "Text", rb_DockItem);
 	rb_define_singleton_method(rb_DockText, "new", docktext_s_new, -1);
 	rb_define_method(rb_DockText, "set_text",

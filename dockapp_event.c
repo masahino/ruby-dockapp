@@ -86,7 +86,8 @@ VALUE dockevent_y(VALUE self)
 }
 
 /*
- * new(xevent)
+ * call-seq:
+ *   new(xevent)
  *
  */
 VALUE dockevent_initialize(VALUE self, XEvent xevent)
