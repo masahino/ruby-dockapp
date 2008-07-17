@@ -27,10 +27,8 @@ end
 make = open("Makefile", "a")
 make.print <<-EOF
 
-rdoc: doc/index.html
-
-doc/index.html: dockapp-doc.rb
-\t@-(rdoc -c euc-jp dockapp-doc.rb)
+rdoc:
+\t@-(rdoc -dU *.c)
 
 EOF
 
