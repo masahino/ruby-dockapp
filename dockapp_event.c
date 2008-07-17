@@ -49,7 +49,11 @@ int wait_Xevent(WMDockApp *dock, int event_type)
 	return -1;
 }
 
-
+/*
+ * call-seq:
+ *   button
+ *
+ */
 VALUE dockevent_button(VALUE self)
 {
 	struct WMDockEvent *event;
@@ -57,6 +61,11 @@ VALUE dockevent_button(VALUE self)
 	return INT2FIX(event->event.xbutton.button);
 }
 
+/*
+ * call-seq:
+ *   x
+ *
+ */
 VALUE dockevent_x(VALUE self)
 {
 	struct WMDockEvent *event;
@@ -64,6 +73,11 @@ VALUE dockevent_x(VALUE self)
 	return INT2FIX(event->event.xbutton.x);
 }
 
+/* 
+ * call-seq:
+ *   y
+ *
+ */
 VALUE dockevent_y(VALUE self)
 {
 	struct WMDockEvent *event;
@@ -71,6 +85,10 @@ VALUE dockevent_y(VALUE self)
 	return INT2FIX(event->event.xbutton.y);
 }
 
+/*
+ * new(xevent)
+ *
+ */
 VALUE dockevent_initialize(VALUE self, XEvent xevent)
 {
 	VALUE obj;
@@ -87,6 +105,9 @@ VALUE dockevent_initialize(VALUE self, XEvent xevent)
 void dockevent_init(VALUE rb_DockApp)
 {
 
+#if 0 /* RDoc */
+     rb_DockApp = rb_define_class("DockApp", rb_cObject);
+#endif
 	rb_DockEvent = rb_define_class_under(rb_DockApp, "Event", rb_cObject);
 	rb_define_singleton_method(rb_DockEvent, "new", dockevent_initialize, 1);
 	rb_define_method(rb_DockEvent, "button",

@@ -67,7 +67,12 @@ void dockapp_mark(WMDockApp *dock)
      }
 }
 
-static void dockapp_signal_connect(VALUE self, VALUE signal_type)
+/*
+ * call-seq:
+ *   signal_connect(type) {|x, y| ...}
+ *
+ */
+static VALUE dockapp_signal_connect(VALUE self, VALUE signal_type)
 {
 
      WMDockApp *dock;
@@ -82,7 +87,7 @@ static void dockapp_signal_connect(VALUE self, VALUE signal_type)
 	  fprintf (stderr, "unknown signal type: %s\n",
 		   StringValuePtr(signal_type));
 	  rb_raise(rb_eRuntimeError, "unknown signal type");
-	  return;
+	  return Qnil;
      }
      signal->callback = rb_block_proc();
 
@@ -97,6 +102,8 @@ static void dockapp_signal_connect(VALUE self, VALUE signal_type)
      }
      signal->next = NULL;
 //	obj = Data_Wrap_Struct(self, docksignal_mark, -1, signal);
+
+     return Qnil;
 }
 
 static VALUE signal_check(struct WMDockSignal *signal, XEvent event)
@@ -166,6 +173,11 @@ static void signal_callback(WMDockItem *item, XEvent event)
 #endif 
 }
 
+/*
+ * call-seq:
+ *   name
+ *
+ */
 static VALUE dockapp_name(VALUE self)
 {
      WMDockApp *dock;
@@ -173,7 +185,12 @@ static VALUE dockapp_name(VALUE self)
      return rb_str_new2(dock->wname);
 }
 
-static void dockapp_delete(VALUE self, VALUE vitem)
+/*
+ * call-seq:
+ *   delete(item)
+ * 
+ */
+static VALUE dockapp_delete(VALUE self, VALUE vitem)
 {
      WMDockItem *item, *tmp;
      WMDockApp *dock;
@@ -194,7 +211,7 @@ static void dockapp_delete(VALUE self, VALUE vitem)
 	  tmp = tmp->next;
      }
      RedrawWindow(dock);
-		
+     return Qtrue;
 }
 
 static WMDockItem* search_dockitem(WMDockApp *dock, WMDockItem *item)
@@ -210,7 +227,12 @@ static WMDockItem* search_dockitem(WMDockApp *dock, WMDockItem *item)
      return tmp;
 }
 
-static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
+/*
+ * call-seq:
+ *   add(x, y, item)
+ *
+ */
+static VALUE dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 {
      WMDockApp *dock;
      WMDockItem *dockitem;
@@ -224,7 +246,7 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
 
      if (dock->display == NULL) {
 	  rb_raise(rb_eRuntimeError, "not openwindow");
-	  return;
+	  return Qnil;
      }
 	
      dockitem->dock = dock;
@@ -292,6 +314,8 @@ static void dockapp_add(VALUE self, VALUE x, VALUE y, VALUE item)
      if (dockitem->redraw_function != NULL) {
 	  dockitem->redraw_function(dockitem);
      }
+     
+     return Qtrue;
 }
 
 /*
@@ -571,7 +595,13 @@ static void event_dispatch(WMDockApp *dock, XEvent event)
 	  break;
      }
 }
-static void dockapp_start(VALUE self)
+
+/*
+ * call-seq:
+ *   start
+ *
+ */
+static VALUE dockapp_start(VALUE self)
 {
      XEvent	event;
      Display *display;
@@ -584,7 +614,7 @@ static void dockapp_start(VALUE self)
 	
      if (dock->display == NULL) {
 	  rb_raise(rb_eRuntimeError, "not openwindow");
-	  return;
+	  return Qnil;
      }
      display = dock->display;
      dock->status = DockAppStatusRun;
@@ -632,9 +662,15 @@ static void dockapp_start(VALUE self)
 	  }
 	  usleep(10000); /* 10ms */
      }
+     return Qtrue;
 }
 
-static void dockapp_destroy(VALUE self)
+/*
+ * call-seq:
+ *   destroy
+ *
+ */
+static VALUE dockapp_destroy(VALUE self)
 {
      Display *display;
      WMDockApp *dock;
@@ -642,13 +678,19 @@ static void dockapp_destroy(VALUE self)
 	
      if (dock->display == NULL) {
 	  rb_raise(rb_eRuntimeError, "not openwindow");
-	  return;
+	  return Qnil;
      }
      display = dock->display;
      XCloseDisplay(display);
      dock->status = DockAppStatusDestroy;
+     return Qtrue;
 }
 
+/*
+ * call-seq:
+ *   new(name = "WMDockApp")
+ *
+ */
 static VALUE dockapp_s_new(int argc, VALUE *argv, VALUE self)
 {
      VALUE obj;
@@ -674,6 +716,11 @@ static VALUE dockapp_s_new(int argc, VALUE *argv, VALUE self)
      return obj;
 }
 
+/*
+ * call-seq:
+ *   get_text_width(text, fontset)
+ *
+ */
 static VALUE dockapp_get_text_width(int argc, VALUE *argv, VALUE self)
 {
      WMDockApp *dockapp;
@@ -690,11 +737,21 @@ static VALUE dockapp_get_text_width(int argc, VALUE *argv, VALUE self)
      return INT2FIX(offset);
 }
 
+/*
+ * call-seq:
+ *   width
+ *
+ */
 static VALUE dockapp_width(VALUE self)
 {
      return INT2FIX(64);
 }
 
+/*
+ * call-seq:
+ *   height
+ *
+ */
 static VALUE dockapp_height(VALUE self)
 {
      return INT2FIX(64);
@@ -704,8 +761,6 @@ void Init_dockapp(void) {
      VALUE rb_DockApp;
 
      id_call = rb_intern("call");
-     mDockApp = rb_define_module("Dock");
-     rb_ivar_set(mDockApp, id_relative_callbacks, Qnil);
      signal(SIGINT, sig_int);
 /*
   memset(mouse_region, 0, sizeof(MOUSE_REGION)*MAX_MOUSE_REGION);

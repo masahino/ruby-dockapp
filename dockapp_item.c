@@ -28,8 +28,12 @@
 
 extern VALUE rb_DockItem;
 
-
-void dockitem_hide_tooltips(WMDockApp *dock)
+/*
+ * call-seq:
+ *   hide_tooltips
+ *
+ */
+VALUE dockitem_hide_tooltips(WMDockApp *dock)
 {
 	WMDockItem *item;
 	XWindowAttributes attributes;
@@ -47,14 +51,20 @@ void dockitem_hide_tooltips(WMDockApp *dock)
 		}
 		item = item->next;
 	}
+	return Qtrue;
 }
 
-void dockitem_show_tooltips(WMDockItem *item)
+/*
+ * call-seq:
+ *   show_tooltips
+ *
+ */
+VALUE dockitem_show_tooltips(WMDockItem *item)
 {
 	int root_x, root_y, win_x, win_y;
 	WMDockApp *dock;
 	if (item->tip_text == NULL) {
-		return;
+		return Qnil;
 	}
 	dock = item->dock;
 	get_pointer_position(dock->win, &root_x, &root_y, &win_x, &win_y);
@@ -63,8 +73,15 @@ void dockitem_show_tooltips(WMDockItem *item)
 	}
 	update_tooltip_window(dock, item->win, root_x, root_y + 16,
 			      item->tip_text);
+
+	return Qtrue;
 }
 
+/*
+ * call-seq:
+ *   width
+ *
+ */
 VALUE dockitem_width(VALUE self)
 {
 	WMDockItem *item;
@@ -73,6 +90,11 @@ VALUE dockitem_width(VALUE self)
 	return INT2FIX(item->width);
 }
 
+/* 
+ * call-seq:
+ *   height
+ *
+ */
 VALUE dockitem_height(VALUE self)
 {
 	WMDockItem *item;
@@ -81,7 +103,12 @@ VALUE dockitem_height(VALUE self)
 	return INT2FIX(item->height);
 }
 
-static void dockitem_draw_led(int argc, VALUE *argv, VALUE self)
+/*
+ * call-seq:
+ *   draw_led(x, y, color, type = "circle", width = 0, height = 0)
+ *
+ */
+static VALUE dockitem_draw_led(int argc, VALUE *argv, VALUE self)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
@@ -117,9 +144,17 @@ static void dockitem_draw_led(int argc, VALUE *argv, VALUE self)
 	dock = dockitem->dock;
 
 	draw_ledpoint(dock, dockitem->x+FIX2INT(x), dockitem->y+FIX2INT(y), StringValuePtr(color));
+
+	return Qtrue;
 }
 
-void dockitem_signal_connect(VALUE self, VALUE signal_type)
+/*
+ * call-seq:
+ *   signal_connect(signal_type) {|event| ...}
+ *
+ *
+ */
+VALUE dockitem_signal_connect(VALUE self, VALUE signal_type)
 {
 	WMDockItem *item;
 	struct WMDockSignal *signal, *tmp;
@@ -133,7 +168,7 @@ void dockitem_signal_connect(VALUE self, VALUE signal_type)
 		fprintf (stderr, "unknown signal type: %s\n",
 			 StringValuePtr(signal_type));
 		rb_raise(rb_eRuntimeError, "unknown signal type");
-		return;
+		return Qnil;
 	}
 	signal->callback = rb_block_proc();
 
@@ -147,19 +182,30 @@ void dockitem_signal_connect(VALUE self, VALUE signal_type)
 		tmp->next = signal;
 	}
 	signal->next = NULL;
+	return Qtrue;
 }
 
-void dockitem_callback(VALUE self)
+/*
+ * call-seq:
+ *   click_callback {|x, y| ...}
+ *
+ */
+VALUE dockitem_callback(VALUE self)
 {
 	WMDockItem *item;
 
 	Data_Get_Struct(self, WMDockItem, item);
 
 	item->callback = rb_block_proc();
-
+	return Qtrue;
 }
 
-static void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)
+/*
+ * call-seq:
+ *   draw_point(x, y, color)
+ *
+ */
+static VALUE dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)
 {
 	WMDockItem *item;
 
@@ -171,9 +217,16 @@ static void dockitem_draw_point(VALUE self, VALUE x, VALUE y, VALUE color)
 
 	draw_point(item->dock, item->x + FIX2INT(x),
 		   item->y + FIX2INT(y), StringValuePtr(color));
+
+	return Qtrue;
 }
 
-static void dockitem_draw_line(VALUE self, VALUE x1, VALUE y1,
+/*
+ * call-seq:
+ *   draw_line(x1, y1, x2, y2, color)
+ *
+ */
+static VALUE dockitem_draw_line(VALUE self, VALUE x1, VALUE y1,
 			VALUE x2, VALUE y2, VALUE color)
 {
 	WMDockItem *item;
@@ -191,9 +244,16 @@ static void dockitem_draw_line(VALUE self, VALUE x1, VALUE y1,
 		  item->x + FIX2INT(x2),
 		  item->y + FIX2INT(y2),
 		  StringValuePtr(color));
+
+	return Qtrue;
 }
 
-static void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
+/*
+ * call-seq:
+ *   draw_rect(x, y, width, height, color)
+ *
+ */
+static VALUE dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
 			VALUE width, VALUE height, VALUE color)
 {
 	WMDockItem *item;
@@ -211,11 +271,17 @@ static void dockitem_draw_rect(VALUE self, VALUE x, VALUE y,
 		  FIX2INT(width),
 		  FIX2INT(height),
 		  StringValuePtr(color));
+	return Qtrue;
 }
 
 
 #ifdef HAVE_IMLIB2_H
-static void dockitem_set_image_at_size(VALUE self, VALUE filename,
+/*
+ * call-seq:
+ *   set_image_at_size(filename, x, y, width, height)
+ *
+ */
+static VALUE dockitem_set_image_at_size(VALUE self, VALUE filename,
 				       VALUE x, VALUE y,
 				       VALUE width, VALUE height)
 {
@@ -234,7 +300,7 @@ static void dockitem_set_image_at_size(VALUE self, VALUE filename,
 	Data_Get_Struct(self, WMDockItem, dockitem);
 	dock = dockitem->dock;
 	if (dock == NULL) {
-		return;
+		return Qnil;
 	}
          vis   = DefaultVisual(dock->display, DefaultScreen(dock->display));
 /*         depth = DefaultDepth(disp, DefaultScreen(disp));
@@ -270,7 +336,7 @@ static void dockitem_set_image_at_size(VALUE self, VALUE filename,
 					       FIX2INT(height));
 
 	RedrawWindow(dock);
-
+	return Qtrue;
 }
 
 static void dockitem_set_image(VALUE self, VALUE filename)
@@ -281,7 +347,12 @@ static void dockitem_set_image(VALUE self, VALUE filename)
 
 #endif /* HAVE_IMLIB2_H */
 
-static void dockitem_set_pixmap(VALUE self, VALUE filename)
+/* 
+ * call-seq:
+ *   set_pixmap(filename)
+ *
+ */
+static VALUE dockitem_set_pixmap(VALUE self, VALUE filename)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
@@ -291,7 +362,7 @@ static void dockitem_set_pixmap(VALUE self, VALUE filename)
 	Data_Get_Struct(self, WMDockItem, dockitem);
 	dock = dockitem->dock;
 	if (dock == NULL) {
-		return;
+		return Qnil;
 	}
 	GetXPMfromFile(&(dockitem->xpm), StringValuePtr(filename));
 //	GetXPM(dock, &(dockitem->xpm), text_xpm);
@@ -303,10 +374,16 @@ static void dockitem_set_pixmap(VALUE self, VALUE filename)
 		  dockitem->xpm.attributes.height,
 		  dockitem->x, dockitem->y);
 	RedrawWindow(dock);
-
+	return Qtrue;
 }
 
-static void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
+/*
+ * call-seq:
+ *   draw_string(x, y, text, color = TEXTCOLOR)
+ *
+ *
+ */
+static VALUE dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 {
 	WMDockApp *dock;
 	WMDockItem *dockitem;
@@ -327,23 +404,22 @@ static void dockitem_drawstring(int argc, VALUE *argv, VALUE self)
 	dock = dockitem->dock;
 	if (dock == NULL) {
 		free(color);
-		return;
+		return Qnil;
 	}
 	drawString(dock, dockitem->x+FIX2INT(x), dockitem->y+FIX2INT(y), 
 		   StringValuePtr(text), color, BGCOLOR, 0);
 	RedrawWindow(dock);
 	free(color);
+	
+	return Qtrue;
 }
 
-/* *********** TODO change argument **********/
-/* Todo: color, font */
-/* argv[0]: text string */
-/* argv[1]: x */
-/* argv[2]: y */
-/* argv[3]: text type(0 = normal, 1 = Yellow text) */
-static void dockitem_drawLEDstring(int argc, VALUE *argv, VALUE self)
-//VALUE self, VALUE x, VALUE y,
-//				   VALUE text, VALUE color)
+/*
+ * call-seq:
+ *   drawLEDstring(x, y, text, color = 0)
+ *
+ */
+static VALUE dockitem_drawLEDstring(int argc, VALUE *argv, VALUE self)
 {
 	VALUE x, y, text, vcolor;
 	WMDockApp *dock;
@@ -365,7 +441,7 @@ static void dockitem_drawLEDstring(int argc, VALUE *argv, VALUE self)
 	Data_Get_Struct(self, WMDockItem, dockitem);
 	dock = dockitem->dock;
 	if (dock == NULL) {
-		return;
+		return Qnil;
 	}
 
 	lines = strsplit(StringValuePtr(text), "\n", 0);
@@ -380,9 +456,15 @@ static void dockitem_drawLEDstring(int argc, VALUE *argv, VALUE self)
 	}
 	if (lines)
 	  free(lines);
+	return Qtrue;
 }
 
-static void dockitem_clear(VALUE self)
+/*
+ * call-seq:
+ *   clear
+ *
+ */
+static VALUE dockitem_clear(VALUE self)
 {
 	WMDockItem *item;
 	WMDockItemOption *option;
@@ -392,7 +474,7 @@ static void dockitem_clear(VALUE self)
 	option = item->option;
 	eraseRect(item->dock, item->x, item->y, item->x + item->width-1,
 		  item->y + item->height-1, option->bgcolor);
-	
+	return Qtrue;
 }
 
 void dockitem_mark(WMDockItem *item)
@@ -408,7 +490,13 @@ void dockitem_mark(WMDockItem *item)
 	}
 }
 
-void dockitem_settip(VALUE self, VALUE text)
+/*
+ * call-seq:
+ *   set_tip(text)
+ *
+ * set tooltips text
+ */
+VALUE dockitem_settip(VALUE self, VALUE text)
 {
 	WMDockItem *item;
 
@@ -419,8 +507,14 @@ void dockitem_settip(VALUE self, VALUE text)
 		free(item->tip_text);
 	}
 	item->tip_text = strdup(StringValuePtr(text));
+	return Qtrue;
 }
 
+/*
+ * call-seq:
+ *   new(width, height, shape = DockApp::Item.Box, style = DockApp::Item.Normal)
+ *
+ */
 static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 {
 	VALUE obj;
@@ -471,8 +565,11 @@ static VALUE dockitem_s_new(int argc, VALUE *argv, VALUE self)
 
 void dockitem_init(VALUE rb_DockApp)
 {
+#if 0 /* RDOC */
+     rb_DockApp = rb_define_class("DockApp", rb_cObject);
+#endif 
 	rb_DockItem = rb_define_class_under(rb_DockApp, "Item", rb_cObject);
-	rb_define_singleton_method(rb_DockItem, "new",  dockitem_s_new, -1);
+	rb_define_singleton_method(rb_DockItem, "new", dockitem_s_new, -1);
 
 	rb_define_method(rb_DockItem, "draw_string", 
 			 RUBY_METHOD_FUNC(dockitem_drawstring), -1);

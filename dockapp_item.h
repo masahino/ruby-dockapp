@@ -10,12 +10,12 @@
 #define LED_COLOR_OFF    4
 
 /* dockapp_item.c */
-void dockitem_callback(VALUE self);
+VALUE dockitem_callback(VALUE self);
 void dockitem_mark(WMDockItem *item);
 void dockitem_init(VALUE rb_DockApp);
-void dockitem_signal_connect(VALUE self, VALUE signal_type);
-void dockitem_settip(VALUE self, VALUE text);
-void dockitem_show_tooltips(WMDockItem *item);
-void dockitem_hide_tooltips(WMDockApp *dock);
+VALUE dockitem_signal_connect(VALUE self, VALUE signal_type);
+VALUE dockitem_settip(VALUE self, VALUE text);
+VALUE dockitem_show_tooltips(WMDockItem *item);
+VALUE dockitem_hide_tooltips(WMDockApp *dock);
 
 #endif /* DOCKAPP_ITEM_H */

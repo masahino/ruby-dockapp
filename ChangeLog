@@ -1,3 +1,7 @@
+2008-07-17  HINO Masayuki  <masahino@gmail.com>
+
+	* dockapp_event.c, dockapp_item.c, dockapp_main.c: add RDoc comments
+
 2008-07-15  HINO Masayuki  <masahino@gmail.com>
 
 	* dockapp_event.c: merged files

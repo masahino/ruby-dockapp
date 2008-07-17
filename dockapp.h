@@ -193,15 +193,6 @@ void docksignal_mark(struct WMDockSignal *signal);
 void docktext_init(VALUE rb_DockApp);
 void redraw_docktext(WMDockItem *item);
 
-/* dockitem.c */
-void dockitem_callback(VALUE self);
-void dockitem_mark(WMDockItem *item);
-void dockitem_init(VALUE rb_DockApp);
-void dockitem_signal_connect(VALUE self, VALUE signal_type);
-void dockitem_settip(VALUE self, VALUE text);
-void dockitem_show_tooltips(WMDockItem *item);
-void dockitem_hide_tooltips(WMDockApp *dock);
-
 /* docktimer.c */
 void docktimer_init(VALUE rb_DockApp);
 void update_timer(WMDockTimer *timer);
