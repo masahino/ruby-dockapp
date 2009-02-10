@@ -733,7 +733,7 @@ static VALUE dockapp_get_text_width(int argc, VALUE *argv, VALUE self)
      Check_Type(vstring, T_STRING);
      Data_Get_Struct(self, WMDockApp, dockapp);
      offset = XmbTextEscapement(dockapp->fontset, StringValuePtr(vstring),
-				RSTRING(vstring)->len);
+				RSTRING_LEN(vstring));
      return INT2FIX(offset);
 }
 

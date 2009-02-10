@@ -3,7 +3,7 @@
   
   Copyright (c) 2005 HINO Masayuki <masahino@tky3.3web.ne.jp>
 
-  TODO: �܂Ƃ߂āA�^�C�v�œ���𕪂���B
+  TODO: まとめて、タイプで動作を分ける。
  */
 
 #include <stdlib.h>
@@ -271,11 +271,11 @@ static VALUE dockpopup_add_item(VALUE self, VALUE item_list)
 
 	Check_Type(item_list, T_ARRAY);
 
-	n = RARRAY(item_list)->len;
+	n = RARRAY_LEN(item_list);
 	option = popup->option;
 	option->item_num = n;
-	/* TODO: ������A1�̕�����ɂ��Ă���̂ŁA */
-	/*       �z��̂܂܈����悤�ɂ���              */
+	/* TODO: 無理矢理、1つの文字列にしているので、 */
+	/*       配列のまま扱うようにする              */
 #ifdef DEBUG
 	printf ("array size = %d\n", n);
 #endif
@@ -381,7 +381,7 @@ VALUE dockpopup_initialize(int argc, VALUE *argv, VALUE self)
 	XSetWindowAttributes att;
 	int type;
 
-	/* TODO �^�C�v�������ɂƂ�悤�� */
+	/* TODO タイプを引数にとるように */
 	if (rb_scan_args(argc, argv, "21", &width, &height, &vtype) == 2) {
 		type = ItemType_PopUp_Led;
 	} else {
@@ -440,19 +440,20 @@ VALUE dockpopupimage_initialize(VALUE self, VALUE xpm_data)
 	popup->type = ItemType_PopUp_Image;
 
 	if (TYPE(xpm_data) == T_STRING) {
-		/* TODO: xpm_fileの存在確認して、無ければraise) */
+		/* TODO: xpm_file縺ｮ蟄伜惠遒ｺ隱阪＠縺ｦ縲∫┌縺代ｌ縺ｰraise) */
 		GetXPMfromFile(&(popup->xpm), StringValuePtr(xpm_data));
 	} else if (TYPE(xpm_data) == T_ARRAY) {
 		char **data;
 		int len;
 		int i;
-		len = RARRAY(xpm_data)->len;
+		len = RARRAY_LEN(xpm_data);
 #ifdef DEBUG
 		printf ("len = %d\n", len);
 #endif
 		data = malloc(sizeof(char*)*len);
 		for (i = 0; i < len; i++) {
-			data[i] = strdup(StringValuePtr(RARRAY(xpm_data)->ptr[i]));
+//		     data[i] = strdup(StringValuePtr(RARRAY(xpm_data)->ptr[i]));
+		     data[i] = strdup(StringValuePtr(RARRAY_PTR(xpm_data)[i]));
 		}
 		GetXPMfromData(&(popup->xpm), data);
 	} else {
