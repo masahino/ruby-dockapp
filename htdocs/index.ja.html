@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="euc-jp"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=EUC-JP" />
+<link rel="stylesheet" type="text/css" href="standard.css" />
+<title>Ruby DockApp </title>
+<meta http-equiv="Last-Modified" content="<!--#flastmod file="index.shtml"-->">
+</head>
+<body>
+<p class="lang-navigator"><a href="index.shtml">English</a> | Japanese</p>
+<h1>Ruby DockApp</h1>
+<!--#config timefmt="(%y/%m/%d)"-->
+<p>RubyでDockAppを作る!</p>
+<h2>これはなにか?</h2>
+<p>Dockアプリケーションを作るためのRuby拡張ライブラリである。</p>
+<p>Dockアプリケーションは、いろいろ揃ってて、とっても便利なんだけど、
+自分で作るのは、結構億劫。
+てRubyで作れれば、楽かなぁ、と思ってライブラリを作ってみた。</p>
+<h2>ダウンロード</h2>
+<p>
+<a href="DockApp-0.2.1.tar.bz2">DockApp-0.2.1.tar.bz2</a>
+</p>
+<h2>インストール</h2>
+<pre>
+% ruby extconf.rb
+% make
+# make install
+</pre>
+<h2>サンプル</h2>
+<h3>その1、時刻と日付</h3>
+<p><img src = "dockapp_sample1.png" alt = "sample1">
+</p>
+<ul>
+<li><a href="clock.rb">clock.rb</a></li>
+</ul>
+<p>
+DockAppの定番アプリケーションといえば、時計だろうと思って、
+単純なサンプルを作ってみた。
+</p>
+<h3>その2、xmmsで演奏中の曲のアルバムのカバーイメージとかタイト
+     ルとかを表示するようなアプリケーション</h3>
+<p><img src = "dockapp_sample2.png" alt = "sample2"></p>
+<ul><li><a href="cover.rb">cover.rb</a></li></ul>
+<p>もうちょっと複雑なサンプルとして、作ってみたもの。
+Rubyのライブラリがいろいろ使えて便利だなぁと実感したかったのである。
+拡張ライブラリとしてxmmsと、amazon/searchとiconvが必要。
+</p>
+<p>DockAppに画像表示しても小さくて良くわからんのですが…</p>
+<h3>その3:uimの入力状態を表示するためのDockアプリケーション</h3>
+<p>
+<img src="dockapp_sample3.png" alt = "sample3">
+</p>
+<ul>
+<li><a href="wmuimhelper.rb">wmuimhelper.rb</a></li>
+</ul>
+<p>もともと、skkinput2からuim-skkに乗り換えたとき、
+uimの入力状態を知るソフトウェアが欲しくて、探したけど(そのとき)見つかな
+かったんで、作ってみようと思って、DockApp作りに手を出した。</p>
+<p>
+で、<a href="http://wmuim.sourceforge.jp">wmuim</a>というのを普通にC言語
+で書いて作ってみたんだが、これが結構大変だった。
+で、その後、もっと簡単にDockAppを作るために、
+拡張ライブラリとして、「Ruby DockApp」を作ってみたのだ。
+</p>
+<p>
+なので、同じものを今度はRubyスクリプトとして実装してみたのがこれ。
+一応、同等の機能を持つものができた。
+</p>
+<p>
+副産物として、libuim-rubyも作った。
+なんだか、とっても無駄なことをしているようだが、
+気にしない。
+</p>
+<hr />
+<address>
+HINO Masayuki
+
+<!--#config timefmt="最終更新日:%Y年 %m月 %d日 %H時 %M分 %S秒"-->
+<!--#echo var="LAST_MODIFIED"-->
+</address>
+</body>
+</html>
+

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="euc-jp"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<link rel="stylesheet" type="text/css" href="standard.css" />
+<title>Ruby-DockApp </title>
+<meta http-equiv="Last-Modified" content="<!--#flastmod file="index.shtml"-->">
+</head>
+<body>
+<p class="lang-navigator">English | <a href="index.ja.shtml">Japanese</a></p>
+<h1>Ruby-DockApp</h1>
+<!--#config timefmt="(%y/%m/%d)"-->
+<h2>What's Ruby-DockApp</h2>
+<p>Ruby-DockApp is a ruby extention library for making DockApps.
+<h2>Download</h2>
+<p>
+<a
+href="http://sourceforge.net/project/showfiles.php?group_id=135210">ruby-dockapp</a>
+</p>
+<h2>Install</h2>
+<pre>
+% ruby extconf.rb
+% make
+# make install
+</pre>
+
+<h2>API</h2>
+<p><a href="rdoc/">reference</a></p>
+<h2>Examples</h2>
+<h3>Example 1: clock and date</h3>
+<p><img src = "dockapp_sample1.png" alt = "sample1">
+</p>
+<ul>
+<li><a href="clock.rb">clock.rb</a></li>
+</ul>
+<h3>Example 2: show cover image</h3>
+<p><img src = "dockapp_sample2.png" alt = "sample2"></p>
+<ul><li><a href="cover.rb">cover.rb</a></li></ul>
+<h3>Example 3: UIM helper application</h3>
+<p>
+<img src="dockapp_sample3.png" alt = "sample3">
+</p>
+<ul>
+<li><a href="http://cvs.sourceforge.jp/cgi-bin/viewcvs.cgi/wmuim/libuim-ruby/wmuimhelper.rb">wmuimhelper.rb</a></li>
+</ul>
+<hr />
+<address>
+HINO Masayuki
+
+<!--#echo var="LAST_MODIFIED"--><br />
+<br />
+<a href="http://sourceforge.net">
+<img src="http://sourceforge.net/sflogo.php?group_id=135210&amp;type=1"
+width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>
+</address>
+</body>
+</html>
+

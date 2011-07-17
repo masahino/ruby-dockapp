@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="euc-jp"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=EUC-JP" />
+<link rel="stylesheet" type="text/css" href="standard.css" />
+<title>Ruby DockApp </title>
+<meta http-equiv="Last-Modified" content="<!--#flastmod file="index.shtml"-->">
+</head>
+<body>
+<p class="lang-navigator"><a href="index.shtml">English</a> | Japanese</p>
+<h1>Ruby DockApp</h1>
+<!--#config timefmt="(%y/%m/%d)"-->
+<p>RubyでDockAppを作る!</p>
+<h2>これはなにか?</h2>
+<p>Dockアプリケーションを作るためのRuby拡張ライブラリである。</p>
+<p>Dockアプリケーションは、いろいろ揃ってて、とっても便利なんだけど、
+自分で作るのは、結構億劫。
+てRubyで作れれば、楽かなぁ、と思ってライブラリを作ってみた。</p>
+<h2>ダウンロード</h2>
+<p>
+<a
+href="http://sourceforge.net/project/showfiles.php?group_id=135210">ruby-dockapp</a>
+から
+</p>
+<h2>インストール</h2>
+<pre>
+% ruby extconf.rb
+% make
+# make install
+</pre>
+<h2>API</h2>
+<p><a href="rdoc/ja/">reference</a></p>
+
+<h2>簡単なチュートリアル</h2>
+<p><a href="tutorial.ja.shtml">チュートリアル</a></p>
+
+<h2>サンプル</h2>
+<h3>その1、時刻と日付</h3>
+<p><img src = "dockapp_sample1.png" alt = "sample1">
+</p>
+<ul>
+<li><a href="clock.rb">clock.rb</a></li>
+</ul>
+<p>
+DockAppの定番アプリケーションといえば、時計だろうと思って、
+単純なサンプルを作ってみた。
+</p>
+<h3>その2、xmmsで演奏中の曲のアルバムのカバーイメージとかタイト
+     ルとかを表示するようなアプリケーション</h3>
+<p><img src = "dockapp_sample2.png" alt = "sample2"></p>
+<ul><li><a href="cover.rb">cover.rb</a></li></ul>
+<p>もうちょっと複雑なサンプルとして、作ってみたもの。
+Rubyのライブラリがいろいろ使えて便利だなぁと実感したかったのである。
+拡張ライブラリとしてxmmsと、amazon/searchとiconvが必要。
+</p>
+<p>DockAppに画像表示しても小さくて良くわからんのですが…</p>
+<h3>その3:uimの入力状態を表示するためのDockアプリケーション</h3>
+<p>
+<img src="dockapp_sample3.png" alt = "sample3">
+</p>
+<ul>
+<li>wmuimhelper.rb</li>
+</ul>
+<p>もともと、skkinput2からuim-skkに乗り換えたとき、
+uimの入力状態を知るソフトウェアが欲しくて、探したけど(そのとき)見つかな
+かったんで、作ってみようと思って、DockApp作りに手を出した。</p>
+<p>
+で、<a href="http://wmuim.sourceforge.jp">wmuim</a>というのを普通にC言語
+で書いて作ってみたんだが、これが結構大変だった。
+で、その後、もっと簡単にDockAppを作るために、
+拡張ライブラリとして、「Ruby DockApp」を作ってみたのだ。
+</p>
+<p>
+なので、同じものを今度はRubyスクリプトとして実装してみたのがこれ。
+一応、同等の機能を持つものができた。
+</p>
+<p>
+副産物として、
+libuim-rubyも作った。wmuimhelper.rbはlibuim-rubyの配布物に入れている。
+最新は、<a
+href="http://cvs.sourceforge.jp/cgi-bin/viewcvs.cgi/wmuim/libuim-ruby/wmuimhelper.rb">ここ</a>。
+
+なんだか、とっても無駄なことをしているようだが、
+気にしない。
+</p>
+<p>
+メニュー機能を追加。
+<img src="wmuimhelper-with-menu.png" alt="wmuimherlper.rb with menu">
+メニューの画像は適当。
+</p>
+
+<hr />
+<address>
+HINO Masayuki
+
+<!--#config timefmt="最終更新日:%Y年 %m月 %d日 %H時 %M分 %S秒"-->
+<!--#echo var="LAST_MODIFIED"--><br />
+ <A href="http://sourceforge.net"> <IMG src="http://sourceforge.net/sflogo.php?group_id=135210&amp;type=5" width="210" height="62" border="0" alt="SourceForge.net Logo" /></A>
+</address>
+</body>
+</html>
+

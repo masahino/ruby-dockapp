@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="euc-jp"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=EUC-JP" />
+<link rel="stylesheet" type="text/css" href="standard.css" />
+<title>Ruby DockApp tutorial</title>
+<meta http-equiv="Last-Modified" content="<!--#flastmod file="tutorial.ja.shtml"-->">
+</head>
+<body>
+<p class="lang-navigator">English | Japanese</p>
+<h1>Ruby DockApp Tutorial</h1>
+<!--#config timefmt="(%y/%m/%d)"-->
+<p>Ruby DockAppを使ったDockアプリケーションの作り方</p>
+<ul>
+<li><a href="#tutorial1">ウィンドウの作成</a></li>
+<li><a href="#tutorial2">いろいろ表示</a></li>
+<li><a href="#tutorial3">イベントの定義</a></li>
+<li><a href="#tutorial4">メニュー</a></li>
+</ul>
+<h2><a name="tutorial1">ウィンドウの作成</a></h2>
+<p>最低限必要なのは、以下の記述です。
+これで、Dockアプリケーションのウィンドウが表示されます。
+</p>
+<pre>
+require 'dockapp'
+
+dock = DockApp.new("test application")
+
+dock.start
+</pre>
+
+<p>情報を表示するためのウィンドウを作るには、
+Dock::Itemを使います。
+引数としては、幅と高さを与えます。
+</p>
+<pre>
+item1 = DockApp::Item.new(50, 40)
+</pre>
+<p>作成したItemを配置するには、DockApp.addを使います。
+引数は、(X軸座標, Y軸座標, Item)です。座標は左上が(0, 0)です。</p>
+<pre>
+dock.add(5, 5, item1)
+</pre>
+<p>これで黒い箱が作成されます。</p>
+<p><img src="images/tutorial1.png" alt="ただの箱"></p>
+
+<hr />
+<h2><a name="tutorial2">いろいろ表示</a></h2>
+<p>Itemには文字や線を表示することができます。</p>
+<p>描画に使えるメソッドを以下に示します。</p>
+<ul>
+ <li>draw_string(x, y, string)</li>
+ <li>drawLEDstring(x, y, string, color = 0)</li>
+ <li>draw_point(x, y, color)</li>
+ <li>draw_line(x1, y1, x2, y2, color)</li>
+ <li>set_pixmap(pixmap_filename)</li>
+</ul>
+<pre>
+item1.draw_string(2, 10, "test")
+item1.drawLEDstring(2, 20, "LED", 0)
+item1.draw_point(40, 5, "red")
+item1.draw_line(10, 30, 20, 35, "blue")
+</pre>
+<p>これで、</p>
+<p><img src="images/tutorial2.png" alt="いろいろ表示">
+</p>
+<p>な感じになります。</p>
+
+<p>LED風なテキストの表示のみを行なう場合には、DockApp::Textが便利です。
+      </p>
+
+<hr />
+<h2><a name="tutorial3">イベントの定義</a></h2>
+<p>イベントに応じて処理を行うには、signal_connectを使います。</p>
+<pre>
+item1.signal_connect("button_press_event") do |event|
+  puts "press!"
+end
+</pre>
+
+<p>定期的に処理を行いたい場合には、DockApp::Timerを使います。</p>
+<pre>
+text1 = DockApp::Text.new("", 5, 1)
+dock.add(5, 30, text1)
+num = 0
+timer1 = DockApp::Timer.new(1000) do
+  num_str = sprintf "%04d", num
+  text1.set_text(num_str)
+  num += 1
+end
+timer1.start
+</pre>
+<p>DockApp::Timer.newの引数には周期時間をミリ秒単位で指定します。</p>
+<p>button_press_eventと組み合わせた例を以下に示します。</p>
+<pre>
+item2 = DockApp::Item.new(40, 12)
+item3 = DockApp::Item.new(40, 12)
+text1 = DockApp::Text.new("", 6, 1)
+dock.add(8, 5, item2)
+dock.add(8, 20, item3)
+dock.add(8, 40, text1)
+item2.draw_string(2, 10, "start")
+item3.draw_string(2, 10, "stop")
+
+num = 0
+timer1 = DockApp::Timer.new(1000) do
+  num_str = sprintf "%06d", num
+  text1.set_text(num_str)
+  num += 1
+end
+
+item2.signal_connect("button_press_event") do
+  timer1.start
+end
+
+item3.signal_connect("button_press_event") do
+  timer1.stop
+end
+</pre>
+<p>"start"をクリックするとタイマを開始して、
+"stop"をクリックするとタイマを停止します。
+</p>
+<p>
+<img src="images/tutorial3.png" alt="event">
+</p>
+
+<hr />
+<h2><a name="tutorial4">メニュー</a></h2>
+<p>ポップアップメニューを作成することができます。</p>
+<p>ポップアップメニューの定義は以下のようにして行います。
+なんだか、いまいちかっこわるいので、そのうち変える予定です。</p>
+<pre>
+popup = DockApp::PopUp.new(10, 10)
+dock.add(0, 0, popup)
+popup.add_item("item1\nitem2\nitem3")
+</pre>
+
+<p>メニューの表示と消去は自分で制御する必要があります。
+</p>
+<pre>
+text.signal_connect("button_press_event") do |event|
+  if event.button == 3
+    popup.popup do |n|
+      puts n
+      case n
+      when 0
+        text.set_text("item1")
+      when 1
+        text.set_text("item2")
+      when 2
+        text.set_text("item3")
+      else
+        text.set_text("none")
+      end
+    end
+  end
+end
+
+text.signal_connect("button_release_event") do |event|
+  popup.hide()
+end
+</pre>
+<p>
+中央のウィンドウで右クリックするとメニューが表示されます。
+選択すると、選択した内容に応じて文字が表示されます。</p>
+<p>
+<img src="images/tutorial4.png" alt="menu"></p>
+<hr />
+<address>
+HINO Masayuki
+
+<!--#config timefmt="最終更新日:%Y年 %m月 %d日 %H時 %M分 %S秒"-->
+<!--#echo var="LAST_MODIFIED"--><br />
+ <A href="http://sourceforge.net"> <IMG src="http://sourceforge.net/sflogo.php?group_id=135210&amp;type=5" width="210" height="62" border="0" alt="SourceForge.net Logo" /></A>
+</address>
+</body>
+</html>
+
