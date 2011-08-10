@@ -50,10 +50,10 @@ static int get_menu_index(WMDockItem *popup)
 #endif
 	if (root_x < popup->x || root_x > popup->x + popup->width ||
 	    root_y < popup->y || root_y > popup->y + popup->height) {
-		return Qnil;
+		return -1;
 	}
 	option = popup->option;
-	return INT2FIX(root_y-popup->y)/(option->row_height);
+	return (root_y-popup->y)/(option->row_height);
 }
 
 static void dockpopup_hide_menu(WMDockItem *popup)
@@ -123,7 +123,9 @@ static VALUE dockpopup_popup(int argc, VALUE *argv, VALUE self)
 	} while (1);
 	index = get_menu_index(popup);
 	dockpopup_hide_menu(popup);
-	rb_funcall(rb_block_proc(), id_call, 1, index);
+	if (index >= 0) {
+		rb_funcall(rb_block_proc(), id_call, 1, INT2FIX(index));
+	}
 	return Qtrue;
 }
 
