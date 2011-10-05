@@ -532,7 +532,9 @@ static void openwindow(WMDockApp *wmdockapp)
 		    XCreateFontSet(wmdockapp->display, 
 				   SUBSTITUTE_FONT
 				   , &miss, &n_miss, &def);
+#ifdef DEBUG
 	       printf ("using substitue font\n");
+#endif
 	  }
      }
      wmdockapp->status = DockAppStatusOpen;
